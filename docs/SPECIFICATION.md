@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.4, all open questions answered |
+| **Status** | Draft v0.5, plan review applied |
 | **Last updated** | 2026-11-02 |
 | **Platform** | Android tablet, single user, personal use |
 
@@ -197,6 +197,7 @@ The total runs from Start to completion: get ready 3 s + exercises 180 s + exerc
 | EX-8 | While paused, **Stop** asks for confirmation, then ends the workout and returns to the workout list. | Agreed |
 | EX-9 | While paused, **Next** and **Previous** move to another exercise without asking for confirmation (see the table below). | Agreed |
 | EX-10 | If the app leaves the foreground (Home button, switching apps, screen turned off), the running workout pauses automatically. The workout only runs while the app is on screen. | Agreed |
+| EX-11 | If Android closes the app while it's in the background (for example, to free memory), the paused workout is not restored. The app reopens on the workout list. | Requested |
 
 What Next and Previous do:
 
@@ -256,7 +257,9 @@ Note on `TTS-1` and `TTS-2`: the 10 s threshold leaves at least 7 s between the 
 | WM-5 | In the editor, rounds and exercises can be added, renamed, reordered, duplicated and removed. To repeat a round, duplicate it. | Agreed |
 | WM-6 | The editor and the workout list show the workout's total duration, from Start to completion: get ready, exercises and rests. | Agreed |
 | WM-7 | Validation: the workout and each round need a name; a workout has at least one round; a round has at least one exercise; durations are at least 1 s; rests are 0 s or more. | Agreed |
-| WM-8 | Workouts are stored locally and survive app restarts and device reboots. | Agreed |
+| WM-8 | Workouts are stored locally and survive app restarts and device reboots. There is no cloud backup: uninstalling the app deletes them. | Agreed |
+| WM-9 | Deleting a workout asks for confirmation. | Requested |
+| WM-10 | Leaving the editor with unsaved changes asks for confirmation before discarding them. | Requested |
 
 ## 6. Screens
 
@@ -264,8 +267,8 @@ All screens are landscape.
 
 | Screen | Purpose | Main actions |
 |---|---|---|
-| **Workout list** (home) | Shows saved workouts with their total duration | Start, edit, duplicate, delete, new workout, open settings |
-| **Workout editor** | Edits a workout's name, defaults, rounds and exercises, including their own durations and rests | Save, cancel |
+| **Workout list** (home) | Shows saved workouts with their total duration | Start, edit, duplicate, delete (with confirmation), new workout, open settings |
+| **Workout editor** | Edits a workout's name, defaults, rounds and exercises, including their own durations and rests | Save, cancel (asks for confirmation if there are unsaved changes) |
 | **Workout runner** | Runs the workout (see §5.1–§5.3) | Running: pause. Paused: resume, previous, next, stop. |
 | **Workout completed** | Shows a "Well done!" message and a short summary (total time, rounds and exercises done) | Back to list |
 | **Settings** | App-wide settings: voice cues on/off (`TTS-9`) | Back |
@@ -394,3 +397,4 @@ Not planned for v1; listed so they are not lost.
 | 0.2 | 2026-11-02 | First review. Proposals accepted or discarded; Q1–Q13 answered. Added: rests per exercise and per round, 3 s get-ready, controls shown only while paused, round-end sound, English-only voice and UI, landscape only, Settings screen. New questions Q14–Q17. |
 | 0.3 | 2026-11-02 | Second review: Q14–Q17 answered, confirming the draft assumptions. The English voice is pinned to English (United States), which is installed on the device. Rest fields that don't apply keep their values. New question Q18 on rest defaults. |
 | 0.4 | 2026-11-02 | Q18 answered: default rests are linked, as for durations. No open questions remain. |
+| 0.5 | 2026-11-02 | From the implementation plan review (PQ-3 to PQ-5): added `EX-11` (a workout isn't restored after Android closes the app), and `WM-9` and `WM-10` (confirmations). `WM-8` now says there is no cloud backup. |
