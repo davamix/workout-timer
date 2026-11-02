@@ -16,13 +16,13 @@ All tasks are implemented, and the skeleton runs on the tablet:
 - `./gradlew build` passes locally, with 0 lint issues and ktlint clean.
 - The 6 instrumented tests pass on the tablet.
 - The app opens in landscape, and the placeholder screens and navigation work.
-- CI runs on the pull request.
+- CI passes on pull request [#1](https://github.com/davamix/workout-timer/pull/1) (3m30s).
 
 Two manual checks need a person at the tablet: the launcher icon, and turning the tablet upside down. See Next steps.
 
 ## Next steps
 
-1. Wait for CI to pass on the pull request.
+1. ~~Wait for CI to pass on the pull request.~~ Done: CI is green.
 2. The user checks on the tablet:
    - the "Workout Timer (debug)" icon in the launcher;
    - turning the tablet upside down → the app follows; holding it upright → it stays landscape.
@@ -42,7 +42,7 @@ Two manual checks need a person at the tablet: the launcher icon, and turning th
 | T6 | Done | 6/6 pass on AGS2-W09 (Android 8.0) |
 | T7 | Done | `.github/workflows/ci.yml` |
 | T8 | Done | `CLAUDE.md`, `.claude/skills/tablet/SKILL.md` |
-| T9 | Doing | Pull request open. Manual checks 1 and 2 are pending the user (§Next steps). |
+| T9 | Doing | Pull request #1 open, CI green. Manual checks 1 and 2 are pending the user (§Next steps). |
 
 ## Decisions and deviations
 
