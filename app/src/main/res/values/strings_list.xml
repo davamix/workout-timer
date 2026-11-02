@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="list_title">Workouts</string>
+    <string name="list_new_workout">New workout</string>
+    <string name="list_settings">Settings</string>
+    <string name="list_run_sample">Run sample</string>
+</resources>

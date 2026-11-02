@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App-wide text. Each feature keeps its own text in strings_<feature>.xml (plan D-13). -->
+<resources>
+    <string name="app_name">Workout Timer</string>
+    <string name="action_back">Back</string>
+    <string name="placeholder_note">Placeholder screen</string>
+</resources>

@@ -27,3 +27,6 @@ output-metadata.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Kotlin compiler session data
+.kotlin/
