@@ -1,0 +1,33 @@
+---
+name: phase-start
+description: Start or resume implementing a workout-timer phase. It loads only that phase's SPEC.md and HANDOVER.md, checks dependencies, and sets up the phase branch or worktree. Use at the start of a session that works on a phase, e.g. "start P3" or "continue P2".
+---
+
+# Start or resume a phase
+
+Input: a phase ID, e.g. `P3`. The phase folders are listed in the `phase-docs` skill.
+
+## Steps
+
+1. **Load the phase.** Read `docs/phases/PN-*/HANDOVER.md` first, then `SPEC.md`.
+   - Don't read `docs/SPECIFICATION.md` or the whole plan. The phase docs are meant to be enough.
+   - Only open those files if the phase docs point to something they don't contain. If that happens, note it as a gap in the handover.
+2. **Check that the phase can start.**
+   - In plan §5.1 (`docs/IMPLEMENTATION_PLAN.md`), every dependency must be `Done`.
+   - If one isn't, stop and tell the user. Work can still go ahead with the fakes described in plan §5.1, but only if the user agrees.
+   - SPEC.md must be `Ready`. If it's still a draft, ask the user before implementing.
+3. **Set up the branch.** The branch is named `phase/pN-<name>`; `<name>` is the folder name without the `PN-` prefix.
+   - Start from an up-to-date `main`: `git fetch origin`.
+   - If the branch already exists, switch to it, or to its worktree.
+   - Otherwise create it: `git switch -c phase/pN-<name> origin/main`.
+   - If this working copy is busy with another phase, use a separate worktree instead: `git worktree add ../workout-timer-pN -b phase/pN-<name> origin/main`.
+4. **Mark it in progress** (first session only):
+   - In HANDOVER.md, set the status to `In progress`. Commit it on the phase branch.
+   - In plan §5.1, set the status to `In progress`. Commit that on `main` and push. Status changes always go to `main`.
+5. **Tell the user** the current state, the next steps from the handover, and what you are going to do now.
+
+## While working
+
+- Follow SPEC.md. When something has to differ, record it straight away under "Decisions and deviations" in HANDOVER.md.
+- If a change affects a requirement, update SPEC.md first, then the specification or the plan if needed, and tell the user.
+- Commit small, coherent steps on the phase branch.

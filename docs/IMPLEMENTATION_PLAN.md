@@ -176,7 +176,7 @@ Rules:
 
 | Phase | Name | Depends on | Status |
 |---|---|---|---|
-| P1 | Project foundation | — | Planned |
+| P1 | Project foundation | — | In progress |
 | P2 | Domain model and timeline | P1 | Planned |
 | P3 | Storage | P2 | Planned |
 | P4 | Workout engine | P2 | Planned |
