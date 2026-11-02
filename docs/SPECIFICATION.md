@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.3, second review applied |
+| **Status** | Draft v0.4, all open questions answered |
 | **Last updated** | 2026-11-02 |
 | **Platform** | Android tablet, single user, personal use |
 
@@ -338,11 +338,7 @@ Paused:
 
 ## 8. Open questions
 
-Each question lists the assumption this draft uses until it is answered.
-
-| # | Question | Draft assumption |
-|---|---|---|
-| Q18 | **Rest defaults.** Every exercise and round has its own rest. How should the workout-level default rests behave? <br>(a) **Linked**, as for durations: an exercise or round without its own value uses the default, and changing the default updates all of them. <br>(b) **Pre-fill only**: new exercises and rounds start with the default value, then keep their own value even if the default changes. <br>(c) **No defaults**: every rest is typed in by hand. | (a) Linked, the same as the default exercise duration |
+None at the moment. New questions are numbered from Q19, and each one lists the assumption the draft uses until it is answered.
 
 ## 9. Decisions
 
@@ -367,6 +363,7 @@ Each question lists the assumption this draft uses until it is answered.
 | Q15 | When the round-end sound plays | When the round ends, at the start of the round rest (`SND-1`) |
 | Q16 | Does the voice setting mute the round-end sound? | No. It only affects the voice (`TTS-9`). |
 | Q17 | Meaning of "own rest" | Each exercise and each round has its own rest, played after it. The last exercise of a round doesn't play its own rest; the round rest plays instead, if it isn't 0 s. (`WM-2`, §4.3) |
+| Q18 | How the default rests behave | Linked, the same as the default exercise duration. An exercise or round without its own rest uses the workout default, and changing the default updates all of them. (§4.2) |
 
 ### 9.2 Discarded proposals
 
@@ -396,3 +393,4 @@ Not planned for v1; listed so they are not lost.
 | 0.1 | 2026-11-02 | First draft from the initial brief and the device information. |
 | 0.2 | 2026-11-02 | First review. Proposals accepted or discarded; Q1–Q13 answered. Added: rests per exercise and per round, 3 s get-ready, controls shown only while paused, round-end sound, English-only voice and UI, landscape only, Settings screen. New questions Q14–Q17. |
 | 0.3 | 2026-11-02 | Second review: Q14–Q17 answered, confirming the draft assumptions. The English voice is pinned to English (United States), which is installed on the device. Rest fields that don't apply keep their values. New question Q18 on rest defaults. |
+| 0.4 | 2026-11-02 | Q18 answered: default rests are linked, as for durations. No open questions remain. |
