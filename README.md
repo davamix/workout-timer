@@ -6,4 +6,7 @@ A workout is made of rounds. Each round is an ordered list of timed exercises, w
 
 ## Status
 
-Specification phase. See [docs/SPECIFICATION.md](docs/SPECIFICATION.md).
+Planning. See:
+
+- [Specification](docs/SPECIFICATION.md): what the app does.
+- [Implementation plan](docs/IMPLEMENTATION_PLAN.md): how it is built, in phases.
