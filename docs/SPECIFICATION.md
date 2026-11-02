@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.2, first review applied |
+| **Status** | Draft v0.3, second review applied |
 | **Last updated** | 2026-11-02 |
 | **Platform** | Android tablet, single user, personal use |
 
@@ -77,13 +77,13 @@ Information read from the tablet with `adb` on 2026-11-02.
 | Screen | 1200 × 1920 px, 320 dpi (xhdpi) → **960 × 600 dp in landscape** |
 | Auto-rotate | Enabled |
 | System language | Spanish (`es-ES`), time zone Europe/Madrid |
-| TTS engine | Google Speech Services (`com.google.android.tts`), the default and only engine installed. No TTS language is forced in settings, so by default it follows the system language (Spanish). |
+| TTS engine | Google Speech Services (`com.google.android.tts`), the default and only engine installed. No TTS language is forced in settings, so by default it follows the system language (Spanish). Installed voices: Spanish (Spain) and English (United States). |
 | Google Play Services | Present |
 
 What this means for the app:
 
 - **Minimum SDK is 26.** Platform APIs added after Android 8.0 can only be used with a fallback.
-- **Voice cues are always in English** (`TTS-11`), but the system language is Spanish. The app has to select English explicitly. The English voice data must also be installed in Google TTS so cues work offline (*not yet verified on the device*).
+- **Voice cues are always in English** (`TTS-11`), but the system language is Spanish. The app has to select English (United States) explicitly. That voice is installed on the device, so cues work offline.
 - EMUI is aggressive about stopping apps that run in the background. This supports the foreground-only design in `EX-10`.
 - The layout targets a 10" screen in landscape (960 × 600 dp). Phone layouts are not needed.
 
@@ -122,7 +122,7 @@ Workout
 ```
 
 - **Defaults:** an optional value that isn't set falls back to the workout default. Changing a default updates every exercise or round that doesn't set its own value. Those that set their own keep it.
-- **Unused values:** two values are never used. The last exercise of a round has no exercise rest, because the round rest runs instead. The last round has no round rest, because the workout ends. The editor marks these fields as not applicable.
+- **Unused values:** two values are never used. The last exercise of a round has no exercise rest, because the round rest runs instead. The last round has no round rest, because the workout ends. The editor marks these fields as not applicable but keeps their values, so they apply again if the exercise or round is moved.
 
 ### 4.3 Sequencing rules
 
@@ -198,7 +198,7 @@ The total runs from Start to completion: get ready 3 s + exercises 180 s + exerc
 | EX-9 | While paused, **Next** and **Previous** move to another exercise without asking for confirmation (see the table below). | Agreed |
 | EX-10 | If the app leaves the foreground (Home button, switching apps, screen turned off), the running workout pauses automatically. The workout only runs while the app is on screen. | Agreed |
 
-What Next and Previous do (draft behaviour, see Q14):
+What Next and Previous do:
 
 - They move between **exercises** and skip any rest in between.
 - After moving, the workout stays **paused** at the start of the target exercise. Resume starts that exercise as normal, including its name announcement (`TTS-1`).
@@ -238,7 +238,7 @@ Voice cues use Android's built-in text-to-speech service with the device's defau
 | TTS-7 | When the workout ends, "Workout complete. Well done!" is spoken. | Agreed |
 | TTS-9 | A setting turns voice cues on or off. The choice is remembered. With voice cues off, the timer, the screen and the round-end sound work the same. | Agreed |
 | TTS-10 | **Get ready:** "Get ready in" is spoken first. When it finishes, the 3 s countdown starts, with "three", "two", "one" spoken in sync with the display. With voice cues off, the countdown starts immediately. | Requested |
-| TTS-11 | Voice cues are always spoken in **English**, whatever the device language. | Requested |
+| TTS-11 | Voice cues are always spoken in **English**, using the English (United States) voice, whatever the device language. | Requested |
 | TTS-12 | **Rests are silent:** no voice cues are spoken during exercise rests or round rests. | Requested |
 | SND-1 | A short **sound** plays when a round ends, at the start of the round rest. It doesn't play after the last round. If the round rest is 0 s, the next exercise's name (`TTS-1`) is spoken after the sound finishes. | Requested |
 | SND-2 | There are no other sound effects. Exercises are marked only by the voice cues. | Requested |
@@ -338,14 +338,11 @@ Paused:
 
 ## 8. Open questions
 
-New questions raised by the first review. Each one lists the assumption this draft uses until it is answered.
+Each question lists the assumption this draft uses until it is answered.
 
 | # | Question | Draft assumption |
 |---|---|---|
-| Q14 | **Next / Previous:** should they jump between exercises and skip rests? After the jump, should the workout stay paused or resume straight away? | Exercises only. The workout stays paused at the start of the target exercise, so you can press Next several times before resuming. |
-| Q15 | **Round-end sound:** should it play when a round ends (start of the round rest) or when the next round starts (end of the round rest)? | When a round ends |
-| Q16 | Should the **voice cues** setting also mute the round-end sound? | No, it only affects the voice |
-| Q17 | **Own rests:** the draft reads "an exercise's own rest" as the rest *after* that exercise, and "a round's own rest" as the rest *after* that round. Is that right? Or should a round instead set the exercise rest used by all of its exercises? | The rest after it, as in `WM-2` |
+| Q18 | **Rest defaults.** Every exercise and round has its own rest. How should the workout-level default rests behave? <br>(a) **Linked**, as for durations: an exercise or round without its own value uses the default, and changing the default updates all of them. <br>(b) **Pre-fill only**: new exercises and rounds start with the default value, then keep their own value even if the default changes. <br>(c) **No defaults**: every rest is typed in by hand. | (a) Linked, the same as the default exercise duration |
 
 ## 9. Decisions
 
@@ -366,6 +363,10 @@ New questions raised by the first review. Each one lists the assumption this dra
 | Q11 | Sound effects | Only when a round ends (`SND-1`) |
 | Q12 | UI language | English for now, translatable to Spanish later (`NF-9`) |
 | Q13 | Music in the background | No music (`TTS-8` discarded) |
+| Q14 | Next / Previous behaviour | They jump between exercises and skip rests. The workout stays paused at the target exercise. (`EX-9`) |
+| Q15 | When the round-end sound plays | When the round ends, at the start of the round rest (`SND-1`) |
+| Q16 | Does the voice setting mute the round-end sound? | No. It only affects the voice (`TTS-9`). |
+| Q17 | Meaning of "own rest" | Each exercise and each round has its own rest, played after it. The last exercise of a round doesn't play its own rest; the round rest plays instead, if it isn't 0 s. (`WM-2`, §4.3) |
 
 ### 9.2 Discarded proposals
 
@@ -394,3 +395,4 @@ Not planned for v1; listed so they are not lost.
 |---|---|---|
 | 0.1 | 2026-11-02 | First draft from the initial brief and the device information. |
 | 0.2 | 2026-11-02 | First review. Proposals accepted or discarded; Q1–Q13 answered. Added: rests per exercise and per round, 3 s get-ready, controls shown only while paused, round-end sound, English-only voice and UI, landscape only, Settings screen. New questions Q14–Q17. |
+| 0.3 | 2026-11-02 | Second review: Q14–Q17 answered, confirming the draft assumptions. The English voice is pinned to English (United States), which is installed on the device. Rest fields that don't apply keep their values. New question Q18 on rest defaults. |
