@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.1, open for refinement |
+| **Status** | Draft v0.2, first review applied |
 | **Last updated** | 2026-11-02 |
 | **Platform** | Android tablet, single user, personal use |
 
@@ -10,9 +10,11 @@ This document describes *what* the app does. Once it is agreed, it becomes the b
 
 How to read it:
 
-- Every requirement has an ID (`EX-1`, `TTS-2`, …) so that the implementation plan and later discussions can refer to it.
-- **Requested** marks requirements that come from the original brief.
-- **Proposed** marks suggestions that still need to be accepted, changed or dropped.
+- Every requirement has an ID (`EX-1`, `TTS-2`, …) so that the implementation plan and later discussions can refer to it. IDs are never reused. Discarded proposals keep their ID and are listed in [§9.2](#92-discarded-proposals).
+- The **Source** column says where a requirement comes from:
+  - **Requested**: asked for in the original brief or in review answers.
+  - **Agreed**: a proposal accepted in review.
+  - **Proposed**: a suggestion still waiting for review.
 - Unresolved points are listed in [§8 Open questions](#8-open-questions), each with the assumption this draft makes for now.
 
 ---
@@ -27,32 +29,40 @@ How to read it:
 6. [Screens](#6-screens)
 7. [Non-functional requirements](#7-non-functional-requirements)
 8. [Open questions](#8-open-questions)
-9. [Future ideas](#9-future-ideas)
-10. [Change log](#10-change-log)
+9. [Decisions](#9-decisions)
+10. [Future ideas](#10-future-ideas)
+11. [Change log](#11-change-log)
 
 ---
 
 ## 1. Purpose
 
-An interval timer that guides a workout made of **rounds** of timed **exercises**. You start it and follow it hands-free: the screen shows where you are and how much time is left, and spoken cues announce each exercise and count down its last seconds.
+An interval timer that guides a workout made of **rounds** of timed **exercises**. You start it and follow it hands-free:
 
-The app runs on one specific tablet (see §3). It is installed directly from the development machine; it is not published on an app store.
+- the screen shows where you are and how much time is left in the current exercise or rest;
+- spoken cues announce each exercise and count down its last seconds;
+- a short sound marks the end of each round.
+
+The app is a simple timer. It runs on one specific tablet (see §3) and is installed directly from the development machine; it is not published on an app store.
 
 ## 2. Scope
 
 ### In scope (v1)
 
-- Defining workouts made of rounds and exercises, with configurable durations and rests.
-- Running a workout with a countdown timer, pause and resume.
-- Spoken cues using the device's built-in text-to-speech (TTS).
+- Creating and editing workouts in the app: rounds, exercises, durations and rests.
+- Running a workout with a countdown timer, pause/resume, and next/previous/stop controls while paused.
+- Spoken cues in English using the device's built-in text-to-speech (TTS), plus a round-end sound.
 - Storing workouts on the device.
 
 ### Out of scope (v1)
 
 - Accounts, cloud sync, or any network use.
 - Publishing on Google Play.
-- Fitness tracking (heart rate, calories) and workout history/statistics (see [§9](#9-future-ideas)).
-- Music playback inside the app.
+- Importing workouts from files. Workouts are created only in the app's editor.
+- Music playback, or adjusting the audio of other apps.
+- Fitness tracking (heart rate, calories) and workout history/statistics.
+- Portrait layout. The app is landscape only for now.
+- Languages other than English. A Spanish translation may come later (see [§10](#10-future-ideas)).
 
 ## 3. Target device
 
@@ -64,18 +74,18 @@ Information read from the tablet with `adb` on 2026-11-02.
 | OS | Android 8.0.0, **API level 26**, EMUI 8.0 |
 | CPU ABI | `arm64-v8a` (also `armeabi-v7a`) |
 | Memory | ~3 GB RAM |
-| Screen | 1200 × 1920 px, 320 dpi (xhdpi) → **600 × 960 dp** in portrait, 960 × 600 dp in landscape |
+| Screen | 1200 × 1920 px, 320 dpi (xhdpi) → **960 × 600 dp in landscape** |
 | Auto-rotate | Enabled |
 | System language | Spanish (`es-ES`), time zone Europe/Madrid |
-| TTS engine | Google Speech Services (`com.google.android.tts`), the default and only engine installed. No TTS language is forced in settings, so it follows the system language (Spanish). |
+| TTS engine | Google Speech Services (`com.google.android.tts`), the default and only engine installed. No TTS language is forced in settings, so by default it follows the system language (Spanish). |
 | Google Play Services | Present |
 
 What this means for the app:
 
 - **Minimum SDK is 26.** Platform APIs added after Android 8.0 can only be used with a fallback.
-- TTS must work **offline**. The voice data for the chosen language must be installed in the Google TTS settings (*not yet verified on the device*).
+- **Voice cues are always in English** (`TTS-11`), but the system language is Spanish. The app has to select English explicitly. The English voice data must also be installed in Google TTS so cues work offline (*not yet verified on the device*).
 - EMUI is aggressive about stopping apps that run in the background. This supports the foreground-only design in `EX-10`.
-- The layout targets a 10" screen (smallest width 600 dp). Phone layouts are not needed.
+- The layout targets a 10" screen in landscape (960 × 600 dp). Phone layouts are not needed.
 
 ## 4. Concepts
 
@@ -83,13 +93,14 @@ What this means for the app:
 
 | Term | Meaning |
 |---|---|
-| **Workout** | A named routine: an ordered list of rounds plus the timing settings below. It is what you start, pause and finish. |
+| **Workout** | A named routine: an ordered list of rounds plus default timings. It is what you start, pause and finish. |
 | **Round** | A named, ordered list of one or more exercises. A round ends when its last exercise finishes. |
 | **Exercise** | A named activity with a duration in seconds. |
-| **Default exercise duration** | A workout-level duration used by every exercise that doesn't define its own. |
-| **Exercise rest** | The pause between two consecutive exercises of the same round, in seconds. |
-| **Round rest** | The pause between the end of one round and the start of the next, in seconds. |
-| **Phase** | One step of a running workout: an exercise or a rest. |
+| **Default exercise duration** | A workout-level duration used by every exercise that doesn't set its own. |
+| **Exercise rest** | The pause after an exercise, before the next exercise of the same round. The workout sets a default; any exercise can set its own. |
+| **Round rest** | The pause after a round, before the next round. The workout sets a default; any round can set its own. |
+| **Get ready** | A 3-second countdown before the first exercise of the workout. |
+| **Phase** | One step of a running workout: get ready, an exercise, or a rest. |
 
 A rest of **0 seconds means no rest**: the next exercise or round starts immediately.
 
@@ -99,29 +110,40 @@ A rest of **0 seconds means no rest**: the next exercise or round starts immedia
 Workout
 ├── name
 ├── default exercise duration (s)
-├── exercise rest (s, ≥ 0)
-├── round rest (s, ≥ 0)
+├── default exercise rest (s, ≥ 0)
+├── default round rest (s, ≥ 0)
 └── rounds (ordered, at least 1)
     ├── name
+    ├── round rest (s), optional: falls back to the default round rest
     └── exercises (ordered, at least 1)
         ├── name
-        └── duration (s), optional: falls back to the default exercise duration
+        ├── duration (s), optional: falls back to the default exercise duration
+        └── rest (s), optional: falls back to the default exercise rest
 ```
 
-Exercises without their own duration follow the default. Changing the default updates all of them at once. Exercises with their own duration keep it.
+- **Defaults:** an optional value that isn't set falls back to the workout default. Changing a default updates every exercise or round that doesn't set its own value. Those that set their own keep it.
+- **Unused values:** two values are never used. The last exercise of a round has no exercise rest, because the round rest runs instead. The last round has no round rest, because the workout ends. The editor marks these fields as not applicable.
 
 ### 4.3 Sequencing rules
 
-1. The workout starts with the first exercise of the first round.
-2. Inside a round, exercises run in order, with the **exercise rest** between each pair.
-3. After the last exercise of a round, the **round rest** runs, then the first exercise of the next round starts. The exercise rest is *not* added on top: only one rest runs between rounds.
-4. After the last exercise of the last round, the workout ends. No rest runs at the end.
-5. A rest of 0 s is skipped entirely: the next phase starts immediately.
+1. Pressing Start runs the **get-ready** countdown (3 s).
+2. The first exercise of the first round starts.
+3. Inside a round, each exercise is followed by **that exercise's rest**, then the next exercise starts.
+4. When the last exercise of a round finishes:
+   - the round-end sound plays;
+   - **that round's rest** runs (the exercise's own rest is not added on top);
+   - the first exercise of the next round starts.
+5. When the last exercise of the last round finishes, the workout ends:
+   - no rest runs and no round-end sound plays;
+   - "Workout complete. Well done!" is spoken.
+6. A rest of 0 s is skipped entirely: the next exercise starts immediately.
 
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> Exercise : Start
+    state "Get ready" as GetReady
+    [*] --> GetReady : Start
+    GetReady --> Exercise : 3 s elapsed
     Exercise --> Rest : time up, rest configured
     Exercise --> Exercise : time up, rest is 0 s
     Rest --> Exercise : time up
@@ -129,29 +151,35 @@ stateDiagram-v2
     Completed --> [*]
 ```
 
-You can pause from any running phase. Resuming returns to the same phase with the same remaining time.
+Any phase can be paused. Resuming returns to the same phase with the same remaining time. While paused, you can also move to the next or previous exercise, or stop the workout (`EX-8`, `EX-9`).
 
 ### 4.4 Example
 
-Workout "Example": default exercise duration 40 s, exercise rest 15 s, round rest 60 s.
+Workout "Example" has these defaults: exercise duration 40 s, exercise rest 15 s, round rest 60 s.
 
-- Round 1 "Warm-up": Jumping jacks (30 s), Arm circles (10 s), High knees (default)
-- Round 2 "Core": Plank (60 s), Crunches (default)
+- Round 1 "Warm-up", own round rest 30 s:
+  - Jumping jacks: 30 s
+  - Arm circles: 10 s, own rest 5 s
+  - High knees: default duration
+- Round 2 "Core":
+  - Plank: 60 s, own rest 30 s
+  - Crunches: default duration
 
-| # | Phase | Round | Name | Duration | Voice cues |
+| # | Phase | Round | Name | Duration | Audio |
 |---|---|---|---|---|---|
-| 1 | Exercise | Warm-up | Jumping jacks | 30 s | "Jumping jacks" · 3-2-1 |
-| 2 | Exercise rest | Warm-up | — | 15 s | |
-| 3 | Exercise | Warm-up | Arm circles | 10 s | 3-2-1 (no name: not longer than 10 s) |
-| 4 | Exercise rest | Warm-up | — | 15 s | |
-| 5 | Exercise | Warm-up | High knees | 40 s | "High knees" · 3-2-1 |
-| 6 | Round rest | — | — | 60 s | |
-| 7 | Exercise | Core | Plank | 60 s | "Plank" · 3-2-1 |
-| 8 | Exercise rest | Core | — | 15 s | |
-| 9 | Exercise | Core | Crunches | 40 s | "Crunches" · 3-2-1 |
-| | **Completed** | | | **Total 4:45** | |
+| 1 | Get ready | — | — | 3 s | "Get ready in" · 3-2-1 |
+| 2 | Exercise | Warm-up | Jumping jacks | 30 s | "Jumping jacks" · 3-2-1 |
+| 3 | Exercise rest | Warm-up | — | 15 s (default) | silent |
+| 4 | Exercise | Warm-up | Arm circles | 10 s | 3-2-1 (no name: not longer than 10 s) |
+| 5 | Exercise rest | Warm-up | — | 5 s (own) | silent |
+| 6 | Exercise | Warm-up | High knees | 40 s (default) | "High knees" · 3-2-1 |
+| 7 | Round rest | — | — | 30 s (own) | round-end sound, then silent |
+| 8 | Exercise | Core | Plank | 60 s | "Plank" · 3-2-1 |
+| 9 | Exercise rest | Core | — | 30 s (own) | silent |
+| 10 | Exercise | Core | Crunches | 40 s (default) | "Crunches" · 3-2-1 |
+| | **Completed** | | | **Total 4:23** | "Workout complete. Well done!" |
 
-The voice cues column only shows the requested cues (`TTS-1`, `TTS-2`). Proposed cues such as `TTS-5` and `TTS-6` would add more.
+The total runs from Start to completion: get ready 3 s + exercises 180 s + exercise rests 50 s + round rest 30 s.
 
 ## 5. Functional requirements
 
@@ -161,14 +189,25 @@ The voice cues column only shows the requested cues (`TTS-1`, `TTS-2`). Proposed
 |---|---|---|
 | EX-1 | Starting a workout runs its phases following the sequencing rules in §4.3. | Requested |
 | EX-2 | Each exercise lasts its configured duration. The remaining time counts down to zero, then the next phase starts automatically. | Requested |
-| EX-3 | Rests between exercises and between rounds last their configured duration. A value of 0 s means no rest. | Requested |
+| EX-3 | Each rest lasts its configured duration. A value of 0 s means no rest. | Requested |
 | EX-4 | The user can **pause** a running exercise and **resume** it. Resuming continues from the remaining time; it does not restart the exercise. | Requested |
-| EX-5 | Pause and resume also work during rests. | Proposed |
-| EX-6 | When the last exercise of the last round finishes, the workout ends and a completion screen is shown. | Proposed |
-| EX-7 | A **get-ready** countdown (e.g. 10 s) runs before the first exercise, so there is time to get into position after pressing Start. | Proposed |
-| EX-8 | The user can **stop** the workout early, after confirming, and return to the workout list. | Proposed |
-| EX-9 | The user can **skip** to the next phase or go back to the start of the previous exercise. | Proposed |
-| EX-10 | If the app leaves the foreground (Home button, switching apps, screen turned off), the running workout pauses automatically. The workout only runs while the app is on screen. | Proposed |
+| EX-5 | Pause and resume also work during rests and the get-ready countdown. | Agreed |
+| EX-6 | When the last exercise of the last round finishes, the workout ends and a completion screen is shown. | Agreed |
+| EX-7 | A **get-ready** countdown of **3 s** runs before the first exercise of the first round, and only there. The screen shows "Get ready", the countdown, and the name of the first exercise. The voice for it is described in `TTS-10`. | Agreed |
+| EX-8 | While paused, **Stop** asks for confirmation, then ends the workout and returns to the workout list. | Agreed |
+| EX-9 | While paused, **Next** and **Previous** move to another exercise without asking for confirmation (see the table below). | Agreed |
+| EX-10 | If the app leaves the foreground (Home button, switching apps, screen turned off), the running workout pauses automatically. The workout only runs while the app is on screen. | Agreed |
+
+What Next and Previous do (draft behaviour, see Q14):
+
+- They move between **exercises** and skip any rest in between.
+- After moving, the workout stays **paused** at the start of the target exercise. Resume starts that exercise as normal, including its name announcement (`TTS-1`).
+
+| Paused during | Next | Previous |
+|---|---|---|
+| Get ready | First exercise | Not available |
+| An exercise | Next exercise; on the last exercise of the workout, ends the workout (completion screen) | Previous exercise; on the first exercise, restarts it |
+| A rest | The exercise after the rest | The exercise before the rest |
 
 ### 5.2 Workout screen
 
@@ -178,29 +217,31 @@ The screen must be readable at a glance from a few metres away while exercising.
 |---|---|---|
 | UI-1 | Shows the current **round name**. | Requested |
 | UI-2 | Shows the current **exercise name**. | Requested |
-| UI-3 | Shows the **time**: the remaining time of the current phase as `mm:ss`, rounded up to the whole second. It shows `00:40` at the start of a 40 s exercise and `00:01` during its last second. | Requested |
+| UI-3 | Shows the **time**: the remaining time of the **current phase only** (exercise, rest or get ready) as `mm:ss`, rounded up to the whole second. It shows `00:40` at the start of a 40 s exercise and `00:01` during its last second. The remaining time of the whole workout is not shown. | Requested |
 | UI-4 | Has a control to **pause / resume**. | Requested |
-| UI-5 | During a rest, shows "Rest" with its remaining time and the name of the **next exercise** (and the next round, if a new one starts). | Proposed |
-| UI-6 | Shows progress: exercise *n* of *m* in the round, round *n* of *m*. | Proposed |
-| UI-7 | Exercise, rest and paused states each have their own background colour, so the current state is clear from a distance. | Proposed |
-| UI-8 | Tapping anywhere on the screen toggles pause/resume, in addition to the explicit button. | Proposed |
-| UI-9 | Shows the total remaining time of the workout. | Proposed |
+| UI-5 | During a rest, shows "Rest" with its remaining time and the name and duration of the **next exercise**. If a new round starts after the rest, the next round's name is shown too. | Agreed |
+| UI-6 | Shows progress: exercise *n* of *m* in the round, round *n* of *m*. | Agreed |
+| UI-7 | Exercise, rest and paused states each have their own background colour, so the current state is clear from a distance. | Agreed |
+| UI-10 | While a phase is running, the only button shown is **Pause**. | Requested |
+| UI-11 | While paused, the buttons shown are **Resume**, **Previous**, **Next** and **Stop**, and the screen clearly says the workout is paused. | Requested |
 
-### 5.3 Voice cues (TTS)
+### 5.3 Audio cues
 
-Voice cues use Android's built-in text-to-speech service with the device's default engine (Google Speech Services).
+Voice cues use Android's built-in text-to-speech service with the device's default engine (Google Speech Services), always in English.
 
 | ID | Requirement | Source |
 |---|---|---|
-| TTS-1 | When an exercise starts and its duration is **longer than 10 s**, the exercise name is spoken. | Requested |
+| TTS-1 | When an exercise starts and its duration is **longer than 10 s**, the exercise name is spoken. The rule is strict: a 10 s exercise is not announced. | Requested |
 | TTS-2 | When **3 s** remain in an exercise, a countdown is spoken: "three", "two", "one". There is one word per second, spoken as the display changes to 3, 2 and 1. An exercise of 3 s or less starts the countdown at its own duration. | Requested |
-| TTS-3 | Pausing stops any speech in progress. Nothing is replayed on resume; the countdown carries on from the current second. | Proposed |
-| TTS-4 | The cues work without a network connection. | Proposed |
-| TTS-5 | The same 3-2-1 countdown is spoken at the end of rests, warning that the next exercise is about to start. | Proposed |
-| TTS-6 | When a rest starts, it is announced and the next exercise is named, e.g. "Rest. Next: squats". | Proposed |
-| TTS-7 | "Workout complete" is spoken at the end. | Proposed |
-| TTS-8 | Other audio (e.g. music playing in another app) is lowered while a cue is spoken, then restored. | Proposed |
-| TTS-9 | A setting turns voice cues on or off. | Proposed |
+| TTS-3 | Pausing stops any speech in progress. Nothing is replayed on resume; the countdown carries on from the current second. | Agreed |
+| TTS-4 | The cues work without a network connection. The app doesn't need the network at all. | Agreed |
+| TTS-7 | When the workout ends, "Workout complete. Well done!" is spoken. | Agreed |
+| TTS-9 | A setting turns voice cues on or off. The choice is remembered. With voice cues off, the timer, the screen and the round-end sound work the same. | Agreed |
+| TTS-10 | **Get ready:** "Get ready in" is spoken first. When it finishes, the 3 s countdown starts, with "three", "two", "one" spoken in sync with the display. With voice cues off, the countdown starts immediately. | Requested |
+| TTS-11 | Voice cues are always spoken in **English**, whatever the device language. | Requested |
+| TTS-12 | **Rests are silent:** no voice cues are spoken during exercise rests or round rests. | Requested |
+| SND-1 | A short **sound** plays when a round ends, at the start of the round rest. It doesn't play after the last round. If the round rest is 0 s, the next exercise's name (`TTS-1`) is spoken after the sound finishes. | Requested |
+| SND-2 | There are no other sound effects. Exercises are marked only by the voice cues. | Requested |
 
 Note on `TTS-1` and `TTS-2`: the 10 s threshold leaves at least 7 s between the spoken name and the start of the countdown, so the two cues never overlap.
 
@@ -209,26 +250,29 @@ Note on `TTS-1` and `TTS-2`: the 10 s threshold leaves at least 7 s between the 
 | ID | Requirement | Source |
 |---|---|---|
 | WM-1 | Each exercise has a **name** and a **duration** in seconds. A workout-level default duration applies to every exercise that doesn't set its own. | Requested |
-| WM-2 | The exercise rest and round rest are configured in seconds; 0 means no rest. | Requested |
-| WM-3 | Several workouts can be saved on the device and are listed on the home screen. | Proposed |
-| WM-4 | Workouts can be created, edited, duplicated and deleted in the app. | Proposed |
-| WM-5 | In the editor, rounds and exercises can be added, renamed, reordered, duplicated and removed. | Proposed |
-| WM-6 | The editor and the workout list show the workout's computed total duration, rests included. | Proposed |
-| WM-7 | Validation: the workout and each round need a name; a workout has at least one round; a round has at least one exercise; durations are at least 1 s; rests are 0 s or more. | Proposed |
-| WM-8 | Workouts are stored locally and survive app restarts and device reboots. | Proposed |
+| WM-2 | Rests are set in seconds; 0 means no rest. The workout sets a default exercise rest and a default round rest. Each exercise can set its **own rest**, used after it. Each round can set its **own round rest**, used after it. | Requested |
+| WM-3 | Several workouts can be saved on the device and are listed on the home screen. | Agreed |
+| WM-4 | Workouts can be created, edited, duplicated and deleted in the app. The editor is the only way to create workouts. | Agreed |
+| WM-5 | In the editor, rounds and exercises can be added, renamed, reordered, duplicated and removed. To repeat a round, duplicate it. | Agreed |
+| WM-6 | The editor and the workout list show the workout's total duration, from Start to completion: get ready, exercises and rests. | Agreed |
+| WM-7 | Validation: the workout and each round need a name; a workout has at least one round; a round has at least one exercise; durations are at least 1 s; rests are 0 s or more. | Agreed |
+| WM-8 | Workouts are stored locally and survive app restarts and device reboots. | Agreed |
 
 ## 6. Screens
 
+All screens are landscape.
+
 | Screen | Purpose | Main actions |
 |---|---|---|
-| **Workout list** (home) | Shows saved workouts with their total duration | Start, edit, duplicate, delete, new workout |
-| **Workout editor** | Edits a workout's name, default exercise duration, rests, rounds and exercises | Save, cancel |
-| **Workout runner** | Runs the workout (see §5.1–§5.3) | Pause/resume, stop, skip (if accepted) |
-| **Workout completed** | Confirms the end and shows a short summary (total time, rounds and exercises done) | Back to list |
+| **Workout list** (home) | Shows saved workouts with their total duration | Start, edit, duplicate, delete, new workout, open settings |
+| **Workout editor** | Edits a workout's name, defaults, rounds and exercises, including their own durations and rests | Save, cancel |
+| **Workout runner** | Runs the workout (see §5.1–§5.3) | Running: pause. Paused: resume, previous, next, stop. |
+| **Workout completed** | Shows a "Well done!" message and a short summary (total time, rounds and exercises done) | Back to list |
+| **Settings** | App-wide settings: voice cues on/off (`TTS-9`) | Back |
 
-Runner screen sketches (landscape, low fidelity, layout only):
+Runner screen sketches (low fidelity, layout only):
 
-During an exercise:
+Exercise running:
 
 ```
 +--------------------------------------------------------------+
@@ -238,18 +282,17 @@ During an exercise:
 |                                                              |
 |                            00:27                             |
 |                                                              |
-|                         Next: Lunges                         |
 |                                                              |
 |                         [ || Pause ]                         |
 |                                                              |
 +--------------------------------------------------------------+
 ```
 
-During a rest:
+Rest running:
 
 ```
 +--------------------------------------------------------------+
-| Round 2/3 · Legs                                Exercise 2/4 |
+| Round 2/3 · Legs                                             |
 |                                                              |
 |                             REST                             |
 |                                                              |
@@ -262,51 +305,92 @@ During a rest:
 +--------------------------------------------------------------+
 ```
 
+Paused:
+
+```
++--------------------------------------------------------------+
+| Round 2/3 · Legs                                Exercise 2/4 |
+|                                                              |
+|                            SQUATS                            |
+|                            PAUSED                            |
+|                            00:27                             |
+|                                                              |
+|         [ |< Previous ]   [ > Resume ]   [ Next >| ]         |
+|                                                              |
+|                           [ Stop ]                           |
+|                                                              |
++--------------------------------------------------------------+
+```
+
 ## 7. Non-functional requirements
 
 | ID | Requirement |
 |---|---|
 | NF-1 | **Timer accuracy:** remaining time is computed from a monotonic clock, not by adding up timer ticks, so errors don't build up. A 60-minute workout ends within ±1 s of real elapsed time, and pausing doesn't change this. |
 | NF-2 | **Screen stays on** while the runner screen is open. |
-| NF-3 | **Robust to configuration changes:** rotating the device or similar events don't reset, pause or skip the running workout. |
+| NF-3 | **Robust to configuration changes:** events such as flipping the tablet between the two landscape orientations don't reset, pause or skip the running workout. |
 | NF-4 | **Offline and private:** no network permission, no accounts, no analytics. |
 | NF-5 | **Compatibility:** runs on Android 8.0 (API 26) on the target device. |
 | NF-6 | **Readability:** the time and exercise name are readable from about 3 m away. Touch targets are large. |
 | NF-7 | **Distribution:** installed as an APK from the development machine (`adb` / Android Studio). |
+| NF-8 | **Landscape only:** the app follows the sensor between the two landscape orientations and never shows portrait. |
+| NF-9 | **Language:** the UI is in English. All user-facing text lives in resource files, so a Spanish translation can be added later without code changes. |
 
 ## 8. Open questions
 
-Each question lists the assumption this draft uses until it is answered.
+New questions raised by the first review. Each one lists the assumption this draft uses until it is answered.
 
 | # | Question | Draft assumption |
 |---|---|---|
-| Q1 | **TTS language.** The tablet is set to Spanish, so the default voice speaks Spanish. Should the countdown be "three, two, one" (English) or "tres, dos, uno" (Spanish)? Exercise names are read by the same voice, so they should be written in that language. | Configurable, defaulting to the device language (Spanish) |
-| Q2 | **How are workouts created?** With an editor in the app, by importing a file (e.g. JSON written on the PC and copied with `adb`), or both? | Editor in the app (`WM-4`, `WM-5`) |
-| Q3 | Are the rest times one value per workout, or can a round or exercise **override** them? | One value of each per workout |
-| Q4 | Can a round be **repeated** N times (e.g. "Round 1 × 3"), or is each round run once? | Each round runs once; duplicating a round gives the same result |
-| Q5 | **Name announcement threshold:** is "longer than 10 s" strict (a 10 s exercise is not announced)? Should the threshold be a setting? | Strict, fixed at 10 s |
-| Q6 | Should the 3-2-1 countdown also be spoken at the **end of rests** (`TTS-5`)? | Yes |
-| Q7 | Should there be a **get-ready** countdown before the first exercise (`EX-7`)? How long? | Yes, 10 s |
-| Q8 | **Orientation:** landscape, portrait or both? Where is the tablet placed during a workout? | Landscape only |
-| Q9 | Besides pause/resume, which runner **controls** are wanted: stop, skip next, previous (`EX-8`, `EX-9`)? | Stop and skip next/previous |
-| Q10 | When the app **leaves the foreground**, should the workout pause (`EX-10`) or keep running in the background? | Pause |
-| Q11 | Besides the voice, should there be **sound effects**, e.g. a beep at each phase change? | Voice only |
-| Q12 | **UI language:** English or Spanish? | English text, kept in resource files so it can be translated later |
-| Q13 | Will **music** be playing from another app during workouts (relevant for `TTS-8`)? | Yes, so cues lower the music |
+| Q14 | **Next / Previous:** should they jump between exercises and skip rests? After the jump, should the workout stay paused or resume straight away? | Exercises only. The workout stays paused at the start of the target exercise, so you can press Next several times before resuming. |
+| Q15 | **Round-end sound:** should it play when a round ends (start of the round rest) or when the next round starts (end of the round rest)? | When a round ends |
+| Q16 | Should the **voice cues** setting also mute the round-end sound? | No, it only affects the voice |
+| Q17 | **Own rests:** the draft reads "an exercise's own rest" as the rest *after* that exercise, and "a round's own rest" as the rest *after* that round. Is that right? Or should a round instead set the exercise rest used by all of its exercises? | The rest after it, as in `WM-2` |
 
-## 9. Future ideas
+## 9. Decisions
+
+### 9.1 Answered questions
+
+| # | Question | Decision |
+|---|---|---|
+| Q1 | TTS language | English. Exercise names are written in English. |
+| Q2 | How workouts are created | Only with the editor in the app |
+| Q3 | Rest overrides | Each exercise and each round can set its own rest (`WM-2`) |
+| Q4 | Round repetitions | No. A round is repeated by duplicating it in the editor. |
+| Q5 | Name announcement threshold | Strictly longer than 10 s, fixed |
+| Q6 | Countdown at the end of rests | No. Rests are silent (`TTS-12`). |
+| Q7 | Get-ready countdown | Yes, 3 s, with "Get ready in three, two, one" (`EX-7`, `TTS-10`) |
+| Q8 | Orientation | Landscape only for now (`NF-8`) |
+| Q9 | Runner controls | Running: Pause only. Paused: Resume, Previous, Next, Stop. Stop asks for confirmation; Next and Previous don't. (`UI-10`, `UI-11`, `EX-8`, `EX-9`) |
+| Q10 | Leaving the app | The workout pauses (`EX-10`) |
+| Q11 | Sound effects | Only when a round ends (`SND-1`) |
+| Q12 | UI language | English for now, translatable to Spanish later (`NF-9`) |
+| Q13 | Music in the background | No music (`TTS-8` discarded) |
+
+### 9.2 Discarded proposals
+
+| ID | Proposal | Reason |
+|---|---|---|
+| UI-8 | Tap anywhere on the screen to pause/resume | The explicit buttons are used instead |
+| UI-9 | Show the total remaining workout time | Only the current exercise or rest time is shown |
+| TTS-5 | 3-2-1 countdown at the end of rests | Rests are silent |
+| TTS-6 | Announce rests and the next exercise | Rests are silent |
+| TTS-8 | Lower other apps' audio during cues | No music is played; the app is a simple timer |
+
+## 10. Future ideas
 
 Not planned for v1; listed so they are not lost.
 
+- Spanish translation of the UI (`NF-9`), and possibly Spanish voice cues.
+- Portrait layout.
 - Workout history: date, workout, completed or stopped.
-- Export/import workouts as JSON, for backup and for editing on the PC.
-- Rest overrides per round or exercise (if Q3 is answered "no" for v1).
-- Round repetitions (if Q4 is answered "no" for v1).
+- Backup and restore of workouts, since uninstalling the app deletes them.
 - Notes or an image per exercise.
 - Speed or volume settings for the voice.
 
-## 10. Change log
+## 11. Change log
 
 | Version | Date | Changes |
 |---|---|---|
 | 0.1 | 2026-11-02 | First draft from the initial brief and the device information. |
+| 0.2 | 2026-11-02 | First review. Proposals accepted or discarded; Q1–Q13 answered. Added: rests per exercise and per round, 3 s get-ready, controls shown only while paused, round-end sound, English-only voice and UI, landscape only, Settings screen. New questions Q14–Q17. |
