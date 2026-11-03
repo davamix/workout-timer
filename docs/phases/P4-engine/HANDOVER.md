@@ -38,7 +38,7 @@ The task IDs come from SPEC.md §7.
 | Task | Status | Notes |
 |---|---|---|
 | T1 | Done | `SessionRunTest` (19) |
-| T2 | To do | |
+| T2 | Done | `PauseResumeTest` (10), `SessionCommandsTest` (11). The waiting-for-announcement pause case comes with T3. |
 | T3 | To do | |
 | T4 | To do | |
 | T5 | To do | |

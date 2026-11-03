@@ -54,14 +54,23 @@ fun List<Timed>.codes(start: Long = T0): List<String> = map { "${it.atMillis - s
 fun List<SessionEvent>.eventCodes(): List<String> = map { it.code() }
 
 /** Calls [SessionMachine.advanceTo] at exactly each [SessionMachine.nextWakeAt] until there is none. */
-internal fun SessionMachine.runOnTime(): List<Timed> =
+internal fun SessionMachine.runOnTime(): List<Timed> = runOnTimeUntil(Long.MAX_VALUE)
+
+/** Calls [SessionMachine.advanceTo] at exactly each [SessionMachine.nextWakeAt] up to [limit], included. */
+internal fun SessionMachine.runOnTimeUntil(limit: Long): List<Timed> =
     buildList {
         repeat(MAX_WAKE_UPS) {
-            val wake = nextWakeAt() ?: return@buildList
+            val wake = nextWakeAt()?.takeIf { it <= limit } ?: return@buildList
             advanceTo(wake).forEach { add(Timed(wake, it)) }
         }
         fail<Unit>("Still running after $MAX_WAKE_UPS wake-ups")
     }
+
+/**
+ * The clock time each phase of [exampleTimeline] starts at when it runs on time from [T0]: 0, 3, 33, 48, 58, 63,
+ * 103, 133, 193 and 223 s.
+ */
+val exampleStarts: List<Long> = listOf(0, 3, 33, 48, 58, 63, 103, 133, 193, 223).map { T0 + it * 1000L }
 
 /** Starts the machine at [at], then runs it on time to the end. */
 internal fun SessionMachine.startAndRunOnTime(at: Long = T0): List<Timed> = start(at).map { Timed(at, it) } + runOnTime()
