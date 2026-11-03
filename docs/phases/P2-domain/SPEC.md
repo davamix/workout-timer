@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.1 |
+| **Status** | Ready, v0.2 |
 | **Phase** | P2, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P1 (done) |
 | **Branch** | `phase/p2-domain` |
@@ -26,14 +26,14 @@ Later phases build on it:
 
 ## 2. Requirements covered
 
-Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.5.
+Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.6.
 
 | ID | Requirement (quoted) | What this phase does for it |
 |---|---|---|
 | WM-1 | "Each exercise has a **name** and a **duration** in seconds. A workout-level default duration applies to every exercise that doesn't set its own." | Model, plus effective-duration resolution |
 | WM-2 | "Rests are set in seconds; 0 means no rest. The workout sets a default exercise rest and a default round rest. Each exercise can set its **own rest**, used after it. Each round can set its **own round rest**, used after it." | Model, plus effective-rest resolution |
 | WM-6 | "The editor and the workout list show the workout's total duration, from Start to completion: get ready, exercises and rests." | The timeline total, and an estimate that also works for incomplete workouts in the editor. P6 shows them. |
-| WM-7 | "Validation: the workout and each round need a name; a workout has at least one round; a round has at least one exercise; durations are at least 1 s; rests are 0 s or more." | `validate()` returns every error found. P6 shows them. See Q1 and Q2. |
+| WM-7 | "Validation: the workout, each round and each exercise need a name; a workout has at least one round; a round has at least one exercise; durations are at least 1 s; rests are 0 s or more. No duration or rest can be longer than 99:59 (99 minutes 59 seconds)." | `validate()` returns every error found. P6 shows them. |
 | EX-1 | "Starting a workout runs its phases following the sequencing rules in §4.3." | The timeline applies the §4.3 rules (quoted below). P4 runs it. |
 | EX-3 | "Each rest lasts its configured duration. A value of 0 s means no rest." | Rest phases get their effective duration. 0 s rests produce no phase. |
 | EX-7 | "A **get-ready** countdown of **3 s** runs before the first exercise of the first round, and only there. The screen shows "Get ready", the countdown, and the name of the first exercise. The voice for it is described in `TTS-10`." | The timeline starts with one 3 s get-ready phase that knows the first exercise. The voice is P5; the screen is P7. |
@@ -120,7 +120,7 @@ P2 computes the targets. Staying paused is P4's job.
 ### In scope
 
 - **Model:** `Workout`, `Round` and `Exercise`, with linked defaults (effective values), the unused-value rules, ID generation, and duplication with new IDs.
-- **Validation:** for WM-7, plus Q1 and Q2 if they are agreed.
+- **Validation:** WM-7.
 - **Timeline:** the phase types, the builder, the total, an estimated total for incomplete workouts, and the next/previous targets.
 - **Storage interface:** `WorkoutRepository` and `InMemoryWorkoutRepository`.
 
@@ -206,7 +206,7 @@ fun Exercise.duplicate(newId: () -> String = ::newId): Exercise
 object Limits {
     const val MIN_DURATION_SECONDS = 1
     const val MIN_REST_SECONDS = 0
-    const val MAX_SECONDS = 5999        // 99:59, the most mm:ss can show (Q2)
+    const val MAX_SECONDS = 5999        // 99:59 (WM-7), the most mm:ss can show
 }
 fun Workout.validate(): List<ValidationError>
 
@@ -215,7 +215,7 @@ sealed interface ValidationError {
     data object NoRounds : ValidationError
     data class RoundNameMissing(val roundId: String) : ValidationError
     data class RoundHasNoExercises(val roundId: String) : ValidationError
-    data class ExerciseNameMissing(val exerciseId: String) : ValidationError   // Q1
+    data class ExerciseNameMissing(val exerciseId: String) : ValidationError
     data class TimeOutOfRange(val field: TimeField, val min: Int, val max: Int) : ValidationError
 }
 
@@ -348,7 +348,7 @@ Assertions use JUnit Jupiter (`org.junit.jupiter.api.Assertions`, `assertThrows`
 ## 5. Security and privacy
 
 - Pure logic: no I/O, no Android and no network.
-- Validation is what keeps impossible values out: negative or zero durations, negative rests, and values too large to display (Q2). Upper limits also keep totals far from `Int` overflow.
+- Validation is what keeps impossible values out: negative or zero durations, negative rests, and values too large to display (over 99:59, WM-7). Upper limits also keep totals far from `Int` overflow.
 - The repository interface returns copies of immutable data classes, so callers can't change stored state behind its back.
 
 ## 6. Testing
@@ -359,7 +359,7 @@ All tests are JVM unit tests in `:core`, run by `./gradlew build` and in CI.
 |---|---|
 | `EffectiveValuesTest`: an unset value uses the default; an own value overrides it; changing a default changes only linked values | WM-1, WM-2, §4.2 Defaults |
 | `UnusedValuesTest`: the last exercise's rest and the last round's rest are unused; after reordering, the kept values are used again | §4.2 Unused values |
-| `ValidationTest`: one test per rule; a valid workout gives no errors; several problems are all reported; unused values are still validated | WM-7, Q1, Q2 |
+| `ValidationTest`: one test per rule; a valid workout gives no errors; several problems are all reported; unused values are still validated; 5999 s is accepted and 6000 s is rejected | WM-7 |
 | `DuplicateTest`: every ID is new at every level; all other values are kept | WM-4/WM-5 support for P6 |
 | `TimelineTest`: one test per §4.3 rule:<br>• get ready comes first and lasts 3 s<br>• the exercise rest sits between exercises<br>• the round rest replaces the last exercise's own rest<br>• no rest after the last exercise of the workout<br>• 0 s exercise and round rests are skipped<br>• a single-exercise workout gives get ready + exercise<br>• `ExerciseInfo` numbering and flags<br>• rest phases know their previous and next exercise | EX-1, EX-3, EX-7, §4.3 |
 | `ExampleWorkoutTest`: the §4.4 example gives exactly the 10 phases of the table (kinds, round names, exercise names, durations), and a total of 263 s (4:23) | §4.4, WM-6 |
@@ -392,13 +392,18 @@ None. This phase has no UI or device behaviour.
 
 ## 9. Open questions
 
-| # | Question | Draft assumption |
+None at the moment.
+
+### Answered
+
+| # | Question | Decision |
 |---|---|---|
-| Q1 | **Exercise names:** WM-7 requires names for the workout and each round, but doesn't mention exercises. An exercise without a name would show a blank screen and say nothing (TTS-1). Should exercise names be required too? | Yes. If agreed, WM-7 in the specification gets "and each exercise" (v0.6). |
-| Q2 | **Upper limits:** the specification sets minimums only. The screen shows `mm:ss` (UI-3), which can't go past 99:59. Should durations and rests have a maximum? | Yes, 5999 s (99:59) for every duration and rest. If agreed, this is added to WM-7 (v0.6). |
+| Q1 | Must exercises have a name? | Yes. Added to WM-7 (specification v0.6). |
+| Q2 | Is there a maximum duration or rest? | Yes, 99:59 (5999 s) for every duration and rest. Added to WM-7 (specification v0.6). |
 
 ## 10. Change log
 
 | Version | Date | Changes |
 |---|---|---|
 | 0.1 | 2026-11-03 | First draft |
+| 0.2 | 2026-11-03 | Q1 and Q2 answered (exercise names required; 99:59 maximum), quoting specification v0.6. Status `Ready`. |
