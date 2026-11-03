@@ -18,8 +18,12 @@ kotlin {
 }
 
 dependencies {
+    // api: Flow is part of the public WorkoutRepository interface.
+    api(libs.kotlinx.coroutines.core)
+
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
