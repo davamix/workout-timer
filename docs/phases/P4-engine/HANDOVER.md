@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress: all tasks done; pull request [#4](https://github.com/davamix/workout-timer/pull/4) is waiting for the user to merge it |
+| **Status** | Done. Merged in pull request [#4](https://github.com/davamix/workout-timer/pull/4) on 2026-11-03. |
 | **Spec** | [SPEC.md](SPEC.md), version v0.3 |
 | **Branch** | `phase/p4-engine` |
 | **Last session** | 2026-11-03 |
@@ -11,21 +11,11 @@ This document tracks the phase as it's built. Update it at the end of every sess
 
 ## Prompt to start or continue
 
-Paste this prompt into a new Claude Code session to start or continue the phase. When the phase is done, replace it with "Phase done: no prompt needed."
-
-```text
-Start or continue phase P4 (Workout engine) of the workout timer.
-
-1. Use the phase-start skill for P4. Read only docs/phases/P4-engine/HANDOVER.md and SPEC.md; they contain everything needed.
-2. Carry on from "Next steps" in the handover. Work through the tasks in SPEC.md §7 in order, on branch phase/p4-engine. Commit after each task, once ./gradlew build passes.
-3. Follow SPEC.md. If something in it is wrong or unclear, stop and ask me before changing course. Record every decision or deviation in the handover.
-4. All tasks are done and pull request #4 is open. First check it with gh pr view 4: if it has been merged, use the phase-close skill; if it has review comments, deal with them on phase/p4-engine and push. The tablet is only needed to rerun EngineClockDeviceTest.
-5. Before the session ends, or once all tasks are done, use the handover skill. When the done criteria pass, open the pull request and wait for me to merge it.
-```
+Phase done: no prompt needed.
 
 ## Current state
 
-All six tasks are done. Pull request [#4](https://github.com/davamix/workout-timer/pull/4) is open. CI passed on it: 1m58s on `d3613fd`, the last code change.
+All six tasks are done and merged into `main` through pull request [#4](https://github.com/davamix/workout-timer/pull/4) on 2026-11-03. CI passed on the pull request: 1m58s on `d3613fd`, the last code change, and again on the handover commit `9148efc`.
 
 - `./gradlew build` passes locally: 270 unit tests (212 in `:core`, 115 of them new; 58 in `:app`), 0 failures. Lint, ktlint and the no-INTERNET check are clean.
 - `connectedDebugAndroidTest` on the tablet: 13 tests. 10 passed, and the 3 `PersistenceCheck` steps were skipped on purpose. On its own, `EngineClockDeviceTest` also passed 3 runs in a row.
@@ -47,9 +37,11 @@ How P5 and P7 use it:
 
 ## Next steps
 
-1. Wait for the user to review and merge pull request #4. If there are review comments, deal with them on `phase/p4-engine`, push, and wait for CI again.
-2. After the merge, use the `phase-close` skill on `main`.
-3. P5 (audio cues) and P7 (runner UI) can then start; both depend on P4.
+None for P4. These phases can start now, as all their dependencies are done:
+
+- **P5** (audio cues), which depends on P4;
+- **P6** (workout management UI), which depends on P2;
+- **P7** (runner UI), which depends on P4.
 
 ## Tasks
 
@@ -62,7 +54,7 @@ The task IDs come from SPEC.md §7.
 | T3 | Done | `NavigationCommandsTest` (32), `GetReadyHandshakeTest` (15, including the pause-while-waiting case listed under `PauseResumeTest` in SPEC §6). `SessionCommandsTest` covers all seven commands. |
 | T4 | Done | `AccuracyTest` (14): a 61:03 workout (`hourLongTimeline`) in 13 seeded random runs. No fix was needed. A mutation check (scheduling the next phase from the tick time instead of the exact end) makes 13 of the 14 fail. |
 | T5 | Done | `WorkoutSessionTest` (14), including commands from 8 threads at once and collectors that call back |
-| T6 | In review | `AppContainer.clock`; `EngineClockDeviceTest` (2) passes on the tablet. Pull request #4. |
+| T6 | Done | `AppContainer.clock`; `EngineClockDeviceTest` (2) passes on the tablet. Pull request #4, merged. |
 
 ## Decisions and deviations
 
@@ -106,6 +98,10 @@ adb shell am instrument -w -e class io.github.davamix.workouttimer.di.EngineCloc
 ## Session log
 
 Newest first.
+
+### 2026-11-03 (close)
+
+- The user merged pull request #4. P4 is closed: done in plan §5.1, done criteria ticked in SPEC.md §8.
 
 ### 2026-11-03
 

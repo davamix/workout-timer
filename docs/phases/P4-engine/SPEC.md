@@ -454,12 +454,12 @@ None. The engine has no UI or sound yet. `EngineClockDeviceTest` runs on the tab
 
 ## 8. Done criteria
 
-- [ ] All tasks done
-- [ ] Unit tests and lint pass locally and in CI
-- [ ] Every §4.3 transition, every cell of the Next/Previous table, pause and resume in every kind of phase, the get-ready handshake, and the 60-minute late-tick run have passing tests
-- [ ] `EngineClockDeviceTest` passes on the tablet
-- [ ] `:core` still has no Android dependency
-- [ ] HANDOVER.md is up to date, and the plan's status table is updated
+- [x] All tasks done
+- [x] Unit tests and lint pass locally and in CI
+- [x] Every §4.3 transition, every cell of the Next/Previous table, pause and resume in every kind of phase, the get-ready handshake, and the 60-minute late-tick run have passing tests
+- [x] `EngineClockDeviceTest` passes on the tablet
+- [x] `:core` still has no Android dependency
+- [x] HANDOVER.md is up to date, and the plan's status table is updated
 
 ## 9. Open questions
 
