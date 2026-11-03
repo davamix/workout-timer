@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready, v0.2 |
+| **Status** | Ready, v0.3 |
 | **Phase** | P4, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P2 (done) |
 | **Branch** | `phase/p4-engine` |
@@ -271,8 +271,8 @@ class WorkoutSession(
 
 Two internal pieces, visible to `:core` tests:
 
-- **`SessionMachine`**: the same commands, plus `advanceTo(now)`. Each takes the clock time `now` as a parameter and returns the list of events it caused. `state(now)` gives the `SessionState`. `nextWakeAt()` gives the clock time of the next change that time alone will cause, or `null` if there is none. It has no coroutines, no clock and no threads, so most tests drive it directly with chosen times.
-- **The sleep hook:** an `internal` constructor of `WorkoutSession` takes the function the driver uses to wait, `suspend (millis: Long) -> Unit`. By default it is `delay`. Tests replace it to wake the driver late or early.
+- **`SessionMachine`**: the same commands, plus `advanceTo(now)`. Each takes the clock time `now` as a parameter and returns the list of events it caused. `state()` gives the `SessionState` as of the last call. `nextWakeAt()` gives the clock time of the next change that time alone will cause, or `null` if there is none. It has no coroutines, no clock and no threads, so most tests drive it directly with chosen times.
+- **The sleep hook:** an `internal` constructor of `WorkoutSession` takes `sleepFor: (plannedMillis: Long) -> Long`, which turns each planned sleep into the actual one. By default it returns the planned time. Tests make it longer or shorter to wake the driver late or early.
 
 **Android clock (`:app`):**
 
@@ -364,12 +364,14 @@ Late wake-ups catch up. Every phase boundary they passed still gets its events, 
   - while running: the next whole second of the current phase, *start time + k × 1000*. Durations are whole seconds, so this includes the phase end.
   - while waiting for the announcement: *wait start + timeout*;
   - otherwise: `null`, and the driver waits for a command.
-- After every command, the driver plans its next wake-up again.
+- After every command, the driver plans its next wake-up again. A command cuts a sleep short.
 - A wake-up that comes early changes nothing. The driver sleeps again until the same time and never spins.
 
 #### Threads and flows
 
-- **Any thread.** Commands may come from any thread: P5 calls `announcementFinished()` from a TTS callback thread. One lock serialises every call into the machine and the publishing of its results, so commands apply in call order.
+- **Any thread, and from collectors.** Commands may come from any thread: P5 calls `announcementFinished()` from a TTS callback thread. A collector of `state` or `events` may also call a command while it handles a value. On `Dispatchers.Main.immediate`, sending an event can run the collector inline, in the middle of a batch of events.
+- **One queue.** So every command is queued, under a lock, and only one call at a time applies the queue and publishes the results. Commands apply in call order, and a command never runs in the middle of another one's events.
+- A command called while another call is applying the queue returns at once and is applied right after. That happens with a call from another thread at the same moment, or from a collector. On one thread with no collector calling back, as in P7's UI, every command is applied before it returns.
 - **`events`** is backed by an unlimited channel:
   - nothing is lost or reordered;
   - events sent before the collector starts are kept, so `start()` may come before the audio subscribes;
@@ -476,3 +478,4 @@ None at the moment.
 |---|---|---|
 | 0.1 | 2026-11-03 | First draft, quoting specification v0.6 |
 | 0.2 | 2026-11-03 | Q1 and Q2 answered as assumed (no round-end sound on Next or Previous; the completed screen shows the planned total), quoting specification v0.7. Status `Ready`. |
+| 0.3 | 2026-11-03 | From implementation: commands are queued and applied one at a time, so collectors may call commands. A command may return before it is applied when another call is applying the queue (§4.3). Internal API: `SessionMachine.state()` takes no `now`, and the sleep hook is `sleepFor: (Long) -> Long` (§4.2). |
