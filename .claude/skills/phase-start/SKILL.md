@@ -7,9 +7,12 @@ description: Start or resume implementing a workout-timer phase. It loads only t
 
 Input: a phase ID, e.g. `P3`. The phase folders are listed in the `phase-docs` skill.
 
+**No phase ID given?** Don't guess. Read plan §5.1 and list the phases that can start: not yet `Done`, with every dependency `Done`. For each one, say whether its SPEC.md and HANDOVER.md exist, and what depends on it. Then ask the user which one to start, recommending the one that unblocks the most work.
+
 ## Steps
 
 1. **Load the phase.** Read `docs/phases/PN-*/HANDOVER.md` first, then `SPEC.md`.
+   - If the phase has no SPEC.md yet, stop: the `phase-docs` skill writes it first, and the user reviews it.
    - Don't read `docs/SPECIFICATION.md` or the whole plan. The phase docs are meant to be enough.
    - Only open those files if the phase docs point to something they don't contain. If that happens, note it as a gap in the handover.
 2. **Check that the phase can start.**

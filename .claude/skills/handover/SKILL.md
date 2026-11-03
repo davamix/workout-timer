@@ -15,13 +15,15 @@ description: End-of-session routine for a workout-timer phase. It runs the check
 3. **Open the pull request, if the phase is complete.** Do this when every done criterion in SPEC.md §8 passes, apart from the ones that need the pull request or the merge: CI, and the plan's status. Open it before writing the handover, so the handover can record the PR number and the CI result.
    - Commit any remaining work on the phase branch, and push it.
    - Write the body (template below) to a file in the session's scratchpad, not in the repository. Then run `gh pr create --base main --head phase/pN-<name> --title "PN: <phase name>" --body-file <file>`.
-   - Wait for CI. Don't call `gh pr checks --watch` straight after creating the PR: until the run registers, it reports "no checks" and exits at once, which looks like success. Run this in the background and wait for it to finish:
+   - Wait for CI on the commit you just pushed. Base the wait on that commit's SHA, not on the pull request. Right after a push, `gh pr checks` can still show the previous commit's finished run, a false green. Before the new run registers, it can report "no checks", which `--watch` also treats as done. Run this in the background and wait for it to finish:
 
      ```bash
-     until [ "$(gh pr checks <N> --json name -q length 2>/dev/null)" -gt 0 ] 2>/dev/null; do sleep 10; done
-     gh pr checks <N> --watch --interval 20
+     sha=$(git rev-parse HEAD)
+     until id=$(gh run list --commit "$sha" --workflow CI --json databaseId -q '.[0].databaseId' 2>/dev/null) && [ -n "$id" ]; do sleep 10; done
+     gh run watch "$id" --exit-status --interval 20 > /dev/null; echo "CI exit=$? run=$id"
      ```
 
+     `CI exit=0` means it passed. Otherwise, `gh run view <id> --log-failed` shows why.
    - If CI fails, fix the cause on the phase branch, push, and wait again.
 4. **Update HANDOVER.md** in the phase folder:
    - **Last session:** today's date.
@@ -34,7 +36,7 @@ description: End-of-session routine for a workout-timer phase. It runs the check
    - **Known issues** and **Pending wiring:** keep them current.
    - **How to verify:** the commands and manual steps that check the current state.
    - **Session log:** add a new entry at the top, saying what was done and anything worth knowing.
-5. **Commit and push** on the phase branch, with a message that summarises the session. With a PR open, this push runs CI again. Wait for it the same way as in step 3.
+5. **Commit and push** on the phase branch, with a message that summarises the session. With a PR open, this push runs CI again. Wait for it with the commands from step 3. They take the new `HEAD`, so they wait for this push's run, not the earlier one.
 6. **Leave the merge to the user**, unless they have said otherwise. Once it's merged, the `phase-close` skill closes the phase on `main`.
 7. **Report to the user:** what was done, the check results, the decisions they should review, and the next steps.
 

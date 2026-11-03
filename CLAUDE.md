@@ -18,7 +18,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - `phase-start`: begin or resume a phase (branch, dependencies, status).
 - `handover`: end a session. Runs the checks, updates HANDOVER.md, commits and pushes, and opens the pull request when the phase is done.
 - `phase-close`: after the user merges a phase's pull request, mark the phase `Done` on `main`.
-- `tablet`: build, install, launch, take screenshots and read logs on the tablet.
+- `tablet`: build, install, launch, take screenshots and read logs on the tablet. It also covers running one instrumented test without wiping the app's data, reading the app's files, and rebooting.
 
 ## Commands
 
@@ -28,7 +28,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 | Fix Kotlin formatting | `./gradlew ktlintFormat` |
 | Unit tests only | `./gradlew test` |
 | Install on the tablet | `./gradlew installDebug` |
-| Instrumented tests on the tablet | `./gradlew connectedDebugAndroidTest` |
+| Instrumented tests on the tablet | `./gradlew connectedDebugAndroidTest` (uninstalls the app afterwards) |
 
 - Gradle runs on Android Studio's JDK; `JAVA_HOME` already points to it.
 - `adb` is not on PATH. The `tablet` skill has the full path.
@@ -57,6 +57,10 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - **Permissions:** none. `INTERNET` is forbidden and fails the build (NF-4).
 - **Versions:** pinned in `gradle/libs.versions.toml`. AGP must stay at 9.3 or lower while Android Studio 2026.1.3 is the installed IDE.
 - **Kotlin style:** ktlint, official style (`.editorconfig`). Run `ktlintFormat` before committing.
+- **Tests:**
+  - **Unit tests:** in both modules, JUnit Jupiter, with sentence names in backticks. With AGP 9, `./gradlew build` runs only `:app`'s debug unit tests (`testDebugUnitTest`).
+  - **Instrumented tests** (`app/src/androidTest`): JUnit 4 with camelCase names. Names with spaces don't compile to DEX below API 30, and `minSdk` is 26.
+  - **Fixtures:** `core/src/test/.../core/ExampleWorkouts.kt` for `:core` and `app/src/test/.../data/SampleWorkouts.kt` for `:app`. Both hold the specification §4.4 example. `:app` IDs only use characters that are valid in file names.
 - **Ownership:** each phase owns its packages. Shared files (the catalog, build files, `AppContainer`, `AppNavHost`) only get that phase's own entries.
 
 ## Git
