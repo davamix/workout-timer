@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress: all tasks done; pull request [#3](https://github.com/davamix/workout-timer/pull/3) is waiting for the user to merge it |
+| **Status** | Done. Merged in pull request [#3](https://github.com/davamix/workout-timer/pull/3) on 2026-11-03. |
 | **Spec** | [SPEC.md](SPEC.md), version v0.2 |
 | **Branch** | `phase/p3-storage` |
 | **Last session** | 2026-11-03 |
@@ -11,21 +11,11 @@ This document tracks the phase as it's built. Update it at the end of every sess
 
 ## Prompt to start or continue
 
-Paste this prompt into a new Claude Code session to start or continue the phase. When the phase is done, replace it with "Phase done: no prompt needed."
-
-```text
-Start or continue phase P3 (Storage) of the workout timer.
-
-1. Use the phase-start skill for P3. Read only docs/phases/P3-storage/HANDOVER.md and SPEC.md; they contain everything needed.
-2. Carry on from "Next steps" in the handover. Work through the tasks in SPEC.md §7 in order, on branch phase/p3-storage. Commit after each task, once ./gradlew build passes.
-3. Follow SPEC.md. If something in it is wrong or unclear, stop and ask me before changing course. Record every decision or deviation in the handover.
-4. All tasks are done and pull request #3 is open. Check whether I have merged it (gh pr view 3). If it's merged, use the phase-close skill for P3. If it has review comments, deal with them on phase/p3-storage, run ./gradlew build, push, and wait for CI. If code under app/ changes, rerun the instrumented tests on the tablet (tablet skill).
-5. Before the session ends, or once all tasks are done, use the handover skill. When the done criteria pass, open the pull request and wait for me to merge it.
-```
+Phase done: no prompt needed.
 
 ## Current state
 
-All five tasks are done. Pull request [#3](https://github.com/davamix/workout-timer/pull/3) is open; CI passes (1m51s, on commit `6a5561c`, the last code change).
+All five tasks are done and merged into `main` through pull request [#3](https://github.com/davamix/workout-timer/pull/3). CI passed on the pull request (1m51s on `6a5561c`, the last code change, and again on the handover commit `e977362`).
 
 - `./gradlew build` passes locally: 155 unit tests (97 in `:core`, 58 in `:app`), 0 failures. Lint, ktlint and the no-INTERNET check are clean.
 - `connectedDebugAndroidTest` on the tablet: 11 tests. 8 passed and 3 were skipped on purpose (the `PersistenceCheck` steps).
@@ -44,8 +34,7 @@ On the tablet, the files are `files/workouts/<id>.json` and `files/datastore/set
 
 ## Next steps
 
-1. Deal with any review comments on pull request #3 on `phase/p3-storage`.
-2. Once the user has merged it, use the `phase-close` skill for P3.
+None for P3. P4 (workout engine) and P6 (workout management UI) can start now; their dependency P2 is done.
 
 ## Tasks
 
@@ -57,7 +46,7 @@ The task IDs come from SPEC.md §7.
 | T2 | Done | `AtomicFilesTest` (6), `FileWorkoutRepositoryTest` (15) |
 | T3 | Done | `InMemorySettingsRepositoryTest` (3, `:core`), `DataStoreSettingsRepositoryTest` (5) |
 | T4 | Done | `FileWorkoutRepositoryDeviceTest` (2) and `PersistenceCheck` (3 steps, skipped unless named). Merged manifest checked. |
-| T5 | In review | Manual checks passed. KDoc on the public API. Pull request #3. |
+| T5 | Done | Manual checks passed. KDoc on the public API. Pull request #3 merged. |
 
 ## Decisions and deviations
 
@@ -103,6 +92,10 @@ Run the steps in this order: `seed`, force-stop, `verify`, `adb reboot` and unlo
 ## Session log
 
 Newest first.
+
+### 2026-11-03 (close)
+
+- **Done:** the user merged pull request #3. P3 is closed: `Done` in plan §5.1, done criteria ticked in SPEC.md.
 
 ### 2026-11-03
 

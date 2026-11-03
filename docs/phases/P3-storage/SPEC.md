@@ -392,13 +392,13 @@ The instrumentation package name is an assumption. Confirm it with `adb shell pm
 
 The checks that must all pass before the phase is merged.
 
-- [ ] All tasks done
-- [ ] Unit tests and lint pass locally and in CI
-- [ ] Instrumented tests pass on the tablet (`connectedDebugAndroidTest`)
-- [ ] Manual checks on the tablet pass: a workout and the voice setting survive closing the app and a reboot
-- [ ] The merged manifest gains no permission and no component
-- [ ] `:core` still has no Android dependency
-- [ ] HANDOVER.md is up to date, and the plan's status table is updated
+- [x] All tasks done
+- [x] Unit tests and lint pass locally and in CI
+- [x] Instrumented tests pass on the tablet (`connectedDebugAndroidTest`)
+- [x] Manual checks on the tablet pass: a workout and the voice setting survive closing the app and a reboot
+- [x] The merged manifest gains no permission and no component
+- [x] `:core` still has no Android dependency
+- [x] HANDOVER.md is up to date, and the plan's status table is updated
 
 ## 9. Open questions
 
