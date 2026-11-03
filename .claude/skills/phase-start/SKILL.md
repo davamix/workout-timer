@@ -12,7 +12,7 @@ Input: a phase ID, e.g. `P3`. The phase folders are listed in the `phase-docs` s
 ## Steps
 
 1. **Load the phase.** Read `docs/phases/PN-*/HANDOVER.md` first, then `SPEC.md`.
-   - If the phase has no SPEC.md yet, stop: the `phase-docs` skill writes it first, and the user reviews it.
+   - If the phase has no SPEC.md yet, write it with the `phase-docs` skill, report it, and stop until the user has reviewed it. Once they agree and the SPEC is `Ready`, carry on from step 2 in the same session. Don't start implementing a draft.
    - Don't read `docs/SPECIFICATION.md` or the whole plan. The phase docs are meant to be enough.
    - Only open those files if the phase docs point to something they don't contain. If that happens, note it as a gap in the handover.
 2. **Check that the phase can start.**

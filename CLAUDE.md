@@ -45,6 +45,14 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
   for d in */build/test-results/*/; do grep -h -o 'tests="[0-9]*" skipped="[0-9]*" failures="[0-9]*" errors="[0-9]*"' "$d"*.xml 2>/dev/null | awk -F'"' -v d="$d" '{t+=$2;s+=$4;f+=$6;e+=$8} END {if (NR) print d": tests="t" skipped="s" failures="f" errors="e}'; done
   ```
 
+- When unit tests fail, this prints each failing test's class, name and message (first 300 characters), from the JUnit XML:
+
+  ```bash
+  grep -h -o '<testcase name="[^"]*" classname="[^"]*"\|<failure message="[^"]\{0,300\}' */build/test-results/*/*.xml | grep -B1 '<failure' | grep -v '^--$' | sed -e 's/^<testcase name="\([^"]*\)" classname="\([^"]*\)"/\2 > \1/' -e 's/^<failure message="/    /' -e 's/&quot;/"/g; s/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g'
+  ```
+
+- Python isn't installed on this machine. Use `grep`, `sed` and `awk` in Git Bash, or PowerShell.
+
 ## Code structure
 
 - `:core` is pure Kotlin: model, timeline, engine, cue planner. Never add Android dependencies to it (plan D-2).
@@ -59,6 +67,8 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - **Kotlin style:** ktlint, official style (`.editorconfig`). Run `ktlintFormat` before committing.
 - **Tests:**
   - **Unit tests:** in both modules, JUnit Jupiter, with sentence names in backticks. With AGP 9, `./gradlew build` runs only `:app`'s debug unit tests (`testDebugUnitTest`).
+  - **Characters in test names:** names in backticks can't contain `.` `;` `:` `/` `\` `[` `]` `<` `>` on the JVM; the compiler rejects them. Use commas, or "and", instead.
+  - **Coroutine tests:** in `runTest`, `advanceUntilIdle()` ignores work that only `backgroundScope` has scheduled. Code launched there, such as a `WorkoutSession`'s timer, doesn't run. Wait in the foreground instead: `session.state.first { … }` or `session.events.toList()`. `advanceTimeBy()` does run background work. For the clock, use `Clock { testScheduler.currentTime }`.
   - **Instrumented tests** (`app/src/androidTest`): JUnit 4 with camelCase names. Names with spaces don't compile to DEX below API 30, and `minSdk` is 26.
   - **Fixtures:** `core/src/test/.../core/ExampleWorkouts.kt` for `:core` and `app/src/test/.../data/SampleWorkouts.kt` for `:app`. Both hold the specification §4.4 example. `:app` IDs only use characters that are valid in file names.
 - **Ownership:** each phase owns its packages. Shared files (the catalog, build files, `AppContainer`, `AppNavHost`) only get that phase's own entries.
@@ -66,7 +76,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 ## Git
 
 - `main` always builds. Each phase is built on its own branch, `phase/pN-<name>`, and merged through a pull request with green CI. The user merges.
-- Draft documents (specification, plan, a phase's SPEC.md) are committed and pushed to `main` at every version.
+- Draft documents (specification, plan, a phase's SPEC.md) are committed and pushed to `main` at every version. That includes a SPEC version made during implementation. Afterwards, merge `main` into the phase branch (skill `handover`).
 - Phase status changes in plan §5.1 also go straight to `main`.
 - HANDOVER.md updates go on the phase branch. The one exception: after the merge, the closing updates go on `main` (skill `phase-close`).
 - Create phase branches with `--no-track` and push them with `-u`, so they never track `main` (skill `phase-start`).

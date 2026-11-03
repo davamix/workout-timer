@@ -9,9 +9,14 @@ description: End-of-session routine for a workout-timer phase. It runs the check
 
 1. **Run the checks.**
    - Run `./gradlew ktlintFormat`, then `./gradlew build` as a separate command (see CLAUDE.md). The build covers compilation, unit tests, lint, ktlint and the no-INTERNET check. Total the test results with the one-liner in CLAUDE.md.
-   - If UI or Android code changed and the tablet is connected, also run `./gradlew connectedDebugAndroidTest`. The `tablet` skill covers the device.
+   - If UI or Android code changed and the tablet is connected, also run `./gradlew connectedDebugAndroidTest`. The `tablet` skill covers the device. That task uninstalls the app when it ends, so run `./gradlew installDebug` afterwards to leave it installed.
+   - When a unit test fails, print each failure's name and message with the one-liner in CLAUDE.md.
    - Note the results exactly. Don't call something passing unless it ran and passed.
-2. **Push decisions up.** If a decision changes SPEC.md, update it, with a new version and change-log entry. If it changes the specification or the plan, update those first and tell the user.
+2. **Push decisions up.**
+   - **Does it need a new SPEC version?** A decision that only settles a point SPEC.md leaves open stays in HANDOVER.md. One that contradicts SPEC.md's text gets a new SPEC version, with a change-log entry. That includes a change to an internal API or behaviour the SPEC describes.
+   - **Specification or plan first.** If a decision changes the specification or the plan, update those first and tell the user.
+   - **Where SPEC versions go:** to `main`, like every version of these documents (CLAUDE.md, "Git"). Commit them there, from a worktree if this working copy is busy, and push. Then run `git merge main` on the phase branch, so the pull request carries the same SPEC.md as `main`. Commit any pending work on the branch before switching.
+   - **Note it in the handover.** Mention the new version in the decision's row.
 3. **Open the pull request, if the phase is complete.** Do this when every done criterion in SPEC.md §8 passes, apart from the ones that need the pull request or the merge: CI, and the plan's status. Open it before writing the handover, so the handover can record the PR number and the CI result.
    - Commit any remaining work on the phase branch, and push it.
    - Write the body (template below) to a file in the session's scratchpad, not in the repository. Then run `gh pr create --base main --head phase/pN-<name> --title "PN: <phase name>" --body-file <file>`.
