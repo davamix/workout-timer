@@ -17,6 +17,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - `phase-docs`: write a phase's SPEC.md and HANDOVER.md.
 - `phase-start`: begin or resume a phase (branch, dependencies, status).
 - `handover`: end a session. Runs the checks, updates HANDOVER.md, commits and pushes, and opens the pull request when the phase is done.
+- `phase-close`: after the user merges a phase's pull request, mark the phase `Done` on `main`.
 - `tablet`: build, install, launch, take screenshots and read logs on the tablet.
 
 ## Commands
@@ -31,6 +32,18 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 
 - Gradle runs on Android Studio's JDK; `JAVA_HOME` already points to it.
 - `adb` is not on PATH. The `tablet` skill has the full path.
+- Run `ktlintFormat` as its own command, before `build`. In a single call (`./gradlew ktlintFormat build`), the ktlint check can still report violations that the format step has just fixed, and the build fails.
+- On JDK 25, ktlint prints harmless `sun.misc.Unsafe` warnings. To hide them and keep only real output (Git Bash):
+
+  ```bash
+  ./gradlew build --console=plain -q 2>&1 | grep -v -i 'unsafe\|^WARNING'
+  ```
+
+- `-q` hides the test counts. To total the unit test results per module and test task, after a build:
+
+  ```bash
+  for d in */build/test-results/*/; do grep -h -o 'tests="[0-9]*" skipped="[0-9]*" failures="[0-9]*" errors="[0-9]*"' "$d"*.xml 2>/dev/null | awk -F'"' -v d="$d" '{t+=$2;s+=$4;f+=$6;e+=$8} END {if (NR) print d": tests="t" skipped="s" failures="f" errors="e}'; done
+  ```
 
 ## Code structure
 
@@ -51,4 +64,5 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - `main` always builds. Each phase is built on its own branch, `phase/pN-<name>`, and merged through a pull request with green CI. The user merges.
 - Draft documents (specification, plan, a phase's SPEC.md) are committed and pushed to `main` at every version.
 - Phase status changes in plan §5.1 also go straight to `main`.
-- HANDOVER.md updates go on the phase branch.
+- HANDOVER.md updates go on the phase branch. The one exception: after the merge, the closing updates go on `main` (skill `phase-close`).
+- Create phase branches with `--no-track` and push them with `-u`, so they never track `main` (skill `phase-start`).

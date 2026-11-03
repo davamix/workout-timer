@@ -16,14 +16,14 @@ Input: a phase ID, e.g. `P3`. The phase folders are listed in the `phase-docs` s
    - In plan §5.1 (`docs/IMPLEMENTATION_PLAN.md`), every dependency must be `Done`.
    - If one isn't, stop and tell the user. Work can still go ahead with the fakes described in plan §5.1, but only if the user agrees.
    - SPEC.md must be `Ready`. If it's still a draft, ask the user before implementing.
-3. **Set up the branch.** The branch is named `phase/pN-<name>`; `<name>` is the folder name without the `PN-` prefix.
-   - Start from an up-to-date `main`: `git fetch origin`.
-   - If the branch already exists, switch to it, or to its worktree.
-   - Otherwise create it: `git switch -c phase/pN-<name> origin/main`.
-   - If this working copy is busy with another phase, use a separate worktree instead: `git worktree add ../workout-timer-pN -b phase/pN-<name> origin/main`.
-4. **Mark it in progress** (first session only):
-   - In HANDOVER.md, set the status to `In progress`. Commit it on the phase branch.
-   - In plan §5.1, set the status to `In progress`. Commit that on `main` and push. Status changes always go to `main`.
+3. **Set up the branch.** The branch is named `phase/pN-<name>`; `<name>` is the folder name without the `PN-` prefix. Run `git fetch origin` first.
+   - **If the branch already exists,** switch to it, or to its worktree, and go to step 5.
+   - **Otherwise, this is the first session.** Mark the phase in progress on `main` first, so the branch starts from that commit. Status changes always go to `main`.
+     1. Get an up-to-date `main`: `git switch main && git pull --ff-only`. If this working copy is busy with another phase, don't switch it. Use a new worktree instead, and work there from now on: `git worktree add --detach ../workout-timer-pN origin/main`.
+     2. In plan §5.1, set the phase's status to `In progress`. Commit, then push with `git push origin HEAD:main`.
+     3. Create the branch from there: `git switch --no-track -c phase/pN-<name>`. Don't branch from `origin/main` without `--no-track`: the branch would then track `main`, and a plain `git push` would push to `main`.
+     4. On the first push, set the upstream: `git push -u origin phase/pN-<name>`.
+4. **Mark it in progress in the handover** (first session only). Set HANDOVER.md's status to `In progress`, and commit it on the phase branch.
 5. **Tell the user** the current state, the next steps from the handover, and what you are going to do now.
 
 ## While working
