@@ -24,6 +24,9 @@ class SessionCommandsTest {
     private val pause = Command("pause") { pause(it) }
     private val resume = Command("resume") { resume(it) }
     private val stop = Command("stop") { stop(it) }
+    private val next = Command("next") { next(it) }
+    private val previous = Command("previous") { previous(it) }
+    private val announcementFinished = Command("announcementFinished") { announcementFinished(it) }
 
     // A machine in each status, with the clock time of its last call. Calling a command at that time adds no elapsed
     // time, so whatever changes comes from the command itself.
@@ -60,29 +63,29 @@ class SessionCommandsTest {
     // Commands that don't apply
 
     @Test
-    fun `before start, pause and resume do nothing`() {
-        assertDoNothing(notStarted(), pause, resume)
+    fun `before start, only start and stop apply`() {
+        assertDoNothing(notStarted(), pause, resume, next, previous, announcementFinished)
     }
 
     @Test
-    fun `while running, start and resume do nothing`() {
-        assertDoNothing(running(), start, resume)
+    fun `while running, only pause and stop apply`() {
+        assertDoNothing(running(), start, resume, next, previous, announcementFinished)
     }
 
     @Test
-    fun `while paused, start and pause do nothing`() {
-        assertDoNothing(paused(), start, pause)
+    fun `while paused, start, pause and announcementFinished do nothing`() {
+        assertDoNothing(paused(), start, pause, announcementFinished)
     }
 
     @Test
     fun `once completed, no command does anything`() {
-        assertDoNothing(completed(), start, pause, resume, stop)
+        assertDoNothing(completed(), start, pause, resume, stop, next, previous, announcementFinished)
     }
 
     @Test
     fun `once stopped, no command does anything, and time has no effect`() {
         val stopped = stopped()
-        assertDoNothing(stopped, start, pause, resume, stop)
+        assertDoNothing(stopped, start, pause, resume, stop, next, previous, announcementFinished)
 
         val (machine, now) = stopped
         val state = machine.state()
@@ -122,7 +125,7 @@ class SessionCommandsTest {
 
     @Test
     fun `a command that comes after an unprocessed end of the workout finds it completed`() {
-        for (command in listOf(pause, stop)) {
+        for (command in listOf(pause, stop, next, previous)) {
             val machine = SessionMachine(exampleTimeline)
             machine.start(T0)
             machine.advanceTo(T0 + 262_000)

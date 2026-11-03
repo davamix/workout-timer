@@ -39,7 +39,7 @@ The task IDs come from SPEC.md §7.
 |---|---|---|
 | T1 | Done | `SessionRunTest` (19) |
 | T2 | Done | `PauseResumeTest` (10), `SessionCommandsTest` (11). The waiting-for-announcement pause case comes with T3. |
-| T3 | To do | |
+| T3 | Done | `NavigationCommandsTest` (32), `GetReadyHandshakeTest` (15, including the pause-while-waiting case listed under `PauseResumeTest` in SPEC §6). `SessionCommandsTest` now covers all seven commands. |
 | T4 | To do | |
 | T5 | To do | |
 | T6 | To do | |
@@ -52,6 +52,8 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 |---|---|---|
 | 2026-11-03 | `SessionMachine.state()` takes no `now`, unlike SPEC §4.2's `state(now)`. It returns the state as of the last call, and `remainingSeconds` is the value last reported by `PhaseStarted` or `SecondChanged`. | The state and the events can never disagree. Every caller advances the machine to `now` first anyway. It is internal, so P5 and P7 aren't affected. |
 | 2026-11-03 | `nextWakeAt()` is computed from the displayed second: *phase start + (duration − displayed + 1) × 1000*. | It needs no `now`, and it gives the next whole second of the phase, or its end when 1 s is displayed. |
+| 2026-11-03 | `ANNOUNCEMENT_TIMEOUT_MILLIS` is declared in `SessionMachine.kt`, next to the code that applies it. | Same package as `WorkoutSession`, so the public API is as SPEC §4.2 lists it. |
+| 2026-11-03 | `start()` also applies elapsed time first, like the other commands. | One rule for every command (SPEC §4.3). Before start it has no effect. |
 
 ## Known issues
 
