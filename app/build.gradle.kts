@@ -44,6 +44,11 @@ android {
         abortOnError = true
         warningsAsErrors = false
     }
+
+    testOptions {
+        // :app unit tests use JUnit Jupiter, like :core (P3).
+        unitTests.all { it.useJUnitPlatform() }
+    }
 }
 
 dependencies {
@@ -57,9 +62,15 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.json)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testRuntimeOnly(libs.junit.platform.launcher)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
