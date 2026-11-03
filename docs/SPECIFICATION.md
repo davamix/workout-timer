@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.5, plan review applied |
+| **Status** | Draft v0.6, P2 review applied |
 | **Last updated** | 2026-11-02 |
 | **Platform** | Android tablet, single user, personal use |
 
@@ -256,7 +256,7 @@ Note on `TTS-1` and `TTS-2`: the 10 s threshold leaves at least 7 s between the 
 | WM-4 | Workouts can be created, edited, duplicated and deleted in the app. The editor is the only way to create workouts. | Agreed |
 | WM-5 | In the editor, rounds and exercises can be added, renamed, reordered, duplicated and removed. To repeat a round, duplicate it. | Agreed |
 | WM-6 | The editor and the workout list show the workout's total duration, from Start to completion: get ready, exercises and rests. | Agreed |
-| WM-7 | Validation: the workout and each round need a name; a workout has at least one round; a round has at least one exercise; durations are at least 1 s; rests are 0 s or more. | Agreed |
+| WM-7 | Validation: the workout, each round and each exercise need a name; a workout has at least one round; a round has at least one exercise; durations are at least 1 s; rests are 0 s or more. No duration or rest can be longer than 99:59 (99 minutes 59 seconds). | Agreed |
 | WM-8 | Workouts are stored locally and survive app restarts and device reboots. There is no cloud backup: uninstalling the app deletes them. | Agreed |
 | WM-9 | Deleting a workout asks for confirmation. | Requested |
 | WM-10 | Leaving the editor with unsaved changes asks for confirmation before discarding them. | Requested |
@@ -398,3 +398,4 @@ Not planned for v1; listed so they are not lost.
 | 0.3 | 2026-11-02 | Second review: Q14–Q17 answered, confirming the draft assumptions. The English voice is pinned to English (United States), which is installed on the device. Rest fields that don't apply keep their values. New question Q18 on rest defaults. |
 | 0.4 | 2026-11-02 | Q18 answered: default rests are linked, as for durations. No open questions remain. |
 | 0.5 | 2026-11-02 | From the implementation plan review (PQ-3 to PQ-5): added `EX-11` (a workout isn't restored after Android closes the app), and `WM-9` and `WM-10` (confirmations). `WM-8` now says there is no cloud backup. |
+| 0.6 | 2026-11-03 | From the P2 spec review (P2 Q1 and Q2): `WM-7` now requires exercise names, and caps every duration and rest at 99:59. |
