@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.1 |
+| **Status** | Ready, v0.2 |
 | **Phase** | P4, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P2 (done) |
 | **Branch** | `phase/p4-engine` |
@@ -24,7 +24,7 @@ Later phases build on it:
 
 ## 2. Requirements covered
 
-Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.6.
+Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.7.
 
 | ID | Requirement (quoted) | What this phase does for it |
 |---|---|---|
@@ -77,6 +77,7 @@ P2's timeline already holds the phases in this order, with the rules applied. Th
 
 > - They move between **exercises** and skip any rest in between.
 > - After moving, the workout stays **paused** at the start of the target exercise. Resume starts that exercise as normal, including its name announcement (`TTS-1`).
+> - Moving doesn't play the round-end sound (`SND-1`), even when it crosses into another round.
 >
 > | Paused during | Next | Previous |
 > |---|---|---|
@@ -330,7 +331,8 @@ Every command first applies the time that has passed, as `advanceTo(now)` does, 
 
 - **Anything else does nothing:** no change, no event and no exception. This covers races such as Pause tapped just as the workout completes, a double tap, or a late callback from the TTS engine.
 - The UI offers Stop only while paused (EX-8). The engine also accepts it in the other live statuses, so its owner can always end it.
-- Moving with Next or Previous sends no event. The target's `PhaseStarted` comes with the next `resume()`, so its name is announced then (§5.1, TTS-1). Moving never sends `RoundEnded` (Q1).
+- Moving with Next or Previous sends no event. The target's `PhaseStarted` comes with the next `resume()`, so its name is announced then (§5.1, TTS-1). Moving never sends `RoundEnded`, as the round-end sound doesn't play (§5.1, Q1).
+- The session doesn't track the time spent running. The completed screen shows the planned total, `timeline.totalSeconds` (Q2).
 
 #### Time passing (`advanceTo`)
 
@@ -459,13 +461,18 @@ None. The engine has no UI or sound yet. `EngineClockDeviceTest` runs on the tab
 
 ## 9. Open questions
 
-| # | Question | Draft assumption |
+None at the moment.
+
+### Answered
+
+| # | Question | Decision |
 |---|---|---|
-| Q1 | When Next skips from the last exercise of a round into the next round, should the round-end sound play? | **No.** `RoundEnded` is sent only when the round's last exercise ends on time, as §4.3 rule 4 says ("when the last exercise of a round finishes"). Next and Previous never send it. |
-| Q2 | The completed screen shows a "total time" (specification §6). Is it the planned total (4:23 for the §4.4 example), or the time actually spent running, which excludes pauses and is shorter if exercises were skipped? | **The planned total**, from the timeline, so P4 doesn't track running time. If it should be the time run, P4 adds `runningMillis` to the state. |
+| Q1 | When Next skips from the last exercise of a round into the next round, should the round-end sound play? | **No.** `RoundEnded` is sent only when the round's last exercise ends on time. Next and Previous never send it. Added to specification §5.1 (v0.7). |
+| Q2 | The completed screen shows a "total time" (specification §6). Is it the planned total (4:23 for the §4.4 example), or the time actually spent running, which excludes pauses and is shorter if exercises were skipped? | **The planned total**, from the timeline, so P4 doesn't track running time. Added to specification §6 (v0.7). |
 
 ## 10. Change log
 
 | Version | Date | Changes |
 |---|---|---|
 | 0.1 | 2026-11-03 | First draft, quoting specification v0.6 |
+| 0.2 | 2026-11-03 | Q1 and Q2 answered as assumed (no round-end sound on Next or Previous; the completed screen shows the planned total), quoting specification v0.7. Status `Ready`. |

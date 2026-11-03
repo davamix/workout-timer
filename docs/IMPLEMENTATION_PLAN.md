@@ -179,7 +179,7 @@ Rules:
 | P1 | Project foundation | — | Done |
 | P2 | Domain model and timeline | P1 | Done |
 | P3 | Storage | P2 | Done |
-| P4 | Workout engine | P2 | Spec draft |
+| P4 | Workout engine | P2 | Ready |
 | P5 | Audio cues | P4 | Planned |
 | P6 | Workout management UI | P2 | Planned |
 | P7 | Workout runner UI | P4 | Planned |

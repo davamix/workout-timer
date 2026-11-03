@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Not started |
-| **Spec** | [SPEC.md](SPEC.md), version v0.1 |
+| **Spec** | [SPEC.md](SPEC.md), version v0.2 |
 | **Branch** | `phase/p4-engine` |
 | **Last session** | — |
 
@@ -25,7 +25,7 @@ Start or continue phase P4 (Workout engine) of the workout timer.
 
 ## Current state
 
-Nothing implemented yet. SPEC.md v0.1 is a draft under review.
+Nothing implemented yet. SPEC.md v0.2 is `Ready`.
 
 ## Next steps
 

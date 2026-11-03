@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.6, P2 review applied |
-| **Last updated** | 2026-11-02 |
+| **Status** | Draft v0.7, P4 review applied |
+| **Last updated** | 2026-11-03 |
 | **Platform** | Android tablet, single user, personal use |
 
 This document describes *what* the app does. Once it is agreed, it becomes the base for the implementation plan.
@@ -203,6 +203,7 @@ What Next and Previous do:
 
 - They move between **exercises** and skip any rest in between.
 - After moving, the workout stays **paused** at the start of the target exercise. Resume starts that exercise as normal, including its name announcement (`TTS-1`).
+- Moving doesn't play the round-end sound (`SND-1`), even when it crosses into another round.
 
 | Paused during | Next | Previous |
 |---|---|---|
@@ -270,7 +271,7 @@ All screens are landscape.
 | **Workout list** (home) | Shows saved workouts with their total duration | Start, edit, duplicate, delete (with confirmation), new workout, open settings |
 | **Workout editor** | Edits a workout's name, defaults, rounds and exercises, including their own durations and rests | Save, cancel (asks for confirmation if there are unsaved changes) |
 | **Workout runner** | Runs the workout (see §5.1–§5.3) | Running: pause. Paused: resume, previous, next, stop. |
-| **Workout completed** | Shows a "Well done!" message and a short summary (total time, rounds and exercises done) | Back to list |
+| **Workout completed** | Shows a "Well done!" message and a short summary (total time, rounds and exercises done). The total time is the workout's planned duration (`WM-6`), not the time spent running, so pauses and skipped exercises don't change it. | Back to list |
 | **Settings** | App-wide settings: voice cues on/off (`TTS-9`) | Back |
 
 Runner screen sketches (low fidelity, layout only):
@@ -399,3 +400,4 @@ Not planned for v1; listed so they are not lost.
 | 0.4 | 2026-11-02 | Q18 answered: default rests are linked, as for durations. No open questions remain. |
 | 0.5 | 2026-11-02 | From the implementation plan review (PQ-3 to PQ-5): added `EX-11` (a workout isn't restored after Android closes the app), and `WM-9` and `WM-10` (confirmations). `WM-8` now says there is no cloud backup. |
 | 0.6 | 2026-11-03 | From the P2 spec review (P2 Q1 and Q2): `WM-7` now requires exercise names, and caps every duration and rest at 99:59. |
+| 0.7 | 2026-11-03 | From the P4 spec review (P4 Q1 and Q2): Next and Previous never play the round-end sound (§5.1). The completed screen's total time is the planned duration (§6). |
