@@ -19,6 +19,49 @@ class Timeline private constructor(
     /** Duration from Start to completion, in seconds: the sum of every phase (WM-6). */
     val totalSeconds: Int = phases.sumOf { it.durationSeconds }
 
+    /** Indexes of the [Phase.Exercise] phases, in order. */
+    private val exerciseIndexes: List<Int> = phases.indices.filter { phases[it] is Phase.Exercise }
+
+    /**
+     * Where Next goes when pressed while paused in the phase at index [from] (EX-9, specification §5.1). It moves
+     * between exercises and skips any rest in between:
+     *
+     * - from [Phase.GetReady]: the first exercise;
+     * - from a [Phase.Exercise]: the next exercise, or [NavigationTarget.Complete] on the last one;
+     * - from a [Phase.Rest]: the exercise after the rest.
+     *
+     * Staying paused after the move is the engine's job (P4).
+     *
+     * @throws IndexOutOfBoundsException if [from] isn't an index of [phases].
+     */
+    fun next(from: Int): NavigationTarget {
+        checkIndex(from)
+        return exerciseIndexes.firstOrNull { it > from }?.let { NavigationTarget.GoTo(it) } ?: NavigationTarget.Complete
+    }
+
+    /**
+     * Where Previous goes when pressed while paused in the phase at index [from] (EX-9, specification §5.1), as the
+     * index of a [Phase.Exercise]. It moves between exercises and skips any rest in between:
+     *
+     * - from [Phase.GetReady]: `null`, as Previous is not available;
+     * - from a [Phase.Exercise]: the previous exercise, or [from] itself on the first one, which restarts it;
+     * - from a [Phase.Rest]: the exercise before the rest.
+     *
+     * @throws IndexOutOfBoundsException if [from] isn't an index of [phases].
+     */
+    fun previous(from: Int): Int? {
+        checkIndex(from)
+        return when (phases[from]) {
+            is Phase.GetReady -> null
+            is Phase.Exercise -> exerciseIndexes.lastOrNull { it < from } ?: from
+            is Phase.Rest -> exerciseIndexes.last { it < from }
+        }
+    }
+
+    private fun checkIndex(index: Int) {
+        if (index !in phases.indices) throw IndexOutOfBoundsException("Phase index $index, size ${phases.size}")
+    }
+
     override fun toString(): String = "Timeline(totalSeconds=$totalSeconds, phases=$phases)"
 
     companion object {
@@ -52,6 +95,17 @@ class Timeline private constructor(
             return Timeline(phases)
         }
     }
+}
+
+/** Where [Timeline.next] goes. */
+sealed interface NavigationTarget {
+    /** Move to the phase at [phaseIndex], which is always a [Phase.Exercise]. */
+    data class GoTo(
+        val phaseIndex: Int,
+    ) : NavigationTarget
+
+    /** End the workout and show the completion screen: Next was pressed on the last exercise. */
+    data object Complete : NavigationTarget
 }
 
 /**
