@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.1 |
+| **Status** | Ready, v0.2 |
 | **Phase** | P3, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P2 (done) |
 | **Branch** | `phase/p3-storage` |
@@ -133,7 +133,7 @@ app/src/androidTest/kotlin/io/github/davamix/workouttimer/data/
 
 /** App-wide settings. */
 data class Settings(
-    val voiceCuesEnabled: Boolean = true,      // TTS-9; on by default (Q1)
+    val voiceCuesEnabled: Boolean = true,      // TTS-9; on by default (Q1, answered)
 )
 
 interface SettingsRepository {
@@ -272,7 +272,7 @@ A file is **damaged** when:
 | A required field is missing, a field has the wrong type or doesn't fit in an `Int`, or an unknown field is present | `"name": 3`, `"durationSeconds": 1e12` |
 | The `id` inside differs from the file name | a file copied or renamed by hand |
 
-The repository doesn't check `WM-7` validation. A well-formed file with, for example, an empty round list loads as it is (Q2).
+The repository doesn't check `WM-7` validation. A well-formed file with, for example, an empty round list loads as it is (Q2, answered).
 
 **Saving** a workout, atomically:
 
@@ -299,7 +299,7 @@ The same `save` call creates (`WM-4` create), replaces (edit), and stores a dupl
 **Settings:**
 
 - One Preferences DataStore file, `settings.preferences_pb`. The voice setting is the Boolean key `voice_cues_enabled`.
-- A missing key means the default: voice cues on (Q1).
+- A missing key means the default: voice cues on (Q1, answered).
 - A corrupted file is replaced with empty preferences (`ReplaceFileCorruptionHandler`), which means defaults. `onWarning` is called.
 - An `IOException` while reading emits the defaults instead of failing the flow.
 - `settings` emits only when a value changes (`distinctUntilChanged`).
@@ -402,11 +402,15 @@ The checks that must all pass before the phase is merged.
 
 ## 9. Open questions
 
-| # | Question | Draft assumption |
+None at the moment.
+
+### Answered
+
+| # | Question | Decision |
 |---|---|---|
-| Q1 | What is the voice-cue setting on a fresh install? The specification doesn't say. | **On.** Voice cues are the main way to follow a workout hands-free. |
-| Q2 | Should the repository refuse a well-formed file whose workout fails `WM-7` validation (for example, a round with no exercises)? | **No, it loads as it is.** The interface already says the repository doesn't validate. Only the editor writes files, and it validates first (P6). P7 must validate before building a timeline, as `Timeline.of` throws on invalid workouts. |
-| Q3 | What should the user see if saving or deleting fails, for example when storage is full? The specification has no requirement for it. | **P3 throws `IOException` and keeps the old data. P6 decides the message.** Suggested for P6: a short error, and the editor stays open with the changes kept. No specification change for now. |
+| Q1 | What is the voice-cue setting on a fresh install? | **On.** Voice cues are the main way to follow a workout hands-free. |
+| Q2 | Should the repository refuse a well-formed file whose workout fails `WM-7` validation? | **No, it loads as it is.** Only the editor writes files, and it validates first (P6). P7 must validate before building a timeline, as `Timeline.of` throws on invalid workouts. |
+| Q3 | What should the user see if saving or deleting fails? | **P3 throws `IOException` and keeps the old data. P6 decides the message.** Suggested for P6: a short error, and the editor stays open with the changes kept. No specification change. |
 | Q4 | Is a check driven by instrumentation acceptable for "workouts survive closing the app and rebooting", given there is no UI yet? | **Yes.** It uses the real `AppContainer` repositories on the tablet. P8 repeats the check through the UI as part of acceptance. |
 
 ## 10. Change log
@@ -414,3 +418,4 @@ The checks that must all pass before the phase is merged.
 | Version | Date | Changes |
 |---|---|---|
 | 0.1 | 2026-11-03 | First draft |
+| 0.2 | 2026-11-03 | Q1–Q4 answered, confirming the draft assumptions. Status `Ready`. |
