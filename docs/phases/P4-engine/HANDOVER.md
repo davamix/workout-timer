@@ -41,7 +41,7 @@ The task IDs come from SPEC.md §7.
 | T2 | Done | `PauseResumeTest` (10), `SessionCommandsTest` (11). The waiting-for-announcement pause case comes with T3. |
 | T3 | Done | `NavigationCommandsTest` (32), `GetReadyHandshakeTest` (15, including the pause-while-waiting case listed under `PauseResumeTest` in SPEC §6). `SessionCommandsTest` now covers all seven commands. |
 | T4 | Done | `AccuracyTest` (14): a 61:03 workout (`hourLongTimeline`) with 13 seeded random runs. No fix was needed. A mutation check (scheduling the next phase from the tick time instead of the exact end) makes 13 of the 14 fail. |
-| T5 | To do | |
+| T5 | Done | `WorkoutSessionTest` (14), including commands from 8 threads at once and collectors that call back |
 | T6 | To do | |
 
 ## Decisions and deviations
@@ -54,10 +54,13 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 | 2026-11-03 | `nextWakeAt()` is computed from the displayed second: *phase start + (duration − displayed + 1) × 1000*. | It needs no `now`, and it gives the next whole second of the phase, or its end when 1 s is displayed. |
 | 2026-11-03 | `ANNOUNCEMENT_TIMEOUT_MILLIS` is declared in `SessionMachine.kt`, next to the code that applies it. | Same package as `WorkoutSession`, so the public API is as SPEC §4.2 lists it. |
 | 2026-11-03 | `start()` also applies elapsed time first, like the other commands. | One rule for every command (SPEC §4.3). Before start it has no effect. |
+| 2026-11-03 | The internal sleep hook is `sleepFor: (plannedMillis: Long) -> Long`, which turns each planned sleep into the actual one, instead of SPEC §4.2's `suspend (millis: Long) -> Unit`. The timer sleeps with `withTimeoutOrNull(sleepFor(millis)) { replan.receive() }`. | A command must be able to cut a sleep short. With a timeout around the replan signal, that needs no extra coroutine or `select`. Tests still make wake-ups late or early. |
+| 2026-11-03 | `WorkoutSession` queues every command. Only one thread at a time applies the queue and publishes the results; a call made while another is applying it just queues its command. | On `Dispatchers.Main.immediate`, sending an event can resume a collector inline. If that collector calls a command, as P5 might, the command would otherwise run in the middle of a batch and send its events out of order. The lock alone can't stop this, because it is re-entrant on the same thread. `WorkoutSessionTest` covers it: with the queue disabled, 2 of its tests fail. |
+| 2026-11-03 | A command from another thread may return before it is applied, if the session is busy applying another one at that moment. It is applied as soon as that one finishes, in call order. | This follows from the queue. On a single thread, as in P7's UI, every command still applies before it returns. |
 
 ## Known issues
 
-None yet.
+- **For P5 and P7 tests:** when a session runs in `runTest`'s `backgroundScope`, `advanceUntilIdle()` doesn't run its timer, because it ignores work that only `backgroundScope` has scheduled. Wait in the foreground instead, for example `session.state.first { it.status == COMPLETED }` or `session.events.toList()`. `advanceTimeBy()` does run it. See `WorkoutSessionTest.awaitEnd()`.
 
 ## Pending wiring
 
