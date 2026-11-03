@@ -1,7 +1,9 @@
 package io.github.davamix.workouttimer.core.engine
 
 import io.github.davamix.workouttimer.core.exampleWorkout
+import io.github.davamix.workouttimer.core.exercise
 import io.github.davamix.workouttimer.core.model.Round
+import io.github.davamix.workouttimer.core.round
 import io.github.davamix.workouttimer.core.timeline.Timeline
 import io.github.davamix.workouttimer.core.workout
 import org.junit.jupiter.api.Assertions.fail
@@ -17,6 +19,30 @@ const val T0 = 1_000_000L
  * 7 Plank (60 s), 8 exercise rest (30 s), 9 Crunches (40 s). Total 263 s.
  */
 val exampleTimeline: Timeline = Timeline.of(exampleWorkout)
+
+/**
+ * A workout of 61:03 (3663 s) for the accuracy test: 10 rounds, each of five exercises lasting 250, 3, 1, 45 and
+ * 2 s, with exercise rests of 20, 0, 0 and 15 s between them. Round rests are 60 s after odd rounds and 0 s after
+ * even ones.
+ */
+val hourLongTimeline: Timeline =
+    Timeline.of(
+        workout(
+            *Array(10) { i ->
+                val r = i + 1
+                round(
+                    "Round $r",
+                    exercise("Long", duration = 250, rest = 20, id = "e-$r-long"),
+                    exercise("Short", duration = 3, rest = 0, id = "e-$r-short"),
+                    exercise("Tiny", duration = 1, rest = 0, id = "e-$r-tiny"),
+                    exercise("Mid", duration = 45, rest = 15, id = "e-$r-mid"),
+                    exercise("Two", duration = 2, id = "e-$r-two"),
+                    rest = if (r % 2 == 1) 60 else 0,
+                )
+            },
+            name = "Hour",
+        ),
+    )
 
 /** The timeline of a workout made of [rounds], with the `workout` fixture's defaults unless given. */
 fun timelineOf(

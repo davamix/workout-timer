@@ -40,7 +40,7 @@ The task IDs come from SPEC.md §7.
 | T1 | Done | `SessionRunTest` (19) |
 | T2 | Done | `PauseResumeTest` (10), `SessionCommandsTest` (11). The waiting-for-announcement pause case comes with T3. |
 | T3 | Done | `NavigationCommandsTest` (32), `GetReadyHandshakeTest` (15, including the pause-while-waiting case listed under `PauseResumeTest` in SPEC §6). `SessionCommandsTest` now covers all seven commands. |
-| T4 | To do | |
+| T4 | Done | `AccuracyTest` (14): a 61:03 workout (`hourLongTimeline`) with 13 seeded random runs. No fix was needed. A mutation check (scheduling the next phase from the tick time instead of the exact end) makes 13 of the 14 fail. |
 | T5 | To do | |
 | T6 | To do | |
 
