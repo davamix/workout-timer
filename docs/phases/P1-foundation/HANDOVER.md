@@ -9,6 +9,10 @@
 
 This document tracks the phase as it's built. Update it at the end of every session, so the next one can continue from here.
 
+## Prompt to start or continue
+
+Phase done: no prompt needed.
+
 ## Current state
 
 All tasks are implemented, and the skeleton runs on the tablet:

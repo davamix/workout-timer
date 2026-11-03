@@ -14,6 +14,7 @@ description: End-of-session routine for a workout-timer phase. It runs the check
 2. **Update HANDOVER.md** in the phase folder:
    - **Last session:** today's date.
    - **Status:** `In progress`, `Blocked` or `Done`.
+   - **Prompt to start or continue:** make sure it works as-is for the next session. Use point 4 for anything that session must know first, such as a question waiting for the user, or that the tablet must be connected. When the phase is `Done`, replace the prompt with "Phase done: no prompt needed."
    - **Current state:** rewrite it so it describes the state now. Don't append to it.
    - **Next steps:** concrete enough that a new session can start without reading anything else.
    - **Tasks:** update each status.

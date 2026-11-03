@@ -8,7 +8,7 @@ An Android interval timer for round-based workouts, with spoken cues. It runs on
 - `docs/IMPLEMENTATION_PLAN.md`: how it is built. Decisions `D-n`, phases P1–P8, and their status in §5.1.
 - `docs/phases/PN-<name>/SPEC.md` and `HANDOVER.md`: one specification and one progress tracker per phase.
 
-When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-start`). They quote everything needed.
+When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-start`). They quote everything needed. Each HANDOVER.md starts with a prompt to paste into a new session to start or continue that phase. Keep it current.
 
 **Precedence:** specification, then plan, then phase SPEC. Fix the higher document first, then let the change flow down.
 

@@ -37,6 +37,7 @@ Phase folders:
    - Status: Not started.
    - Every task listed as To do.
    - Next steps: start with `T1`.
+   - **Prompt to start or continue:** fill in the phase ID, name, folder and branch. Write the phase's own notes in point 4, for example whether the tablet must be connected, or which fakes to use while a dependency isn't merged.
 6. **Update the plan.** Set the phase's status in plan §5.1 to `Spec draft`. Status changes don't need a new plan version.
 7. **Commit and push to `main`.** Use the message `PN spec v0.1: <phase name>`. Draft documents are pushed at every version.
 8. **Report to the user.** Summarise the spec and list its open questions for review.
