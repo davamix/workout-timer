@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | In progress: implementation complete; waiting for the pull request review and two manual checks by the user |
+| **Status** | Done. Merged in pull request [#1](https://github.com/davamix/workout-timer/pull/1) on 2026-11-03. |
 | **Spec** | [SPEC.md](SPEC.md), version v0.1 |
 | **Branch** | `phase/p1-foundation` |
-| **Last session** | 2026-11-02 |
+| **Last session** | 2026-11-03 |
 
 This document tracks the phase as it's built. Update it at the end of every session, so the next one can continue from here.
 
@@ -18,17 +18,11 @@ All tasks are implemented, and the skeleton runs on the tablet:
 - The app opens in landscape, and the placeholder screens and navigation work.
 - CI passes on pull request [#1](https://github.com/davamix/workout-timer/pull/1) (3m30s).
 
-Two manual checks need a person at the tablet: the launcher icon, and turning the tablet upside down. See Next steps.
+The user checked both manual items on the tablet: the launcher icon shows with "Workout Timer (debug)", and the app stays in landscape. The phase is merged into `main`.
 
 ## Next steps
 
-1. ~~Wait for CI to pass on the pull request.~~ Done: CI is green.
-2. The user checks on the tablet:
-   - the "Workout Timer (debug)" icon in the launcher;
-   - turning the tablet upside down → the app follows; holding it upright → it stays landscape.
-3. The user reviews and merges the pull request.
-4. After the merge, set P1 to `Done` in plan §5.1, on `main`.
-5. Then write the P2 documents (skill `phase-docs`).
+None for P1. The next phase is P2 (domain model and timeline).
 
 ## Tasks
 
@@ -42,7 +36,7 @@ Two manual checks need a person at the tablet: the launcher icon, and turning th
 | T6 | Done | 6/6 pass on AGS2-W09 (Android 8.0) |
 | T7 | Done | `.github/workflows/ci.yml` |
 | T8 | Done | `CLAUDE.md`, `.claude/skills/tablet/SKILL.md` |
-| T9 | Doing | Pull request #1 open, CI green. Manual checks 1 and 2 are pending the user (§Next steps). |
+| T9 | Done | Pull request #1 merged with CI green. The user confirmed both manual checks. |
 
 ## Decisions and deviations
 
@@ -75,6 +69,10 @@ None.
 ## Session log
 
 Newest first.
+
+### 2026-11-03
+
+- **Done:** the user confirmed the launcher icon and landscape behaviour on the tablet, and merged pull request #1. P1 is closed.
 
 ### 2026-11-02
 

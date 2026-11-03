@@ -196,11 +196,11 @@ Bytecode targets Java 17. The build runs on Android Studio's bundled JDK (JBR 25
 
 ## 8. Done criteria
 
-- [ ] All tasks done
-- [ ] `gradlew build` passes locally and in CI
-- [ ] `gradlew connectedDebugAndroidTest` passes on the tablet
-- [ ] Manual checks on the tablet pass
-- [ ] HANDOVER.md is up to date, and the plan's status table is updated
+- [x] All tasks done
+- [x] `gradlew build` passes locally and in CI
+- [x] `gradlew connectedDebugAndroidTest` passes on the tablet
+- [x] Manual checks on the tablet pass
+- [x] HANDOVER.md is up to date, and the plan's status table is updated
 
 ## 9. Open questions
 
