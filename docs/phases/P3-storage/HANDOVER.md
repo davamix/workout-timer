@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | Not started |
-| **Spec** | [SPEC.md](SPEC.md), version v0.1 |
+| **Status** | In progress |
+| **Spec** | [SPEC.md](SPEC.md), version v0.2 |
 | **Branch** | `phase/p3-storage` |
-| **Last session** | — |
+| **Last session** | 2026-11-03 |
 
 This document tracks the phase as it's built. Update it at the end of every session, so the next one can continue from here.
 
@@ -25,11 +25,11 @@ Start or continue phase P3 (Storage) of the workout timer.
 
 ## Current state
 
-Nothing implemented yet. SPEC.md v0.1 is a draft waiting for review of its open questions (§9).
+Nothing implemented yet. SPEC.md v0.2 is `Ready`; its open questions are all answered with the draft assumptions.
 
 ## Next steps
 
-1. Once SPEC.md is `Ready`, start `T1`: add the `:app` unit-test setup and `kotlinx-serialization-json` to `app/build.gradle.kts`, then write `WorkoutFileFormat.kt` and `WorkoutFileFormatTest`.
+1. Start `T1`: add the `:app` unit-test setup and `kotlinx-serialization-json` to `app/build.gradle.kts`, then write `WorkoutFileFormat.kt` and `WorkoutFileFormatTest`.
 
 ## Tasks
 
