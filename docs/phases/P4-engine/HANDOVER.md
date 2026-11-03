@@ -37,7 +37,7 @@ The task IDs come from SPEC.md §7.
 
 | Task | Status | Notes |
 |---|---|---|
-| T1 | To do | |
+| T1 | Done | `SessionRunTest` (19) |
 | T2 | To do | |
 | T3 | To do | |
 | T4 | To do | |
@@ -50,6 +50,8 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-11-03 | `SessionMachine.state()` takes no `now`, unlike SPEC §4.2's `state(now)`. It returns the state as of the last call, and `remainingSeconds` is the value last reported by `PhaseStarted` or `SecondChanged`. | The state and the events can never disagree. Every caller advances the machine to `now` first anyway. It is internal, so P5 and P7 aren't affected. |
+| 2026-11-03 | `nextWakeAt()` is computed from the displayed second: *phase start + (duration − displayed + 1) × 1000*. | It needs no `now`, and it gives the next whole second of the phase, or its end when 1 s is displayed. |
 
 ## Known issues
 

@@ -1,0 +1,70 @@
+package io.github.davamix.workouttimer.core.engine
+
+import io.github.davamix.workouttimer.core.exampleWorkout
+import io.github.davamix.workouttimer.core.model.Round
+import io.github.davamix.workouttimer.core.timeline.Timeline
+import io.github.davamix.workouttimer.core.workout
+import org.junit.jupiter.api.Assertions.fail
+
+// Test fixtures for the engine tests.
+
+/** The clock time at which tests start their sessions. Any value works; a non-zero one shows the origin doesn't matter. */
+const val T0 = 1_000_000L
+
+/**
+ * The timeline of the specification §4.4 example. Phase indexes: 0 get ready (3 s), 1 Jumping jacks (30 s),
+ * 2 exercise rest (15 s), 3 Arm circles (10 s), 4 exercise rest (5 s), 5 High knees (40 s), 6 round rest (30 s),
+ * 7 Plank (60 s), 8 exercise rest (30 s), 9 Crunches (40 s). Total 263 s.
+ */
+val exampleTimeline: Timeline = Timeline.of(exampleWorkout)
+
+/** The timeline of a workout made of [rounds], with the `workout` fixture's defaults unless given. */
+fun timelineOf(
+    vararg rounds: Round,
+    defaultExerciseRest: Int = 15,
+    defaultRoundRest: Int = 60,
+) = Timeline.of(workout(*rounds, defaultExerciseRest = defaultExerciseRest, defaultRoundRest = defaultRoundRest))
+
+/** An event with the clock time of the call that returned it. */
+data class Timed(
+    val atMillis: Long,
+    val event: SessionEvent,
+)
+
+/**
+ * A compact description of an event: `start 3` (phase 3 started), `countdown`, `3:29` (phase 3 shows 29 s),
+ * `round-end 1`, `paused`, `resumed`, `completed` or `stopped`.
+ */
+fun SessionEvent.code(): String =
+    when (this) {
+        is SessionEvent.PhaseStarted -> "start $phaseIndex"
+        SessionEvent.CountdownStarted -> "countdown"
+        is SessionEvent.SecondChanged -> "$phaseIndex:$remainingSeconds"
+        is SessionEvent.RoundEnded -> "round-end $roundNumber"
+        SessionEvent.Paused -> "paused"
+        SessionEvent.Resumed -> "resumed"
+        SessionEvent.Completed -> "completed"
+        SessionEvent.Stopped -> "stopped"
+    }
+
+/** Each event as `<milliseconds after [start]> <code>`, e.g. `3000 start 1`. */
+fun List<Timed>.codes(start: Long = T0): List<String> = map { "${it.atMillis - start} ${it.event.code()}" }
+
+/** The events' codes, without times. */
+fun List<SessionEvent>.eventCodes(): List<String> = map { it.code() }
+
+/** Calls [SessionMachine.advanceTo] at exactly each [SessionMachine.nextWakeAt] until there is none. */
+internal fun SessionMachine.runOnTime(): List<Timed> =
+    buildList {
+        repeat(MAX_WAKE_UPS) {
+            val wake = nextWakeAt() ?: return@buildList
+            advanceTo(wake).forEach { add(Timed(wake, it)) }
+        }
+        fail<Unit>("Still running after $MAX_WAKE_UPS wake-ups")
+    }
+
+/** Starts the machine at [at], then runs it on time to the end. */
+internal fun SessionMachine.startAndRunOnTime(at: Long = T0): List<Timed> = start(at).map { Timed(at, it) } + runOnTime()
+
+/** More wake-ups than any test workout needs: a 99:59 phase has 5999. */
+private const val MAX_WAKE_UPS = 100_000
