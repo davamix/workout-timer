@@ -178,7 +178,7 @@ Rules:
 |---|---|---|---|
 | P1 | Project foundation | — | Done |
 | P2 | Domain model and timeline | P1 | Done |
-| P3 | Storage | P2 | Ready |
+| P3 | Storage | P2 | In progress |
 | P4 | Workout engine | P2 | Planned |
 | P5 | Audio cues | P4 | Planned |
 | P6 | Workout management UI | P2 | Planned |
