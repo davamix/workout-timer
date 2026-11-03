@@ -2,8 +2,10 @@ package io.github.davamix.workouttimer.di
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.os.SystemClock
 import android.util.Log
 import androidx.datastore.preferences.preferencesDataStoreFile
+import io.github.davamix.workouttimer.core.engine.Clock
 import io.github.davamix.workouttimer.core.repository.WorkoutRepository
 import io.github.davamix.workouttimer.core.settings.SettingsRepository
 import io.github.davamix.workouttimer.data.DataStoreSettingsRepository
@@ -32,6 +34,12 @@ class AppContainer(
             createSettingsDataStore(context.preferencesDataStoreFile("settings"), onWarning = ::logStorageWarning),
         )
     }
+
+    /**
+     * The monotonic clock the workout engine runs on (P4, plan D-6). `elapsedRealtime` keeps counting in deep sleep
+     * and ignores changes to the device's date or time.
+     */
+    val clock: Clock = Clock { SystemClock.elapsedRealtime() }
 
     /** Storage problems that don't stop the app, such as a damaged file. Logged in debug builds only (plan §3). */
     private fun logStorageWarning(
