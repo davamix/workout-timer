@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress: all tasks done; pull request [#2](https://github.com/davamix/workout-timer/pull/2) is waiting for the user to merge it |
+| **Status** | Done. Merged in pull request [#2](https://github.com/davamix/workout-timer/pull/2) on 2026-11-03. |
 | **Spec** | [SPEC.md](SPEC.md), version v0.2 |
 | **Branch** | `phase/p2-domain` |
 | **Last session** | 2026-11-03 |
@@ -11,21 +11,11 @@ This document tracks the phase as it's built. Update it at the end of every sess
 
 ## Prompt to start or continue
 
-Paste this prompt into a new Claude Code session to start or continue the phase. When the phase is done, replace it with "Phase done: no prompt needed."
-
-```text
-Start or continue phase P2 (Domain model and timeline) of the workout timer.
-
-1. Use the phase-start skill for P2. Read only docs/phases/P2-domain/HANDOVER.md and SPEC.md; they contain everything needed.
-2. Carry on from "Next steps" in the handover. Work through the tasks in SPEC.md §7 in order, on branch phase/p2-domain. Commit after each task, once ./gradlew build passes.
-3. Follow SPEC.md. If something in it is wrong or unclear, stop and ask me before changing course. Record every decision or deviation in the handover.
-4. This phase is pure Kotlin in the :core module. The tablet isn't needed, and :core must not get any Android dependency. All tasks are done and pull request #2 is open: check whether it has been merged or has review comments before doing anything else.
-5. Before the session ends, or once all tasks are done, use the handover skill. When the done criteria pass, open the pull request and wait for me to merge it.
-```
+Phase done: no prompt needed.
 
 ## Current state
 
-All six tasks are implemented on `phase/p2-domain`. Pull request [#2](https://github.com/davamix/workout-timer/pull/2) is open.
+All six tasks are implemented and merged into `main` through pull request [#2](https://github.com/davamix/workout-timer/pull/2).
 
 - `./gradlew build` passes locally: 94 `:core` unit tests (0 failures), lint and ktlint clean, no compiler warnings.
 - CI passes on pull request #2 (1m35s, on commit `d0e5b7a`, the last code change).
@@ -45,11 +35,7 @@ Test fixtures live in `core/src/test/.../core/ExampleWorkouts.kt`: `exampleWorko
 
 ## Next steps
 
-1. Wait for the user to merge pull request #2. Fix any review comments on `phase/p2-domain`, then run `./gradlew build` and push.
-2. After the merge, close the phase:
-   - on `main`, set P2 to `Done` in plan §5.1, then commit and push;
-   - set this handover's status to `Done` with the PR link, replace the prompt with "Phase done: no prompt needed.", and set T6 to `Done`.
-3. Phases P3, P4 and P6 can then start.
+None for P2. P3 (storage), P4 (workout engine) and P6 (workout management UI) can start now.
 
 ## Tasks
 
@@ -60,7 +46,7 @@ Test fixtures live in `core/src/test/.../core/ExampleWorkouts.kt`: `exampleWorko
 | T3 | Done | `TimelineTest` (19), `ExampleWorkoutTest` (2). `exampleWorkout` added to `ExampleWorkouts.kt`. |
 | T4 | Done | `NavigationTest` (12), `EstimatedTotalTest` (11) |
 | T5 | Done | `InMemoryWorkoutRepositoryTest` (7) |
-| T6 | In review | KDoc done, build passes, handover written, pull request #2 open. Done once merged. |
+| T6 | Done | KDoc on the public API. Pull request #2 merged with CI green. |
 
 ## Decisions and deviations
 
@@ -99,6 +85,10 @@ There are no tablet checks: this phase has no UI.
 ## Session log
 
 Newest first.
+
+### 2026-11-03 (close)
+
+- **Done:** the user merged pull request #2. P2 is closed: `Done` in plan §5.1, done criteria ticked in SPEC.md.
 
 ### 2026-11-03
 

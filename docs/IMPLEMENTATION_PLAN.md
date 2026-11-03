@@ -177,7 +177,7 @@ Rules:
 | Phase | Name | Depends on | Status |
 |---|---|---|---|
 | P1 | Project foundation | — | Done |
-| P2 | Domain model and timeline | P1 | In progress |
+| P2 | Domain model and timeline | P1 | Done |
 | P3 | Storage | P2 | Planned |
 | P4 | Workout engine | P2 | Planned |
 | P5 | Audio cues | P4 | Planned |

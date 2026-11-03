@@ -384,11 +384,11 @@ None. This phase has no UI or device behaviour.
 
 ## 8. Done criteria
 
-- [ ] All tasks done
-- [ ] Unit tests and lint pass locally and in CI
-- [ ] Every §4.3 rule, every cell of the Next/Previous table, and the §4.4 example have passing tests
-- [ ] `:core` still has no Android dependency
-- [ ] HANDOVER.md is up to date, and the plan's status table is updated
+- [x] All tasks done
+- [x] Unit tests and lint pass locally and in CI
+- [x] Every §4.3 rule, every cell of the Next/Previous table, and the §4.4 example have passing tests
+- [x] `:core` still has no Android dependency
+- [x] HANDOVER.md is up to date, and the plan's status table is updated
 
 ## 9. Open questions
 
