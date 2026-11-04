@@ -2,4 +2,6 @@
 <resources>
     <string name="editor_title_new">New workout</string>
     <string name="editor_title_edit">Edit workout</string>
+    <!-- The name a new round gets. %1$d is its number. -->
+    <string name="editor_round_default_name">Round %1$d</string>
 </resources>

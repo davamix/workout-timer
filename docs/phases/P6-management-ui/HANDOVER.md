@@ -40,7 +40,7 @@ The task IDs come from SPEC.md §7.
 | T1 | Done | SwiftKey isn't full screen in landscape. It's 372 dp tall, leaving 204 dp visible above it. Only `adjustResize` keeps the top bar on screen. The numbers are in SPEC §4.3.6 (v0.3). The probe was deleted. |
 | T2 | Done | `TotalDurationTest` (12), `WorkoutFormTest` (43), `EditorErrorsTest` (3). The icon library adds no permission or component to the merged release manifest. |
 | T3 | Done | `WorkoutListViewModelTest` (12). On the tablet, `WorkoutListScreenTest` (8) and the updated `NavigationSmokeTest` (6) pass. The list and its delete dialog were checked in screenshots. |
-| T4 | To do | |
+| T4 | Done | `WorkoutEditorViewModelTest` (19). Compose snapshot state works in JVM unit tests. |
 | T5 | To do | |
 | T6 | To do | |
 | T7 | To do | |
@@ -50,8 +50,16 @@ The task IDs come from SPEC.md §7.
 
 Anything decided during implementation that isn't in SPEC.md, or that changes it. A change to a requirement goes into SPEC.md or SPECIFICATION.md first.
 
+None of these change SPEC.md. They settle points it doesn't specify.
+
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-11-04 | `formatTotalDuration` pads with `padStart` instead of `String.format`. | `String.format` without a locale triggers Lint's `DefaultLocale` warning, and the result shouldn't depend on the device's locale. |
+| 2026-11-04 | `timeText` keeps only ASCII digits `0`–`9`, not every Unicode digit. | Other digits (Arabic-Indic, for example) would pass `isDigit()` but aren't what the number keyboard types. |
+| 2026-11-04 | `WorkoutListViewModel.state` is shared with `SharingStarted.Eagerly`. | The repository's flow is a cheap state flow, and the list lives as long as the app. `state.value` is then current in unit tests without a collector. |
+| 2026-11-04 | Callbacks that take an ID go through `NavBackStackEntry.ifResumed` in `AppNavHost`, a private helper. | It is `dropUnlessResumed` for callbacks with an argument (SPEC §4.3.9). |
+| 2026-11-04 | Besides `edit` and `addRound`, the editor ViewModel has `addExercise`, `duplicateRound` and `duplicateExercise`. All four return the new item's ID. | The screen needs the ID to scroll to the new item and focus a new exercise (SPEC §4.3.3). They use the ViewModel's `newId`, so tests get fixed IDs. |
+| 2026-11-04 | The editor ignores edits, and `requestClose`, while a save runs. | Edits made during a save would be lost when the editor closes after it. The save closes the editor anyway. |
 
 ## Known issues
 
