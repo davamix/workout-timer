@@ -38,7 +38,7 @@ The task IDs come from SPEC.md §7.
 | Task | Status | Notes |
 |---|---|---|
 | T1 | Done | SwiftKey isn't full screen in landscape. It's 372 dp tall, leaving 204 dp visible above it. Only `adjustResize` keeps the top bar on screen. The numbers are in SPEC §4.3.6 (v0.3). The probe was deleted. |
-| T2 | To do | |
+| T2 | Done | `TotalDurationTest` (12), `WorkoutFormTest` (43), `EditorErrorsTest` (3). The icon library adds no permission or component to the merged release manifest. |
 | T3 | To do | |
 | T4 | To do | |
 | T5 | To do | |
