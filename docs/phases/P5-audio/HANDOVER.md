@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress |
+| **Status** | In progress: all tasks done; pull request [#5](https://github.com/davamix/workout-timer/pull/5) is waiting for the user to merge it |
 | **Spec** | [SPEC.md](SPEC.md), version v0.3 |
 | **Branch** | `phase/p5-audio` |
 | **Last session** | 2026-11-04 |
@@ -19,18 +19,18 @@ Start or continue phase P5 (Audio cues) of the workout timer.
 1. Use the phase-start skill for P5. Read only docs/phases/P5-audio/HANDOVER.md and SPEC.md; they contain everything needed.
 2. Carry on from "Next steps" in the handover. Work through the tasks in SPEC.md §7 in order, on branch phase/p5-audio. Commit after each task, once ./gradlew build passes.
 3. Follow SPEC.md. If something in it is wrong or unclear, stop and ask me before changing course. Record every decision or deviation in the handover.
-4. T1 to T6 are done, and I've approved the chime (manual check 1). T7 needs me at the tablet to listen to the cues (manual checks 2–9). The tablet must be connected over USB (tablet skill), and it stays in Spanish.
+4. All tasks are done, and pull request #5 is open. First check it with `gh pr view 5`: if I've merged it, use the phase-close skill instead. If it has review comments, deal with them on the branch. For any fix that changes audio, the tablet must be connected over USB (tablet skill); it stays in Spanish.
 5. Before the session ends, or once all tasks are done, use the handover skill. When the done criteria pass, open the pull request and wait for me to merge it.
 ```
 
 ## Current state
 
-T1 to T6 are done and pushed. The planner, the chime, the speaker with its warm-up, the cue player and the debug screen all work. Every unit test passes, and so do all the instrumented tests on the tablet. The user approved the chime (manual check 1). The TTS start-up delay found in T3 led to SPEC v0.3 (Q6): the speaker warms the engine up before it's READY, and the activities start preparing when they're created. What's left is T7, the checks by ear on the tablet.
+All tasks are done, and pull request [#5](https://github.com/davamix/workout-timer/pull/5) is open. CI passed on `792642e` (run 41903245858). The planner, the chime, the speaker with its warm-up, the cue player and the debug screen all work. `./gradlew build` passes with 318 unit tests (245 in `:core`, 73 in `:app`). `connectedDebugAndroidTest` gives 26 tests: 23 passed and 3 skipped (P3's manual-only `PersistenceCheck`), 0 failures. The user ran manual checks 1–9 on the tablet, and all pass. The TTS start-up delay found in T3 led to SPEC v0.3 (Q6).
 
 ## Next steps
 
-1. T7: manual checks 2–9 (SPEC §6) with the user at the tablet, using "WT audio debug". Record each result here, and fix anything they find.
-2. KDoc review of the public API P7 uses, `./gradlew build`, the handover skill, and the pull request.
+1. Wait for the user to merge pull request #5. Deal with any review comments on the branch first.
+2. After the merge, use the `phase-close` skill on `main`.
 
 ## Tasks
 
@@ -44,7 +44,7 @@ The task IDs come from SPEC.md §7.
 | T4 | Done | `CuePlayerTest` 15 tests, including a real session of the example that completes at 264.5 s. `SpokenTextDeviceTest` passes (2 tests). |
 | T5 | Done | Installed; screenshots checked. The edge-case workout ran end to end on the tablet. The merged release manifest exports only `MainActivity` among activities. |
 | T6 | Done | The warm-up (SPEC v0.3, Q6). `TtsSpeakerDeviceTest` passes (6 tests), `SpokenTextDeviceTest` too (3 tests). Timings under "Known issues". |
-| T7 | To do | Manual checks 2–9; needs the user at the tablet. |
+| T7 | In review | The user ran manual checks 2–9 on the tablet, and all pass. KDoc reviewed: `CuePlayer.prepare()` now says how long it can wait. Pull request [#5](https://github.com/davamix/workout-timer/pull/5). |
 
 ## Decisions and deviations
 
@@ -83,7 +83,7 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 ## How to verify
 
 - `./gradlew build`: compiles, runs the `:core` and `:app` unit tests, Android Lint, ktlint and the no-`INTERNET` check.
-- Instrumented tests on the tablet (tablet skill, "Run one instrumented test and keep the app's data"): `TtsSpeakerDeviceTest`, `MediaSoundPlayerDeviceTest`, `SpokenTextDeviceTest`.
+- Instrumented tests on the tablet: `./gradlew connectedDebugAndroidTest` runs them all, then uninstalls the app, so run `./gradlew installDebug` afterwards. To run one and keep the app's data, see the tablet skill: `TtsSpeakerDeviceTest`, `MediaSoundPlayerDeviceTest`, `SpokenTextDeviceTest`. To time a cold start, force-stop `com.google.android.tts` and the app first.
 - Manual checks 1–9 in SPEC §6, with the debug screen "WT audio debug". Launch it from its icon, or with `adb shell am start -n io.github.davamix.workouttimer.debug/io.github.davamix.workouttimer.audiodebug.AudioDebugActivity`.
 - Regenerate the chime with `pwsh tools/generate-round-end-sound.ps1`. `git status` shows no change unless its parameters changed.
 
@@ -93,5 +93,5 @@ Newest first.
 
 ### 2026-11-04
 
-- Done: SPEC v0.1 written. The review answered Q1–Q5 as assumed, which gave specification v0.8 and SPEC v0.2 `Ready`. Branch created. T1 to T5 implemented, tested and pushed. TTS start-up measured on the tablet, which showed the first phrase starts 3–4 s late. The user agreed to the warm-up proposal: SPEC v0.3 (Q6) pushed to `main` and merged, and T6 implemented and tested on the tablet. The user approved the chime as it is (manual check 1).
+- Done: SPEC v0.1 written. The review answered Q1–Q5 as assumed, which gave specification v0.8 and SPEC v0.2 `Ready`. Branch created. T1 to T5 implemented, tested and pushed. TTS start-up measured on the tablet, which showed the first phrase starts 3–4 s late. The user agreed to the warm-up proposal: SPEC v0.3 (Q6) pushed to `main` and merged, and T6 implemented and tested on the tablet. The user approved the chime as it is (manual check 1), and ran manual checks 2–9 on the tablet: all pass. KDoc reviewed. Pull request [#5](https://github.com/davamix/workout-timer/pull/5) opened; CI passed.
 - Notes: the tablet's battery went from 13 % to 55 % on USB during the session.
