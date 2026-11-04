@@ -43,8 +43,9 @@ class CuePlayer(
 ) {
     /**
      * Gets the audio ready for a workout: loads the chime and, if [voiceCuesEnabled], prepares the speaker. Call it
-     * before `session.start()`. Returns whether voice cues can be heard: `false` when they're off or the speaker
-     * isn't READY.
+     * before `session.start()`. It usually returns at once, as `AppContainer.prepareAudio()` already ran when the app
+     * opened. Within about 10 s of a cold start, it can wait up to [SPEAKER_PREPARE_TIMEOUT_MILLIS] for the TTS
+     * engine. Returns whether voice cues can be heard: `false` when they're off or the speaker isn't READY.
      */
     suspend fun prepare(voiceCuesEnabled: Boolean): Boolean {
         soundPlayer.prepare()
