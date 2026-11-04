@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The audio debug screen (P5), in debug builds only. -->
+    <string name="audio_debug_label">WT audio debug</string>
+    <string name="audio_debug_workout">Workout</string>
+    <string name="audio_debug_workout_option">%1$s (%2$s)</string>
+    <string name="audio_debug_voice_cues">Voice cues</string>
+    <string name="audio_debug_speaker">Speaker: %1$s</string>
+    <string name="audio_debug_voice">Voice: %1$s</string>
+    <string name="audio_debug_no_voice">none</string>
+    <string name="audio_debug_preparing">Preparing the audio…</string>
+    <string name="audio_debug_not_started">Not started</string>
+    <string name="audio_debug_waiting">waiting for \"Get ready in\"</string>
+    <string name="audio_debug_start">Start</string>
+    <string name="audio_debug_pause">Pause</string>
+    <string name="audio_debug_resume">Resume</string>
+    <string name="audio_debug_previous">Previous</string>
+    <string name="audio_debug_next">Next</string>
+    <string name="audio_debug_stop">Stop</string>
+    <string name="audio_debug_log">Events and cues, newest first</string>
+</resources>
