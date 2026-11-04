@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="settings_title">Settings</string>
+    <string name="settings_voice_cues">Voice cues</string>
+    <string name="settings_voice_cues_text">Speak exercise names and countdowns. The round-end sound plays either way.</string>
+    <string name="settings_save_failed">Couldn\'t save the setting.</string>
 </resources>

@@ -43,7 +43,7 @@ The task IDs come from SPEC.md §7.
 | T4 | Done | `WorkoutEditorViewModelTest` (19). Compose snapshot state works in JVM unit tests. |
 | T5 | Done | The whole editor screen, including what SPEC §7 lists under T6 (move, duplicate, remove, add, the discard dialog, `BackHandler`, not found), because it lives in the same composables. Checked on the tablet in screenshots: a new workout, an edited one, the keyboard over a rest field, and the validation messages. `NavigationSmokeTest`'s editor test now leaves with Cancel. |
 | T6 | Done | `WorkoutEditorScreenTest` (13) passes on the tablet. It creates the §4.4 example by typing, and covers editing, own and linked values, unused rests, structure, validation, leaving, not found and touch targets. The round header now has its own tag, `round-header-<id>`. |
-| T7 | To do | |
+| T7 | Done | `SettingsViewModelTest` (4); `SettingsScreenTest` (4) passes on the tablet. The screen was checked in a screenshot. |
 | T8 | To do | |
 
 ## Decisions and deviations
@@ -66,6 +66,8 @@ None of these change SPEC.md. They settle points it doesn't specify.
 | 2026-11-04 | The editor's content takes an `EditorActions` interface, which the ViewModel implements, instead of ten callbacks. | Shorter signatures for the composables. Tests still drive the real ViewModel. |
 | 2026-11-04 | `assertTouchTargetsAtLeast` checks the touch bounds of the clickable nodes that are fully on screen, and skips the others. | In Material 3 1.4 an `IconButton` lays out at 40 dp; `minimumInteractiveComponentSize` widens only its touch area to 48 dp. Touch bounds are clipped to the screen, so a row half scrolled out of the editor would read as too small. |
 | 2026-11-04 | System Back in the editor tests closes the soft keyboard first (`closeSoftKeyboard()`, then `pressBack()`). | With the keyboard up, Back only closes the keyboard. |
+| 2026-11-04 | `SettingsViewModel` takes `prepareAudio` as a suspend lambda. Its factory runs `AppContainer.prepareAudio()` on `Dispatchers.Default`. | The same thread `MainActivity` uses, because connecting the speech engine shouldn't run on the main thread. The ViewModel stays testable with a plain lambda. |
+| 2026-11-04 | The whole settings row toggles voice cues; the `Switch` itself takes no clicks. | One large touch target (NF-6), and one node for tests to find. |
 | 2026-11-04 | Each round is one `LazyColumn` item (a card holding its exercise rows). The form scrolls to a round's card for the first error and for a new round. A new exercise's name field takes the focus, which scrolls it into view. | Rounds hold few exercises, so one item each is cheap. Item indexes stay simple: 0 is the workout, then one per round, then Add round. |
 
 ## Known issues
