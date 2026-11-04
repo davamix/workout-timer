@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress: all tasks done; pull request [#5](https://github.com/davamix/workout-timer/pull/5) is waiting for the user to merge it |
+| **Status** | Done. Merged in pull request [#5](https://github.com/davamix/workout-timer/pull/5) on 2026-11-04. |
 | **Spec** | [SPEC.md](SPEC.md), version v0.3 |
 | **Branch** | `phase/p5-audio` |
 | **Last session** | 2026-11-04 |
@@ -11,26 +11,20 @@ This document tracks the phase as it's built. Update it at the end of every sess
 
 ## Prompt to start or continue
 
-Paste this prompt into a new Claude Code session to start or continue the phase. When the phase is done, replace it with "Phase done: no prompt needed."
-
-```text
-Start or continue phase P5 (Audio cues) of the workout timer.
-
-1. Use the phase-start skill for P5. Read only docs/phases/P5-audio/HANDOVER.md and SPEC.md; they contain everything needed.
-2. Carry on from "Next steps" in the handover. Work through the tasks in SPEC.md §7 in order, on branch phase/p5-audio. Commit after each task, once ./gradlew build passes.
-3. Follow SPEC.md. If something in it is wrong or unclear, stop and ask me before changing course. Record every decision or deviation in the handover.
-4. All tasks are done, and pull request #5 is open. First check it with `gh pr view 5`: if I've merged it, use the phase-close skill instead. If it has review comments, deal with them on the branch. For any fix that changes audio, the tablet must be connected over USB (tablet skill); it stays in Spanish.
-5. Before the session ends, or once all tasks are done, use the handover skill. When the done criteria pass, open the pull request and wait for me to merge it.
-```
+Phase done: no prompt needed.
 
 ## Current state
 
-All tasks are done, and pull request [#5](https://github.com/davamix/workout-timer/pull/5) is open. CI passed on `792642e` (run 41903245858). The planner, the chime, the speaker with its warm-up, the cue player and the debug screen all work. `./gradlew build` passes with 318 unit tests (245 in `:core`, 73 in `:app`). `connectedDebugAndroidTest` gives 26 tests: 23 passed and 3 skipped (P3's manual-only `PersistenceCheck`), 0 failures. The user ran manual checks 1–9 on the tablet, and all pass. The TTS start-up delay found in T3 led to SPEC v0.3 (Q6).
+Merged into `main` through pull request [#5](https://github.com/davamix/workout-timer/pull/5) on 2026-11-04, with CI passing. The planner, the chime, the speaker with its warm-up, the cue player and the debug screen all work. `./gradlew build` passes with 318 unit tests (245 in `:core`, 73 in `:app`). `connectedDebugAndroidTest` gives 26 tests: 23 passed and 3 skipped (P3's manual-only `PersistenceCheck`), 0 failures. The user ran manual checks 1–9 on the tablet, and all pass. The TTS start-up delay found in T3 led to SPEC v0.3 (Q6).
 
 ## Next steps
 
-1. Wait for the user to merge pull request #5. Deal with any review comments on the branch first.
-2. After the merge, use the `phase-close` skill on `main`.
+None for P5.
+
+Phases that can start now, with all their dependencies `Done` (plan §5.1):
+
+- **P6, Workout management UI** (depends on P2). Its suggested P5 wiring is under "Pending wiring".
+- **P7, Workout runner UI** (depends on P4). It wires the audio into the runner, as under "Pending wiring".
 
 ## Tasks
 
@@ -44,7 +38,7 @@ The task IDs come from SPEC.md §7.
 | T4 | Done | `CuePlayerTest` 15 tests, including a real session of the example that completes at 264.5 s. `SpokenTextDeviceTest` passes (2 tests). |
 | T5 | Done | Installed; screenshots checked. The edge-case workout ran end to end on the tablet. The merged release manifest exports only `MainActivity` among activities. |
 | T6 | Done | The warm-up (SPEC v0.3, Q6). `TtsSpeakerDeviceTest` passes (6 tests), `SpokenTextDeviceTest` too (3 tests). Timings under "Known issues". |
-| T7 | In review | The user ran manual checks 2–9 on the tablet, and all pass. KDoc reviewed: `CuePlayer.prepare()` now says how long it can wait. Pull request [#5](https://github.com/davamix/workout-timer/pull/5). |
+| T7 | Done | The user ran manual checks 2–9 on the tablet, and all pass. KDoc reviewed: `CuePlayer.prepare()` now says how long it can wait. Pull request [#5](https://github.com/davamix/workout-timer/pull/5). |
 
 ## Decisions and deviations
 
@@ -90,6 +84,10 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 ## Session log
 
 Newest first.
+
+### 2026-11-04 (close)
+
+- The user merged pull request [#5](https://github.com/davamix/workout-timer/pull/5). P5 is closed: `Done` in plan §5.1, done criteria ticked in SPEC.md §8.
 
 ### 2026-11-04
 

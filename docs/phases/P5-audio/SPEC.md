@@ -635,13 +635,13 @@ The tablet stays in Spanish. The user listens; adb can't check sound. Use the de
 
 ## 8. Done criteria
 
-- [ ] All tasks done
-- [ ] Unit tests and lint pass locally and in CI
-- [ ] `ExampleCuesTest` matches the §4.3.8 sequences exactly
-- [ ] `TtsSpeakerDeviceTest`, `MediaSoundPlayerDeviceTest` and `SpokenTextDeviceTest` pass on the tablet
-- [ ] Manual checks 1–9 pass: on the tablet, still in Spanish, every cue is heard in English at the right moment
-- [ ] `:core` still has no Android dependency; the release manifest exports only `MainActivity`, and has no `INTERNET` permission
-- [ ] HANDOVER.md is up to date, with the runner wiring under "Pending wiring", and the plan's status table is updated
+- [x] All tasks done
+- [x] Unit tests and lint pass locally and in CI
+- [x] `ExampleCuesTest` matches the §4.3.8 sequences exactly
+- [x] `TtsSpeakerDeviceTest`, `MediaSoundPlayerDeviceTest` and `SpokenTextDeviceTest` pass on the tablet
+- [x] Manual checks 1–9 pass: on the tablet, still in Spanish, every cue is heard in English at the right moment
+- [x] `:core` still has no Android dependency; the release manifest exports only `MainActivity`, and has no `INTERNET` permission
+- [x] HANDOVER.md is up to date, with the runner wiring under "Pending wiring", and the plan's status table is updated
 
 ## 9. Open questions
 
