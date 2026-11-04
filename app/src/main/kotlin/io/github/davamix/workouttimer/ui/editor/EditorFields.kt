@@ -49,8 +49,8 @@ import io.github.davamix.workouttimer.R
 import io.github.davamix.workouttimer.core.model.TimeField
 
 // The parts of the editor's form (P6 SPEC §4.3.2–§4.3.4). Fields are tagged for tests: workout-name, default-duration,
-// default-exercise-rest, default-round-rest; round-<id> with round-name-<id> and round-rest-<id>; exercise-<id> with
-// exercise-name-<id>, exercise-duration-<id> and exercise-rest-<id>.
+// default-exercise-rest, default-round-rest; round-<id> with round-header-<id>, round-name-<id> and round-rest-<id>;
+// exercise-<id> with exercise-name-<id>, exercise-duration-<id> and exercise-rest-<id>.
 
 /** The workout's name and its three defaults: the first item of the form. */
 @Composable
@@ -108,7 +108,7 @@ internal fun RoundCard(
     val isLastRound = position == roundCount - 1
     Card(modifier.fillMaxWidth().testTag("round-${round.id}")) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.testTag("round-header-${round.id}"), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(R.string.editor_round_position, position + 1),
                     style = MaterialTheme.typography.titleLarge,
