@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | In progress |
-| **Spec** | [SPEC.md](SPEC.md), version v0.2 |
+| **Spec** | [SPEC.md](SPEC.md), version v0.3 |
 | **Branch** | `phase/p6-management-ui` |
 | **Last session** | 2026-11-04 |
 
@@ -25,11 +25,11 @@ Start or continue phase P6 (Workout management UI) of the workout timer.
 
 ## Current state
 
-SPEC.md v0.2 is `Ready`: the review confirmed all eight draft assumptions (Q1–Q8). The branch exists. No code yet.
+SPEC.md is `Ready`. The review confirmed all eight draft assumptions (Q1–Q8). T1's keyboard measurements confirmed §4.3.6, and are recorded there in SPEC v0.3: `MainActivity` gets `adjustResize` in T5. No app code yet.
 
 ## Next steps
 
-1. `T1`: the keyboard probe on the tablet (SPEC §7). Record the results in SPEC §4.3.6 and choose `windowSoftInputMode`.
+1. `T2`: the foundations (SPEC §7). Add the dependencies, `TotalDuration.kt`, `WorkoutForm.kt`, `EditorErrors.kt`, `MainDispatcherExtension` and `TestRepositories.kt`, with their unit tests.
 
 ## Tasks
 
@@ -37,7 +37,7 @@ The task IDs come from SPEC.md §7.
 
 | Task | Status | Notes |
 |---|---|---|
-| T1 | To do | |
+| T1 | Done | SwiftKey isn't full screen in landscape. It's 372 dp tall, leaving 204 dp visible above it. Only `adjustResize` keeps the top bar on screen. The numbers are in SPEC §4.3.6 (v0.3). The probe was deleted. |
 | T2 | To do | |
 | T3 | To do | |
 | T4 | To do | |
