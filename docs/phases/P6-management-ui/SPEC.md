@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready, v0.2 |
+| **Status** | Ready, v0.3 |
 | **Phase** | P6, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P2 (done). It also uses P3 and P5, both done. |
 | **Branch** | `phase/p6-management-ui` |
@@ -196,7 +196,7 @@ app/src/androidTest/kotlin/io/github/davamix/workouttimer/ui/
   - `implementation(libs.androidx.compose.material.icons.core)`;
   - `implementation(libs.androidx.lifecycle.viewmodel.compose)`. It's already in the catalog, and already on the classpath through Navigation; declaring it makes `viewModel()` an explicit dependency. P7 may add the same line. Whichever phase merges second keeps a single copy.
 - `navigation/AppNavHost.kt`: the list, editor and settings destinations (§4.3.9).
-- `app/src/main/AndroidManifest.xml`: `android:windowSoftInputMode` on `MainActivity`, as T1 decides (§4.3.6).
+- `app/src/main/AndroidManifest.xml`: `android:windowSoftInputMode="adjustResize"` on `MainActivity` (§4.3.6, measured in T1).
 - `app/src/androidTest/.../NavigationSmokeTest.kt` (P1's): updated for the real list. The "Run sample" button is gone, so the runner tests start a seeded workout (§6).
 - `strings_list.xml`: `list_run_sample` is removed with the button.
 
@@ -544,23 +544,29 @@ The form scrolls (a `LazyColumn` keyed by round and exercise ID). The top bar, w
 
 #### 4.3.6 Keyboard (measured in T1)
 
-The soft keyboard takes a large part of a 600 dp-high landscape screen, so the editor depends on how it behaves on the tablet. Nobody has measured that yet.
+The soft keyboard takes a large part of a 600 dp-high landscape screen, so the editor depends on how it behaves on the tablet.
 
-**What the design assumes until T1:**
+**Decision, from T1's measurements:** `MainActivity` gets `android:windowSoftInputMode="adjustResize"`. The window then shrinks above the keyboard, Compose scrolls the focused field into view, and the top bar stays on screen.
 
-- the keyboard isn't full screen in landscape: the form stays visible above it;
-- `MainActivity` needs `android:windowSoftInputMode="adjustResize"`. With the default, Android pans the window instead, because a Compose view isn't a scroll container, and the top bar may slide off;
-- with `adjustResize`, the window shrinks above the keyboard, and Compose scrolls the focused field into view;
-- the top bar stays visible.
+**Measured in T1** on 2026-11-04. A throwaway probe showed a 64 dp top bar over a `LazyColumn` of `OutlinedTextField`s, and tapped the lowest fully visible field (field 4). Each mode ran twice, with the same numbers each time.
 
-**T1 measures** these, and records the results here:
+- **Input method:** Microsoft SwiftKey (`com.touchtype.swiftkey`), the tablet's default.
+- **Full screen in landscape:** no (`InputMethodManager.isFullscreenMode` is `false`). The app stays visible above the keyboard.
+- **Keyboard height:** 744 px, 372 dp, with a text keyboard. The visible window shrinks from 48–1133 px to 48–456 px, which leaves **204 dp** between the status bar and the keyboard. With a 64 dp top bar, that's 140 dp for the form: about one exercise row. The frame changes 350–400 ms after the tap.
+- **Each soft-input mode:**
 
-- the input method in use;
-- whether it's full screen in landscape;
-- the keyboard's height;
-- with each soft-input mode, whether a focused field near the bottom stays visible and the top bar stays on screen.
+  | Mode | Window | Top bar | Focused field |
+  |---|---|---|---|
+  | unspecified (today's manifest) | panned up by 504 px; the content keeps its full height (1085 px) | **off screen** (at −456 px) | visible, right above the keyboard |
+  | `adjustPan` | the same as unspecified | **off screen** | visible |
+  | `adjustResize` | the content shrinks to 408 px | **visible** (48–176 px) | visible, right above the keyboard; the list scrolled by itself to keep it there |
 
-If the results contradict these assumptions, the SPEC changes first (`phase-docs`, "SPEC change during implementation").
+  Unspecified behaves as `adjustPan`, as expected: a Compose view isn't a scroll container, so Android pans.
+
+**What follows for the layout:**
+
+- the top bar stays a single standard row (64 dp at most), so the form keeps the 140 dp it has above the keyboard;
+- an exercise row should stay compact: its fields side by side, not stacked, so the field being typed in and its row fit in that space.
 
 Keyboard actions: name and time fields use `ImeAction.Next`; the last field on the screen uses `ImeAction.Done`. Name fields capitalise sentences.
 
@@ -758,3 +764,4 @@ None at the moment. New questions are numbered from Q9.
 |---|---|---|
 | 0.1 | 2026-11-04 | First draft |
 | 0.2 | 2026-11-04 | Q1–Q8 answered, confirming the draft assumptions. No specification change: they settle UI details. Status `Ready`. |
+| 0.3 | 2026-11-04 | T1 done: the keyboard measurements are in §4.3.6. They confirm the draft's assumptions, so `MainActivity` gets `adjustResize`. With the keyboard up, 204 dp of the screen stay visible, so the top bar and the exercise rows stay compact. |
