@@ -63,11 +63,12 @@ class NavigationSmokeTest {
     }
 
     @Test
-    fun editorOpensAndReturnsWithBackButton() {
+    fun editorOpensAndReturnsWithCancel() {
         click(R.string.list_new_workout)
         assertDisplayed(R.string.editor_title_new)
 
-        click(R.string.action_back)
+        // An untouched new workout has no changes, so Cancel leaves without asking.
+        click(R.string.editor_cancel)
         assertDisplayed(R.string.list_title)
     }
 

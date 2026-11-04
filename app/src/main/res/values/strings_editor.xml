@@ -4,4 +4,55 @@
     <string name="editor_title_edit">Edit workout</string>
     <!-- The name a new round gets. %1$d is its number. -->
     <string name="editor_round_default_name">Round %1$d</string>
+
+    <!-- Top bar -->
+    <string name="editor_total">Total %1$s</string>
+    <string name="editor_cancel">Cancel</string>
+    <string name="editor_save">Save</string>
+
+    <!-- Workout name and defaults -->
+    <string name="editor_workout_name">Workout name</string>
+    <string name="editor_defaults">Defaults</string>
+    <string name="editor_default_duration">Exercise duration</string>
+    <string name="editor_default_exercise_rest">Rest between exercises</string>
+    <string name="editor_default_round_rest">Rest between rounds</string>
+
+    <!-- Rounds and exercises. %1$d is the round's position in the workout. -->
+    <string name="editor_round_position">Round %1$d</string>
+    <string name="editor_round_name">Round name</string>
+    <string name="editor_round_rest">Round rest</string>
+    <string name="editor_column_exercise">Exercise</string>
+    <string name="editor_column_duration">Duration</string>
+    <string name="editor_column_rest">Rest</string>
+    <!-- After a duration or rest, in seconds. -->
+    <string name="editor_seconds">s</string>
+    <string name="editor_uses_default">Default</string>
+    <string name="editor_use_default">Use default</string>
+    <string name="editor_not_used_exercise">Not used: last exercise</string>
+    <string name="editor_not_used_round">Not used: last round</string>
+
+    <!-- Actions on rounds and exercises -->
+    <string name="editor_add_round">Add round</string>
+    <string name="editor_add_exercise">Add exercise</string>
+    <string name="editor_move_up">Move up</string>
+    <string name="editor_move_down">Move down</string>
+    <string name="editor_more">More actions</string>
+    <string name="editor_duplicate">Duplicate</string>
+    <string name="editor_remove">Remove</string>
+
+    <!-- Validation (WM-7). In editor_error_range, %1$d and %2$d are the smallest and largest values allowed. -->
+    <string name="editor_error_name">Enter a name</string>
+    <string name="editor_error_range">From %1$d to %2$d s</string>
+    <string name="editor_error_no_rounds">Add at least one round</string>
+    <string name="editor_error_no_exercises">Add at least one exercise</string>
+    <string name="editor_check_fields">Check the highlighted fields.</string>
+    <string name="editor_save_failed">Couldn\'t save the workout. Your changes are still here.</string>
+
+    <!-- Leaving with unsaved changes (WM-10) -->
+    <string name="editor_discard_title">Discard changes?</string>
+    <string name="editor_discard_text">Your changes to this workout haven\'t been saved.</string>
+    <string name="editor_discard_keep">Keep editing</string>
+    <string name="editor_discard_confirm">Discard</string>
+
+    <string name="editor_not_found">This workout no longer exists.</string>
 </resources>

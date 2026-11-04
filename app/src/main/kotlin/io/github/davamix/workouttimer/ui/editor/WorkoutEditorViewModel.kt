@@ -32,7 +32,8 @@ class WorkoutEditorViewModel(
     private val workoutId: String?,
     private val roundName: (number: Int) -> String,
     private val newId: () -> String = ::newId,
-) : ViewModel() {
+) : ViewModel(),
+    EditorActions {
     /**
      * What the editor shows. It's Compose snapshot state, changed synchronously by every edit, so text fields get their
      * new value in the same frame (§4.3.5). Read it during composition, or directly in a test.
@@ -74,7 +75,7 @@ class WorkoutEditorViewModel(
     }
 
     /** Applies [change] to the form. Ignored unless editing, and while a save runs. */
-    fun edit(change: (WorkoutForm) -> WorkoutForm) {
+    override fun edit(change: (WorkoutForm) -> WorkoutForm) {
         val current = state as? EditorState.Editing ?: return
         if (current.saving) return
         val form = change(current.form)
@@ -90,16 +91,16 @@ class WorkoutEditorViewModel(
     }
 
     /** Adds a round called "Round *n*" at the end, with one exercise to name. Returns the new round's ID. */
-    fun addRound(): String? = added { form, ids -> form.addRound(roundName(form.rounds.size + 1), ids) }
+    override fun addRound(): String? = added { form, ids -> form.addRound(roundName(form.rounds.size + 1), ids) }
 
     /** Adds an exercise to name at the end of the round [roundId]. Returns the new exercise's ID. */
-    fun addExercise(roundId: String): String? = added { form, ids -> form.addExercise(roundId, ids) }
+    override fun addExercise(roundId: String): String? = added { form, ids -> form.addExercise(roundId, ids) }
 
     /** Puts a copy of the round [roundId] right after it. Returns the copy's ID. */
-    fun duplicateRound(roundId: String): String? = added { form, ids -> form.duplicateRound(roundId, ids) }
+    override fun duplicateRound(roundId: String): String? = added { form, ids -> form.duplicateRound(roundId, ids) }
 
     /** Puts a copy of the exercise [exerciseId] right after it. Returns the copy's ID. */
-    fun duplicateExercise(exerciseId: String): String? = added { form, ids -> form.duplicateExercise(exerciseId, ids) }
+    override fun duplicateExercise(exerciseId: String): String? = added { form, ids -> form.duplicateExercise(exerciseId, ids) }
 
     /**
      * Applies an operation that adds a round or an exercise, and returns the ID of the round or exercise it added: the
@@ -122,7 +123,7 @@ class WorkoutEditorViewModel(
      * errors show from now on, and the message says to check them. If saving fails, the form is kept and the message
      * says so. Does nothing while a save runs.
      */
-    fun save() {
+    override fun save() {
         val current = state as? EditorState.Editing ?: return
         if (current.saving) return
         val workout = current.form.toWorkout()
@@ -148,7 +149,7 @@ class WorkoutEditorViewModel(
      * Cancel, the back arrow and system Back. With unsaved changes it asks first (WM-10); otherwise the editor closes.
      * Ignored while a save runs: the save closes the editor.
      */
-    fun requestClose() {
+    override fun requestClose() {
         val current = state
         state =
             when {
@@ -160,18 +161,18 @@ class WorkoutEditorViewModel(
     }
 
     /** Leaves without saving. */
-    fun confirmDiscard() {
+    override fun confirmDiscard() {
         if (state is EditorState.Editing) state = EditorState.Closed
     }
 
     /** Keeps editing: closes the discard confirmation. */
-    fun cancelDiscard() {
+    override fun cancelDiscard() {
         val current = state as? EditorState.Editing ?: return
         state = current.copy(confirmingDiscard = false)
     }
 
     /** The screen has shown [EditorState.Editing.message]. */
-    fun messageShown() {
+    override fun messageShown() {
         val current = state as? EditorState.Editing ?: return
         state = current.copy(message = null)
     }
@@ -190,6 +191,39 @@ class WorkoutEditorViewModel(
                 }
             }
     }
+}
+
+/** What the editor screen can ask for. [WorkoutEditorViewModel] does it; the screen's content only calls it. */
+interface EditorActions {
+    /** Applies [change] to the form. */
+    fun edit(change: (WorkoutForm) -> WorkoutForm)
+
+    /** Adds a round at the end. Returns its ID. */
+    fun addRound(): String?
+
+    /** Adds an exercise at the end of the round [roundId]. Returns its ID. */
+    fun addExercise(roundId: String): String?
+
+    /** Puts a copy of the round [roundId] right after it. Returns the copy's ID. */
+    fun duplicateRound(roundId: String): String?
+
+    /** Puts a copy of the exercise [exerciseId] right after it. Returns the copy's ID. */
+    fun duplicateExercise(exerciseId: String): String?
+
+    /** Validates, then saves if valid. */
+    fun save()
+
+    /** Cancel, the back arrow and system Back: closes, or asks first if there are unsaved changes. */
+    fun requestClose()
+
+    /** Leaves without saving. */
+    fun confirmDiscard()
+
+    /** Keeps editing. */
+    fun cancelDiscard()
+
+    /** The message has been shown. */
+    fun messageShown()
 }
 
 /** What the editor shows. */

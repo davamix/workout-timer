@@ -33,7 +33,7 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
         composable<WorkoutEditorRoute> { entry ->
             WorkoutEditorScreen(
                 workoutId = entry.toRoute<WorkoutEditorRoute>().workoutId,
-                onBack = dropUnlessResumed { navController.popBackStack() },
+                onClose = dropUnlessResumed { navController.popBackStack() },
             )
         }
         composable<SettingsRoute> {
