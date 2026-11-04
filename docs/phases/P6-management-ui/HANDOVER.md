@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Not started |
-| **Spec** | [SPEC.md](SPEC.md), version v0.1 |
+| **Status** | In progress |
+| **Spec** | [SPEC.md](SPEC.md), version v0.2 |
 | **Branch** | `phase/p6-management-ui` |
 | **Last session** | 2026-11-04 |
 
@@ -25,12 +25,11 @@ Start or continue phase P6 (Workout management UI) of the workout timer.
 
 ## Current state
 
-SPEC.md v0.1 is written and waiting for review. No code yet.
+SPEC.md v0.2 is `Ready`: the review confirmed all eight draft assumptions (Q1–Q8). The branch exists. No code yet.
 
 ## Next steps
 
-1. Review SPEC.md v0.1, and answer Q1–Q8 in §9.
-2. Once the SPEC is `Ready`, start with `T1`: the keyboard probe on the tablet.
+1. `T1`: the keyboard probe on the tablet (SPEC §7). Record the results in SPEC §4.3.6 and choose `windowSoftInputMode`.
 
 ## Tasks
 
@@ -83,5 +82,5 @@ Newest first.
 
 ### 2026-11-04
 
-- Done: SPEC.md v0.1 and this handover written. P6 set to `Spec draft` in plan §5.1.
+- Done: SPEC.md v0.1 and this handover written. The user agreed to Q1–Q8 as assumed, so SPEC v0.2 is `Ready`. CLAUDE.md now says Compose UI tests use the `v2` rules. P6 marked `In progress` on `main`, and the branch created.
 - Notes: the specification and the plan were read only to write the SPEC.
