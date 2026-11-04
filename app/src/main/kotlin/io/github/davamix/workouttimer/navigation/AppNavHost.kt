@@ -1,7 +1,9 @@
 package io.github.davamix.workouttimer.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.dropUnlessResumed
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,11 +22,12 @@ import io.github.davamix.workouttimer.ui.settings.SettingsScreen
 @Composable
 fun AppNavHost(navController: NavHostController = rememberNavController()) {
     NavHost(navController = navController, startDestination = WorkoutListRoute) {
-        composable<WorkoutListRoute> {
+        composable<WorkoutListRoute> { entry ->
             WorkoutListScreen(
                 onNewWorkout = dropUnlessResumed { navController.navigate(WorkoutEditorRoute()) },
+                onEditWorkout = { workoutId -> entry.ifResumed { navController.navigate(WorkoutEditorRoute(workoutId)) } },
+                onStartWorkout = { workoutId -> entry.ifResumed { navController.navigate(RunnerRoute(workoutId)) } },
                 onOpenSettings = dropUnlessResumed { navController.navigate(SettingsRoute) },
-                onStartWorkout = { workoutId -> navController.navigate(RunnerRoute(workoutId)) },
             )
         }
         composable<WorkoutEditorRoute> { entry ->
@@ -54,4 +57,12 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
             )
         }
     }
+}
+
+/**
+ * Runs [action] only while this destination is resumed, as `dropUnlessResumed` does for callbacks without an
+ * argument. A double tap then can't open a screen twice.
+ */
+private inline fun NavBackStackEntry.ifResumed(action: () -> Unit) {
+    if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) action()
 }

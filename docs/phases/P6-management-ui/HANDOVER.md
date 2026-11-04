@@ -39,7 +39,7 @@ The task IDs come from SPEC.md §7.
 |---|---|---|
 | T1 | Done | SwiftKey isn't full screen in landscape. It's 372 dp tall, leaving 204 dp visible above it. Only `adjustResize` keeps the top bar on screen. The numbers are in SPEC §4.3.6 (v0.3). The probe was deleted. |
 | T2 | Done | `TotalDurationTest` (12), `WorkoutFormTest` (43), `EditorErrorsTest` (3). The icon library adds no permission or component to the merged release manifest. |
-| T3 | To do | |
+| T3 | Done | `WorkoutListViewModelTest` (12). On the tablet, `WorkoutListScreenTest` (8) and the updated `NavigationSmokeTest` (6) pass. The list and its delete dialog were checked in screenshots. |
 | T4 | To do | |
 | T5 | To do | |
 | T6 | To do | |
