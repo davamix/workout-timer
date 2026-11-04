@@ -1,6 +1,6 @@
 ---
 name: phase-docs
-description: Create the SPEC.md and HANDOVER.md of a workout-timer phase (P1–P8) from the implementation plan and the templates. Use when asked to write, create or prepare a phase's documents or specification.
+description: Create the SPEC.md and HANDOVER.md of a workout-timer phase (P1–P8) from the implementation plan and the templates. Use when asked to write, create or prepare a phase's documents or specification, and when a phase's SPEC.md must change during implementation.
 ---
 
 # Create a phase's documents
@@ -29,6 +29,7 @@ Phase folders:
 3. **Read the code it builds on.** Read only the merged code this phase uses: the interfaces from its dependencies, plus the shared files it will touch.
 4. **Read what earlier phases learned.** A session that implements this phase reads only this phase's documents, so lessons left in other handovers never reach it unless this SPEC carries them.
    - For each phase this one depends on in plan §5.1, and their own dependencies in turn, read three sections of its HANDOVER.md: "Decisions and deviations", "Known issues" and "Pending wiring".
+   - Then read "Pending wiring" in the HANDOVER.md of every other phase marked `Done` in plan §5.1, and take the items that name this phase. The plan's dependencies don't list every phase whose code this one wires up. For example, P7 depends only on P4, but completes P5's audio wiring.
    - Carry what applies into SPEC.md:
      - pending wiring this phase must complete, or must leave for a later phase;
      - pitfalls that will affect its code or tests;
@@ -39,6 +40,7 @@ Phase folders:
    - The document must stand alone. A session that implements the phase should not need the specification or the plan.
    - List the packages and files the phase owns. Name every shared file it changes.
    - Tasks: in order, each one session or less, with IDs `T1`, `T2`, …
+   - **Measure first what the documents can't tell.** If the design depends on device or platform behaviour that nobody has measured, make a task that measures it on the tablet before the design relies on it. That covers timing, latency, and what Android does in the background or on a cold start. Use a throwaway probe (`tablet` skill, "Measuring device behaviour"), and say in §9 what the design assumes until then. In P5, the TTS start-up delay only came to light in T3, and forced SPEC v0.3 in the middle of the phase.
    - Every covered requirement needs a test or a manual check in §6.
    - Anything unclear goes into §9 as a question, with the assumption the draft uses.
 6. **Write HANDOVER.md.** Copy `docs/phases/_templates/HANDOVER_TEMPLATE.md` as `HANDOVER.md`:
@@ -58,3 +60,21 @@ Phase folders:
 - **Commit and push** every changed document to `main`.
 - **Once the user agrees,** set SPEC.md's status to `Ready`, and plan §5.1 to `Ready`.
 - **If the user asked to start the phase,** carry on with the `phase-start` skill in the same session.
+
+## SPEC change during implementation
+
+When something found while building a phase contradicts its SPEC.md, such as a measurement, a platform limit or a design flaw:
+
+1. **Stop and ask the user.** Explain what was found, with numbers if there are any, and propose a change. Don't change course until they agree.
+2. **Commit pending work on the phase branch,** so `git status` is clean before switching.
+3. **Higher documents first.** If the change affects the specification or the plan, update those first, as in "After the review".
+4. **Edit SPEC.md on `main`:** run `git switch main && git pull --ff-only`, or use a worktree if this working copy is busy (`phase-start`, step 3).
+   - Bump the version in the header.
+   - Apply the change everywhere it shows: scope (§3), files and shared files (§4.1), interfaces (§4.2), behaviour (§4.3), security (§5), tests and manual checks (§6), tasks (§7), done criteria (§8).
+   - Record it in §9's "Answered" table as the next question number: the problem, and what was decided.
+   - Add a change-log row.
+   - New work gets the next free task ID, after the last task that's done. Renumber only tasks that haven't started.
+   - Fold in any recorded deviation that the same sections now describe, so the SPEC matches the code.
+5. **Commit and push to `main`:** `PN spec vX.Y: <what changed>`.
+6. **Merge it into the phase branch:** `git switch phase/pN-<name> && git merge --no-edit main && git push`.
+7. **Update HANDOVER.md** on the branch: the SPEC version in its header, the tasks table, and "Known issues" if the change resolves one. Commit it with the next task, or on its own.

@@ -1,6 +1,6 @@
 ---
 name: tablet
-description: Build, install, launch, screenshot and read logs of the Workout Timer app on the HUAWEI tablet over adb; run one instrumented test without wiping the app's data; read the app's private files; reboot the tablet. Use whenever the app needs to run on the device, be checked visually, or be debugged on the device, including instrumented tests.
+description: Build, install, launch, screenshot and read logs of the Workout Timer app on the HUAWEI tablet over adb; read the text on screen without a screenshot; run one instrumented test without wiping the app's data, and summarise the results; measure device behaviour with a throwaway probe; read the app's private files; reboot the tablet. Use whenever the app needs to run on the device, be checked visually, be measured, or be debugged on the device, including instrumented tests.
 ---
 
 # Work with the tablet
@@ -13,6 +13,7 @@ description: Build, install, launch, screenshot and read logs of the Workout Tim
 | OS | Android 8.0, API 26, EMUI 8 |
 | Screen | 1920 × 1200 px in landscape (960 × 600 dp) |
 | System language | Spanish |
+| TTS engine | Google Speech Services, package `com.google.android.tts` |
 | TTS voices installed | Spanish (Spain) and English (United States) |
 | Connection | USB |
 
@@ -32,6 +33,7 @@ Check the connection with `adb devices -l`. The tablet must be listed as `device
 - Debug build: `io.github.davamix.workouttimer.debug`
 - Release build: `io.github.davamix.workouttimer`
 - Activity, both builds: `io.github.davamix.workouttimer.MainActivity`
+- Audio debug screen, debug build only (P5): `io.github.davamix.workouttimer.audiodebug.AudioDebugActivity`, with its own launcher icon, "WT audio debug"
 - Instrumented tests (debug): `io.github.davamix.workouttimer.debug.test`, runner `androidx.test.runner.AndroidJUnitRunner`. `adb shell pm list instrumentation` confirms it.
 
 ## Common tasks
@@ -43,15 +45,42 @@ Gradle finds adb by itself, so the Gradle tasks need no path.
 | Build and install | `./gradlew installDebug` |
 | Instrumented tests | `./gradlew connectedDebugAndroidTest`. This uninstalls the app afterwards, which also deletes its data, so run `installDebug` again to keep using it. |
 | Run one instrumented test and keep the app's data | `./gradlew installDebug installDebugAndroidTest`, then `adb shell am instrument -w [-e <arg> <value>] -e class io.github.davamix.workouttimer.<package>.<Class>#<method> io.github.davamix.workouttimer.debug.test/androidx.test.runner.AndroidJUnitRunner \| tail -8`. It passes when it ends with `OK (1 test)`. Read the tail rather than grepping for `OK`: a filter hides errors such as `no devices/emulators found`. |
+| Results of the instrumented tests | See "Instrumented test results" below. |
 | Read the app's private files (debug build only) | `adb shell run-as io.github.davamix.workouttimer.debug ls -la files/workouts`, or `… cat files/workouts/<id>.json`. Settings are in `files/datastore/settings.preferences_pb`, a binary file. |
 | Launch and time it | `adb shell am start -W -n io.github.davamix.workouttimer.debug/io.github.davamix.workouttimer.MainActivity` |
+| Launch the audio debug screen | `adb shell am start -n io.github.davamix.workouttimer.debug/io.github.davamix.workouttimer.audiodebug.AudioDebugActivity` |
+| Read the text on screen | `adb exec-out uiautomator dump /dev/tty \| grep -o 'text="[^"]\+"'`. It lists every text shown, Compose's included, using far less context than a screenshot. Prefer it when only the words matter. A dump takes about 2 s, so a loop of dumps can wait for a state, such as `Speaker: READY`, without sleeping. |
 | Stop | `adb shell am force-stop io.github.davamix.workouttimer.debug` |
+| Cold start of the speech engine | `adb shell am force-stop com.google.android.tts`, and stop the app. The next connection then takes ~3 s, and the speaker's whole `prepare()` 9–10 s. |
+| Battery level | `adb shell dumpsys battery \| grep -e level -e powered`. Check it before a long manual run, such as a full workout. |
 | Screenshot | `adb shell screencap -p /sdcard/wt.png && adb pull /sdcard/wt.png <scratchpad>/wt.png && adb shell rm /sdcard/wt.png`, then Read the PNG to look at it |
 | App logs | `adb logcat -d --pid=$(adb shell pidof -s io.github.davamix.workouttimer.debug) \| tail -200`. Clear the log first with `adb logcat -c`. |
 | Crash logs | `adb logcat -d -b crash \| tail -100` |
 | Send the app to the background (`EX-10`) | `adb shell input keyevent KEYCODE_HOME` |
 | Simulate Android closing the app (`EX-11`) | Background the app, then run `adb shell am kill io.github.davamix.workouttimer.debug` |
 | Tap a point | `adb shell input tap <x> <y>`, using pixel coordinates from a screenshot |
+
+## Instrumented test results
+
+After `./gradlew connectedDebugAndroidTest`, read the results from the XML instead of the Gradle output. The totals, then one line per failing test with its class, name and the first 300 characters of its message:
+
+```bash
+f=$(ls app/build/outputs/androidTest-results/connected/debug/*.xml)
+grep -o '<testsuites tests="[0-9]*" failures="[0-9]*" errors="[0-9]*" skipped="[0-9]*"' "$f" | sed 's/<testsuites //'
+awk '/<testcase /{match($0,/ name="[^"]*"/); n=substr($0,RSTART+7,RLENGTH-8); match($0,/classname="[^"]*"/); c=substr($0,RSTART+11,RLENGTH-12); sub(/.*\./,"",c)} /<(failure|error)/{l=$0; sub(/.*<(failure|error)[^>]*>/,"",l); if (l ~ /^[[:space:]]*$/) getline l; print c" > "n"\n    "substr(l,1,300)}' "$f"
+```
+
+P3's `PersistenceCheck` has 3 tests that are always skipped: they only run by hand.
+
+## Measuring device behaviour
+
+When a design depends on how the tablet behaves (timing, latency, what Android does in the background), measure it with a throwaway probe before relying on it:
+
+1. Write a JUnit 4 test in `app/src/androidTest/kotlin/io/github/davamix/workouttimer/probe/<Name>Probe.kt`. It logs what it measures with `Log.i("<Name>Probe", …)`, using `SystemClock.elapsedRealtime()` for times.
+2. Run `./gradlew installDebug installDebugAndroidTest`. Clear the log with `adb logcat -c`, then run the probe with `am instrument`, as in "Run one instrumented test".
+3. Read the results with `adb logcat -d -s <Name>Probe:I`.
+4. Repeat each measurement 2–3 times. For a cold start, force-stop whatever must be cold first, for example the app and the speech engine.
+5. Record the numbers in the handover, or in the SPEC if the design depends on them. Then delete the probe: it never goes in a commit.
 
 ## Rebooting
 
@@ -75,4 +104,5 @@ A reboot needs the user at the tablet. Until the screen is unlocked once after b
 
 - **Slow first launch:** the first launch after installing takes 30–75 s, because Android 8 compiles the debug APK on the device. Later cold starts take about 2 s. Measure timing on the second launch.
 - **Orientation:** don't change the tablet's rotation settings. A person has to turn the tablet to check how the app follows it.
-- **Audio:** cues can't be checked through adb. Ask the user to listen, and record the result in the handover.
+- **Audio:** cues can't be checked through adb. Ask the user to listen, and record the result in the handover. The audio debug screen runs a workout with its cues before the runner screen exists.
+- **`am instrument` output** has `\r\n` line endings and ends with blank lines, so `tail -2` shows nothing useful. Use `tail -8`, or pipe it through `tr -d '\r' | grep -v '^$'`.

@@ -15,7 +15,7 @@ description: End-of-session routine for a workout-timer phase. It runs the check
 2. **Push decisions up.**
    - **Does it need a new SPEC version?** A decision that only settles a point SPEC.md leaves open stays in HANDOVER.md. One that contradicts SPEC.md's text gets a new SPEC version, with a change-log entry. That includes a change to an internal API or behaviour the SPEC describes.
    - **Specification or plan first.** If a decision changes the specification or the plan, update those first and tell the user.
-   - **Where SPEC versions go:** to `main`, like every version of these documents (CLAUDE.md, "Git"). Commit them there, from a worktree if this working copy is busy, and push. Then run `git merge main` on the phase branch, so the pull request carries the same SPEC.md as `main`. Commit any pending work on the branch before switching.
+   - **Where SPEC versions go:** to `main`, like every version of these documents (CLAUDE.md, "Git"). Commit them there, from a worktree if this working copy is busy, and push. Then run `git merge main` on the phase branch, so the pull request carries the same SPEC.md as `main`. Commit any pending work on the branch before switching. The full steps are in the `phase-docs` skill, "SPEC change during implementation".
    - **Note it in the handover.** Mention the new version in the decision's row.
 3. **Open the pull request, if the phase is complete.** Do this when every done criterion in SPEC.md §8 passes, apart from the ones that need the pull request or the merge: CI, and the plan's status. Open it before writing the handover, so the handover can record the PR number and the CI result.
    - Commit any remaining work on the phase branch, and push it.

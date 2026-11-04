@@ -14,11 +14,11 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 
 ## Skills
 
-- `phase-docs`: write a phase's SPEC.md and HANDOVER.md.
+- `phase-docs`: write a phase's SPEC.md and HANDOVER.md, and change a SPEC.md during implementation.
 - `phase-start`: begin or resume a phase (branch, dependencies, status).
 - `handover`: end a session. Runs the checks, updates HANDOVER.md, commits and pushes, and opens the pull request when the phase is done.
 - `phase-close`: after the user merges a phase's pull request, mark the phase `Done` on `main`.
-- `tablet`: build, install, launch, take screenshots and read logs on the tablet. It also covers running one instrumented test without wiping the app's data, reading the app's files, and rebooting.
+- `tablet`: build, install, launch, take screenshots and read logs on the tablet. It also covers reading the text on screen without a screenshot, running one instrumented test without wiping the app's data, summarising instrumented test results, measuring device behaviour with a throwaway probe, reading the app's files, and rebooting.
 
 ## Commands
 
@@ -33,6 +33,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - Gradle runs on Android Studio's JDK; `JAVA_HOME` already points to it.
 - `adb` is not on PATH. The `tablet` skill has the full path.
 - Run `ktlintFormat` as its own command, before `build`. In a single call (`./gradlew ktlintFormat build`), the ktlint check can still report violations that the format step has just fixed, and the build fails.
+- `ktlintFormat` can't fix every line that's too long. It can leave one half-wrapped, and `build` then fails on ktlint. Wrap such lines by hand, for example by moving part of an expression into a local `val`. The reports in `app/build/reports/ktlint/` (or `core/…`) name the file and line.
 - On JDK 25, ktlint prints harmless `sun.misc.Unsafe` warnings. To hide them and keep only real output (Git Bash):
 
   ```bash
@@ -52,6 +53,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
   ```
 
 - Python isn't installed on this machine. Use `grep`, `sed` and `awk` in Git Bash, or PowerShell.
+- Create and change source files with the Write and Edit tools, not shell heredocs. In P5, a heredoc that wrote a Kotlin file failed to parse in Git Bash, and nothing was written.
 
 ## Code structure
 
@@ -70,6 +72,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
   - **Characters in test names:** names in backticks can't contain `.` `;` `:` `/` `\` `[` `]` `<` `>` on the JVM; the compiler rejects them. Use commas, or "and", instead.
   - **Coroutine tests:** in `runTest`, `advanceUntilIdle()` ignores work that only `backgroundScope` has scheduled. Code launched there, such as a `WorkoutSession`'s timer, doesn't run. Wait in the foreground instead: `session.state.first { … }` or `session.events.toList()`. `advanceTimeBy()` does run background work. For the clock, use `Clock { testScheduler.currentTime }`.
   - **Instrumented tests** (`app/src/androidTest`): JUnit 4 with camelCase names. Names with spaces don't compile to DEX below API 30, and `minSdk` is 26.
+  - **JUnit 4 asserts:** `assertNotNull` returns nothing, so its result can't be used. To check a value and then use it, write `val voice = checkNotNull(x) { "No voice selected" }`.
   - **Fixtures:** `core/src/test/.../core/ExampleWorkouts.kt` for `:core` and `app/src/test/.../data/SampleWorkouts.kt` for `:app`. Both hold the specification §4.4 example. `:app` IDs only use characters that are valid in file names.
 - **Ownership:** each phase owns its packages. Shared files (the catalog, build files, `AppContainer`, `AppNavHost`) only get that phase's own entries.
 
