@@ -181,7 +181,7 @@ Rules:
 | P3 | Storage | P2 | Done |
 | P4 | Workout engine | P2 | Done |
 | P5 | Audio cues | P4 | Done |
-| P6 | Workout management UI | P2 | Spec draft |
+| P6 | Workout management UI | P2 | Ready |
 | P7 | Workout runner UI | P4 | Planned |
 | P8 | Integration and v1.0 | P3, P5, P6, P7 | Planned |
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.1 |
+| **Status** | Ready, v0.2 |
 | **Phase** | P6, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P2 (done). It also uses P3 and P5, both done. |
 | **Branch** | `phase/p6-management-ui` |
@@ -651,7 +651,7 @@ What earlier phases settled about the code this phase uses, from their SPECs and
 - **P1 and P3:** the first launch after installing takes 30–72 s on the tablet, while Android 8 compiles the debug APK. Later launches are fast.
 - **P2 and P3, fixtures:** `:core`'s `ExampleWorkouts.kt` isn't visible to `:app`, and `app/src/test`'s `SampleWorkouts.kt` isn't visible to `app/src/androidTest`. Instrumented tests get their own small `UiTestWorkouts.kt` rather than a shared-source build change.
 
-CLAUDE.md already covers instrumented test names (camelCase), `checkNotNull` in JUnit 4, and running `ktlintFormat` on its own.
+CLAUDE.md already covers instrumented test names (camelCase), the `v2` Compose test rules, `checkNotNull` in JUnit 4, and running `ktlintFormat` on its own.
 
 ## 5. Security and privacy
 
@@ -737,11 +737,15 @@ The checks that must all pass before the phase is merged.
 
 ## 9. Open questions
 
-| # | Question | Draft assumption |
+None at the moment. New questions are numbered from Q9.
+
+### Answered
+
+| # | Question | Decision |
 |---|---|---|
 | Q1 | When does the editor show validation messages? | **From the first Save attempt on,** then live with every edit. Before that, none, so a new workout doesn't open covered in red. |
 | Q2 | What does a new workout start with? | **An empty name; defaults of 40 s, 15 s and 60 s** (the §4.4 example's); **one round, "Round 1", with one exercise to name.** Rounds added later are named "Round *n*" and come with one exercise to name. |
-| Q3 | How are durations and rests typed? | **Whole seconds,** with a number keyboard: "90" for a minute and a half. The alternatives are mm:ss fields, or fields that accept both "90" and "1:30". |
+| Q3 | How are durations and rests typed? | **Whole seconds,** with a number keyboard: "90" for a minute and a half. Not mm:ss. |
 | Q4 | In what order does the list show workouts? | **By name, A to Z, ignoring case.** The model has no dates, so "last edited first" would need a storage-format change. |
 | Q5 | What happens after Save? | **The editor closes,** and the list shows the workout. |
 | Q6 | What does Duplicate on the list do? | **It saves a copy called "*name* (copy)" at once,** which appears in the list. The editor doesn't open. |
@@ -753,3 +757,4 @@ The checks that must all pass before the phase is merged.
 | Version | Date | Changes |
 |---|---|---|
 | 0.1 | 2026-11-04 | First draft |
+| 0.2 | 2026-11-04 | Q1–Q8 answered, confirming the draft assumptions. No specification change: they settle UI details. Status `Ready`. |
