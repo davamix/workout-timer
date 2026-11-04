@@ -26,4 +26,18 @@ class SpokenText(
             is Utterance.ExerciseName -> utterance.name
             Utterance.WorkoutComplete -> resources.getString(R.string.cue_workout_complete)
         }
+
+    /**
+     * The phrases that are the same in every workout, in the order a workout first speaks them: "Get ready in",
+     * "three", "two", "one", "Workout complete. Well done!". The speaker warms up with them.
+     */
+    val fixedPhrases: List<String>
+        get() =
+            listOf(
+                Utterance.GetReadyIn,
+                Utterance.Count(3),
+                Utterance.Count(2),
+                Utterance.Count(1),
+                Utterance.WorkoutComplete,
+            ).map(::of)
 }

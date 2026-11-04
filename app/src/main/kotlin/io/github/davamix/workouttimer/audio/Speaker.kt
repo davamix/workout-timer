@@ -2,12 +2,15 @@ package io.github.davamix.workouttimer.audio
 
 import kotlinx.coroutines.flow.StateFlow
 
-/** How long [Speaker.prepare] waits at most for the TTS engine. */
-const val SPEAKER_PREPARE_TIMEOUT_MILLIS = 5_000L
+/**
+ * How long [Speaker.prepare] waits at most for the TTS engine. From a cold start, connecting and warming up take 9–10 s
+ * on the tablet. The app starts preparing when its activity is created, so a workout's call waits for less.
+ */
+const val SPEAKER_PREPARE_TIMEOUT_MILLIS = 10_000L
 
 /** Whether a [Speaker] can be heard. */
 enum class SpeakerStatus {
-    /** Not connected yet, or connecting. */
+    /** Not connected yet, connecting, or warming up. */
     INITIALIZING,
 
     /** Connected, with the English (United States) voice selected. Speech can be heard. */
@@ -26,9 +29,10 @@ interface Speaker {
     val voiceName: String?
 
     /**
-     * Gets ready to speak: connects to the default TTS engine and selects the voice, unless already READY. When
-     * UNAVAILABLE, it starts again from scratch. Returns the status once READY or UNAVAILABLE, or after
-     * [timeoutMillis], when it may still be INITIALIZING.
+     * Gets ready to speak: connects to the default TTS engine, selects the voice and warms the engine up, unless
+     * that's done or under way. When UNAVAILABLE, it starts again from scratch. Returns the status once READY or
+     * UNAVAILABLE, or after [timeoutMillis], when it may still be INITIALIZING and carries on preparing. Several calls
+     * may wait at once; they share one preparation.
      */
     suspend fun prepare(timeoutMillis: Long = SPEAKER_PREPARE_TIMEOUT_MILLIS): SpeakerStatus
 

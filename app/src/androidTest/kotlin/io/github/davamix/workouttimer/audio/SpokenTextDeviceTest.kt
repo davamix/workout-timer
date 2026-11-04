@@ -14,16 +14,29 @@ import java.util.Locale
 class SpokenTextDeviceTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
+    private val spanishText: SpokenText
+        get() {
+            val spanish = Configuration(context.resources.configuration).apply { setLocale(Locale("es", "ES")) }
+            return SpokenText(context.createConfigurationContext(spanish).resources)
+        }
+
     @Test
     fun phrasesAreEnglishWithASpanishConfiguration() {
-        val spanish = Configuration(context.resources.configuration).apply { setLocale(Locale("es", "ES")) }
-        val text = SpokenText(context.createConfigurationContext(spanish).resources)
+        val text = spanishText
 
         assertEquals("Get ready in", text.of(Utterance.GetReadyIn))
         assertEquals("three", text.of(Utterance.Count(3)))
         assertEquals("two", text.of(Utterance.Count(2)))
         assertEquals("one", text.of(Utterance.Count(1)))
         assertEquals("Workout complete. Well done!", text.of(Utterance.WorkoutComplete))
+    }
+
+    @Test
+    fun fixedPhrasesAreTheFiveEnglishPhrasesInOrder() {
+        assertEquals(
+            listOf("Get ready in", "three", "two", "one", "Workout complete. Well done!"),
+            spanishText.fixedPhrases,
+        )
     }
 
     @Test

@@ -11,19 +11,21 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.File
 import java.util.Collections
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
  * The speaker on the tablet, which is set to Spanish: it selects an installed English (US) voice that needs no
- * network, and reports when speech ends (TTS-4, TTS-10, TTS-11). Speech is heard during the test.
+ * network, warms up with the fixed phrases, and reports when speech ends (TTS-4, TTS-10, TTS-11). Speech is heard
+ * during the test. To measure a cold start, force-stop `com.google.android.tts` first.
  */
 @RunWith(AndroidJUnit4::class)
 class TtsSpeakerDeviceTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val warnings: MutableList<String> = Collections.synchronizedList(mutableListOf())
-    private val speaker = TtsSpeaker(context) { message, _ -> warnings += message }
+    private val speaker = TtsSpeaker(context, SpokenText(context.resources).fixedPhrases) { message, _ -> warnings += message }
 
     @Test
     fun prepareReachesReadyWithAnOfflineEnglishUsVoice() {
@@ -39,6 +41,27 @@ class TtsSpeakerDeviceTest {
         assertFalse("${voice.name} needs the network", voice.isNetworkConnectionRequired)
         assertEquals(voice.name, speaker.voiceName)
         assertEquals(emptyList<String>(), warnings)
+    }
+
+    @Test
+    fun warmUpFileIsGoneOnceReady() {
+        val status = runBlocking { speaker.prepare() }
+
+        assertEquals(SpeakerStatus.READY, status)
+        assertFalse("the warm-up file is left", File(context.cacheDir, TtsSpeaker.WARM_UP_FILE_NAME).exists())
+    }
+
+    @Test
+    fun warmedUpPhraseIsDoneSoonAfterSpeak() {
+        runBlocking { speaker.prepare() }
+        val done = CountDownLatch(1)
+
+        // "three" takes ~0.7 s to say. Before the warm-up, the first phrase was done 5.5 s after speak().
+        val start = SystemClock.elapsedRealtime()
+        speaker.speak("three") { done.countDown() }
+
+        assertTrue("onDone within 1.5 s", done.await(1500, TimeUnit.MILLISECONDS))
+        Log.i(TAG, "\"three\" was done ${SystemClock.elapsedRealtime() - start} ms after speak()")
     }
 
     @Test
