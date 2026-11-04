@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.7, P4 review applied |
-| **Last updated** | 2026-11-03 |
+| **Status** | Draft v0.8, P5 review applied |
+| **Last updated** | 2026-11-04 |
 | **Platform** | Android tablet, single user, personal use |
 
 This document describes *what* the app does. Once it is agreed, it becomes the base for the implementation plan.
@@ -204,6 +204,7 @@ What Next and Previous do:
 - They move between **exercises** and skip any rest in between.
 - After moving, the workout stays **paused** at the start of the target exercise. Resume starts that exercise as normal, including its name announcement (`TTS-1`).
 - Moving doesn't play the round-end sound (`SND-1`), even when it crosses into another round.
+- Next on the last exercise ends the workout as if it had finished, so "Workout complete. Well done!" is spoken (`TTS-7`).
 
 | Paused during | Next | Previous |
 |---|---|---|
@@ -230,6 +231,8 @@ The screen must be readable at a glance from a few metres away while exercising.
 ### 5.3 Audio cues
 
 Voice cues use Android's built-in text-to-speech service with the device's default engine (Google Speech Services), always in English.
+
+The voice and the round-end sound play at the media volume. While the app is open, the volume keys always change that volume, even between cues.
 
 | ID | Requirement | Source |
 |---|---|---|
@@ -389,6 +392,7 @@ Not planned for v1; listed so they are not lost.
 - Backup and restore of workouts, since uninstalling the app deletes them.
 - Notes or an image per exercise.
 - Speed or volume settings for the voice.
+- A message when the English (United States) voice isn't available. In v1, voice cues are then silent; the timer and the round-end sound still work.
 
 ## 11. Change log
 
@@ -401,3 +405,4 @@ Not planned for v1; listed so they are not lost.
 | 0.5 | 2026-11-02 | From the implementation plan review (PQ-3 to PQ-5): added `EX-11` (a workout isn't restored after Android closes the app), and `WM-9` and `WM-10` (confirmations). `WM-8` now says there is no cloud backup. |
 | 0.6 | 2026-11-03 | From the P2 spec review (P2 Q1 and Q2): `WM-7` now requires exercise names, and caps every duration and rest at 99:59. |
 | 0.7 | 2026-11-03 | From the P4 spec review (P4 Q1 and Q2): Next and Previous never play the round-end sound (§5.1). The completed screen's total time is the planned duration (§6). |
+| 0.8 | 2026-11-04 | From the P5 spec review (P5 Q3 to Q5): the voice and the round-end sound use the media volume, which the volume keys always control (§5.3). Next on the last exercise also says "Workout complete. Well done!" (§5.1). A message when the English voice is missing is a future idea (§10). |

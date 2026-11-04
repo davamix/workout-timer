@@ -180,7 +180,7 @@ Rules:
 | P2 | Domain model and timeline | P1 | Done |
 | P3 | Storage | P2 | Done |
 | P4 | Workout engine | P2 | Done |
-| P5 | Audio cues | P4 | Spec draft |
+| P5 | Audio cues | P4 | Ready |
 | P6 | Workout management UI | P2 | Planned |
 | P7 | Workout runner UI | P4 | Planned |
 | P8 | Integration and v1.0 | P3, P5, P6, P7 | Planned |

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | Not started |
-| **Spec** | [SPEC.md](SPEC.md), version v0.1 |
+| **Spec** | [SPEC.md](SPEC.md), version v0.2 |
 | **Branch** | `phase/p5-audio` |
 | **Last session** | — |
 
@@ -25,11 +25,11 @@ Start or continue phase P5 (Audio cues) of the workout timer.
 
 ## Current state
 
-Not started. SPEC.md is a draft under review.
+Not started. SPEC.md is `Ready` (v0.2): Q1 to Q5 were answered as assumed.
 
 ## Next steps
 
-1. Once SPEC.md is `Ready`, start with `T1`: the `Cue` and `Utterance` types and `CuePlanner` in `:core`, with `CuePlannerTest` and `ExampleCuesTest`.
+1. Start with `T1`: the `Cue` and `Utterance` types and `CuePlanner` in `:core`, with `CuePlannerTest` and `ExampleCuesTest`.
 
 ## Tasks
 

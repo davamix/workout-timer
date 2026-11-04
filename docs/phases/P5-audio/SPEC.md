@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.1 |
+| **Status** | Ready, v0.2 |
 | **Phase** | P5, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P4 (done) |
 | **Branch** | `phase/p5-audio` |
@@ -23,7 +23,7 @@ Later phases build on it:
 
 ## 2. Requirements covered
 
-Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.7.
+Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.8.
 
 | ID | Requirement (quoted) | What this phase does for it |
 |---|---|---|
@@ -31,7 +31,7 @@ Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.7.
 | TTS-2 | "When **3 s** remain in an exercise, a countdown is spoken: "three", "two", "one". There is one word per second, spoken as the display changes to 3, 2 and 1. An exercise of 3 s or less starts the countdown at its own duration." | The planner speaks a number word when an exercise's displayed time becomes 3, 2 or 1, including at its start for exercises of 3 s or less. |
 | TTS-3 | "Pausing stops any speech in progress. Nothing is replayed on resume; the countdown carries on from the current second." | Pause gives a "stop speech" cue; the player stops the speaker and drops waiting speech. Resume gives no cue. |
 | TTS-4 | "The cues work without a network connection. The app doesn't need the network at all." | The speaker picks an installed English (US) voice that needs no network. The app still has no `INTERNET` permission. |
-| TTS-7 | "When the workout ends, "Workout complete. Well done!" is spoken." | The planner speaks it on `Completed`. |
+| TTS-7 | "When the workout ends, "Workout complete. Well done!" is spoken." | The planner speaks it on `Completed`, which P4 sends when the last exercise ends and when Next is pressed on it. |
 | TTS-9 | "A setting turns voice cues on or off. The choice is remembered. With voice cues off, the timer, the screen and the round-end sound work the same." | Applies the stored setting: with voice cues off the planner gives no speech cues, but the chime still plays, and get ready doesn't wait. P3 stores the setting; P6 has the settings screen. |
 | TTS-10 | "**Get ready:** "Get ready in" is spoken first. When it finishes, the 3 s countdown starts, with "three", "two", "one" spoken in sync with the display. With voice cues off, the countdown starts immediately." | The planner speaks "Get ready in" when get ready starts. The player calls `announcementFinished()` when the speech ends, and the planner counts down from there. |
 | TTS-11 | "Voice cues are always spoken in **English**, using the English (United States) voice, whatever the device language." | The speaker selects `Locale.US`. The spoken phrases are English resources that are never translated. |
@@ -45,6 +45,8 @@ Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.7.
 From specification §5.3, the introduction and the note:
 
 > Voice cues use Android's built-in text-to-speech service with the device's default engine (Google Speech Services), always in English.
+>
+> The voice and the round-end sound play at the media volume. While the app is open, the volume keys always change that volume, even between cues.
 
 > Note on `TTS-1` and `TTS-2`: the 10 s threshold leaves at least 7 s between the spoken name and the start of the countdown, so the two cues never overlap.
 
@@ -58,6 +60,12 @@ From specification §5.1, what Next and Previous do:
 > After moving, the workout stays **paused** at the start of the target exercise. Resume starts that exercise as normal, including its name announcement (`TTS-1`).
 >
 > Moving doesn't play the round-end sound (`SND-1`), even when it crosses into another round.
+>
+> Next on the last exercise ends the workout as if it had finished, so "Workout complete. Well done!" is spoken (`TTS-7`).
+
+From specification §10, future ideas:
+
+> A message when the English (United States) voice isn't available. In v1, voice cues are then silent; the timer and the round-end sound still work.
 
 The §4.4 example, with its audio column:
 
@@ -108,7 +116,7 @@ From specification §3, the target device:
 | The settings screen with the voice switch | P6 |
 | The runner ViewModel and screens, pausing when the app leaves the foreground (`EX-10`) | P7 |
 | Wiring the cue player into the runner (§4.3.6): P7 if P5 is merged first, otherwise P8 | P7 or P8 |
-| A message on screen when the English voice isn't available (see Q5) | none in v1 |
+| A message on screen when the English voice isn't available (Q5) | future idea (specification §10) |
 | Voice speed or volume settings, Spanish voice cues | future ideas (specification §10) |
 | Lowering other apps' audio during cues | discarded (`TTS-8`) |
 
@@ -594,16 +602,21 @@ The tablet stays in Spanish. The user listens; adb can't check sound. Use the de
 
 ## 9. Open questions
 
-| # | Question | Draft assumption |
+None at the moment.
+
+### Answered
+
+| # | Question | Decision |
 |---|---|---|
-| Q1 | Where do the spoken phrases live? They're user-facing text, but they must stay English even after the UI is translated (TTS-11). | In `res/values/strings_audio.xml`, marked `translatable="false"`. `:core` gives an `Utterance`, and `:app` turns it into text. Keeping them as constants in `:core` would be the alternative. |
-| Q2 | How is the debug screen reached? | A separate activity with its own launcher icon, "WT audio debug", in debug builds only. The release build doesn't contain it. A shell can't start an activity that isn't exported, so it's exported either way. |
-| Q3 | Should the volume keys always control the cue volume? On Android 8, they change the ringer volume when nothing is playing, which happens between cues. | Yes: `MainActivity` sets `volumeControlStream` to the media stream, one line in a shared file. The debug activity does the same. |
-| Q4 | Next on the last exercise ends the workout (specification §5.1). Is "Workout complete. Well done!" spoken then too? | Yes. TTS-7 says it is spoken when the workout ends, and P4 sends the same `Completed` event in both cases. |
-| Q5 | If the English (US) voice isn't available, voice cues are silent. Should the app tell the user? | Not in v1. The specification doesn't ask for it, and the voice is installed on the tablet. It's logged in debug builds, and the debug screen shows the speaker status. A message on the runner could be a future idea. |
+| Q1 | Where do the spoken phrases live? They're user-facing text, but they must stay English even after the UI is translated (TTS-11). | **In `res/values/strings_audio.xml`**, marked `translatable="false"`, not as constants. `:core` gives an `Utterance`, and `:app` turns it into text (§4.2). |
+| Q2 | How is the debug screen reached? | **A separate activity with its own launcher icon**, "WT audio debug", in debug builds only (§4.3.7). The release build doesn't contain it. A shell can't start an activity that isn't exported, so it's exported either way. |
+| Q3 | Should the volume keys always control the cue volume? On Android 8, they change the ringer volume when nothing is playing, which happens between cues. | **Yes.** `MainActivity` sets `volumeControlStream` to the media stream; the debug activity does the same. Added to specification §5.3 (v0.8). |
+| Q4 | Next on the last exercise ends the workout (specification §5.1). Is "Workout complete. Well done!" spoken then too? | **Yes**, as TTS-7 says it is spoken when the workout ends. P4 sends the same `Completed` event in both cases. Added to specification §5.1 (v0.8). |
+| Q5 | If the English (US) voice isn't available, voice cues are silent. Should the app tell the user? | **Not in v1.** It's logged in debug builds, and the debug screen shows the speaker status. A message is a future idea, added to specification §10 (v0.8). |
 
 ## 10. Change log
 
 | Version | Date | Changes |
 |---|---|---|
 | 0.1 | 2026-11-04 | First draft, quoting specification v0.7 |
+| 0.2 | 2026-11-04 | Q1 to Q5 answered as assumed: the phrases live in `strings_audio.xml`; the debug screen has its own launcher icon; the volume keys control the media volume; Next on the last exercise says "Workout complete"; no message when the voice is missing. Quoting specification v0.8. Status `Ready`. |
