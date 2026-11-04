@@ -4,6 +4,13 @@
 
     <!-- No permissions on purpose: the app works fully offline (NF-4). -->
 
+    <!-- Makes the TTS engine visible to the app on API 30 and higher (P5). It isn't a permission. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
     <application
         android:name=".WorkoutTimerApp"
         android:allowBackup="false"

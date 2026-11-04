@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application>
+        <!--
+            Debug builds only (P5): runs a built-in workout with audio and no runner screen, so the voice and sound
+            cues can be checked by ear. It has its own launcher icon; release builds don't contain it.
+        -->
+        <activity
+            android:name=".audiodebug.AudioDebugActivity"
+            android:exported="true"
+            android:label="@string/audio_debug_label"
+            android:screenOrientation="sensorLandscape"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

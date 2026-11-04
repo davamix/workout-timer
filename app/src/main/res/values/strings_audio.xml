@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        The voice cues (P5). They are spoken by the English (United States) voice whatever the device language
+        (TTS-11), so they are never translated, even when the UI is. Exercise names are spoken as written.
+    -->
+    <string name="cue_get_ready_in" translatable="false">Get ready in</string>
+    <string name="cue_three" translatable="false">three</string>
+    <string name="cue_two" translatable="false">two</string>
+    <string name="cue_one" translatable="false">one</string>
+    <string name="cue_workout_complete" translatable="false">Workout complete. Well done!</string>
+</resources>
