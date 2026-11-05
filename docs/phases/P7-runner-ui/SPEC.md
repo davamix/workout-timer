@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready, v0.2 |
+| **Status** | Ready, v0.3 |
 | **Phase** | P7, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P4 (done). It also uses P2, P3, P5 and P6, all done. |
 | **Branch** | `phase/p7-runner-ui` |
@@ -514,12 +514,23 @@ Round rest:
 
 #### 4.3.4 Leaving the foreground, and configuration changes (`EX-10`, `NF-3`)
 
-- `RunnerScreen` calls `onScreenStopped()` on its lifecycle's `ON_STOP`, and `onScreenStarted()` on `ON_START`, with `LifecycleEventEffect`. The lifecycle is the navigation entry's, which follows the activity's. `ON_STOP` comes when the app leaves the screen: Home, Recents, another app, and the screen turned off (assumed until T1 confirms it).
+- `RunnerScreen` calls `onScreenStopped()` on its lifecycle's `ON_STOP`, and `onScreenStarted()` on `ON_START`, with `LifecycleEventEffect`. The lifecycle is the navigation entry's, which follows the activity's. `ON_STOP` comes when the app leaves the screen: Home, Recents, another app, and the screen turned off (measured in T1, below).
 - `onScreenStopped()` calls `session.pause()` if it's running. A paused workout stays as it is. When the app comes back, the workout is paused and shows the paused controls: nothing resumes by itself.
-- **A configuration change also stops the activity,** just before it's recreated. The screen then doesn't call `onScreenStopped()`: it checks `LocalActivity.current?.isChangingConfigurations`, which Android sets for exactly this case, and which its documentation suggests checking in `onStop`. T1 confirms it's `true` in `onStop` on the tablet. The ViewModel, the session and its timer survive the recreation (D-7), so nothing resets, pauses or skips (`NF-3`), and the new screen shows the same state.
-- **T1 measures** whether turning the tablet over (180°) recreates the activity at all. Android doesn't need to, because no configuration value changes. The design works either way, and `RunnerActivityTest` forces a recreation with `ActivityScenario.recreate()`.
-- If T1 finds that one of the `EX-10` cases gives `ON_PAUSE` but no `ON_STOP` (for example, the screen turned off), the runner would have to pause on `ON_PAUSE` instead. That is a SPEC change, to agree first.
+- **A configuration change also stops the activity,** just before it's recreated. The screen then doesn't call `onScreenStopped()`: it checks `LocalActivity.current?.isChangingConfigurations`, which Android sets for exactly this case, and which its documentation suggests checking in `onStop`. On the tablet it's `true` in `onPause`, `onStop` and `onDestroy` (T1). The ViewModel, the session and its timer survive the recreation (D-7), so nothing resets, pauses or skips (`NF-3`), and the new screen shows the same state.
 - There's no foreground service and nothing runs in the background (D-8).
+
+**Measured in T1** on the tablet, with a probe logging the activity's callbacks. Home, Recents and the power button were each tried three times, the flip once:
+
+| What | Callbacks |
+|---|---|
+| Home | `onPause`, then `onStop` 300–560 ms later. `isChangingConfigurations` is `false`. |
+| Recents | `onPause`, then `onStop` 60–70 ms later; `false` |
+| Power button (screen off) | `onPause`, then `onStop` 50–70 ms later; `false`. The tablet has no lock screen, so waking it resumes the app directly. |
+| Notification shade, pulled down and back up | none |
+| Turning the tablet over (180°), and back | none. Only the display's rotation changes (1 → 3 → 1): no configuration change, no recreation. |
+| `activity.recreate()`, as `ActivityScenario.recreate()` does | `onPause`, `onStop` and `onDestroy`, all with `isChangingConfigurations` `true`, then a new activity with saved state |
+
+So all three `EX-10` cases give `ON_STOP`, and turning the tablet over never reaches the runner. The `isChangingConfigurations` check still matters for the recreation `RunnerActivityTest` forces, and for any other configuration change that recreates the activity while the runner is shown.
 
 #### 4.3.5 After Android closes the app (`EX-11`)
 
@@ -527,7 +538,8 @@ Round rest:
 - The ViewModel keeps one flag in its `SavedStateHandle`: `started`, set the first time it opens (§4.3.1, step 2). A rebuilt runner finds it set and becomes `Exited`, so the screen returns to the list. A runner opened from Start never has it.
 - A configuration change keeps the ViewModel, so it never gets here.
 - Nothing else is saved: the specification says the paused workout isn't restored.
-- T1 finds how to make Android close the app on the tablet, for the manual check, and whether the back stack really comes back. If it doesn't, the app opens on the list anyway, and `EX-11` holds.
+- **Measured in T1,** with the runner placeholder: after the cached process was ended, reopening the app from the launcher or from Recents started a new process, and Navigation rebuilt the list with the runner on top. So this case does happen on the tablet.
+- **Making it happen** for the manual check: `adb shell am kill` doesn't end the process on this tablet, even once it's cached. Instead, press Home, open another app (Settings), and press Home again, so the timer is no longer the "previous" app. Then run `adb shell run-as io.github.davamix.workouttimer.debug kill -9 <pid>`, with the PID from `pidof`. The system logs "Process … has died: cch CAC", as for a low-memory kill, and the task stays in Recents.
 
 #### 4.3.6 Keeping the screen on (`NF-2`)
 
@@ -600,7 +612,7 @@ Rules:
 
 - The time is always the largest text.
 - Its digits all have the same width, so the time doesn't shift as it counts. Roboto's do; keep it so.
-- Every state fits on screen without scrolling. The design assumes a content area of at least 960 × 528 dp: 600 dp minus a 24 dp status bar and a 48 dp navigation bar. T1 measures it.
+- Every state fits on screen without scrolling, in the content area of 960 × 542 dp measured in T1: 600 dp minus a 24 dp status bar and a 33 dp navigation bar.
 - Sizes are in `sp`, like the rest of the app.
 
 **Touch targets.** Every runner button is at least 72 dp tall and wide, and Pause and Resume at least 96 dp tall. The Stop dialog's buttons are at least 56 dp tall. They are used in the middle of an exercise, from arm's length. P6's minimum is 48 dp.
@@ -723,8 +735,8 @@ Run them with `./gradlew installDebug`, after the instrumented tests, which unin
 | 6 | Press system Back while running, then again | The first pauses; the second opens the Stop dialog (Q1) |
 | 7 | Turn the tablet over while running, while paused, and with the Stop dialog open | Nothing resets, pauses or skips; the dialog stays open (`NF-3`) |
 | 8 | While running: press Home, then return. Repeat with Recents and with the power button. | Each time, the workout is paused on return, at the time it had (`EX-10`) |
-| 9 | Leave the runner paused for longer than the screen timeout (`adb shell settings get system screen_off_timeout`). Then wait on the list. | The screen stays on in the runner. On the list, it turns off as usual (`NF-2`). |
-| 10 | Start a workout, press Home, and make Android close the app as T1 found. Reopen it from Recents. | The workout list, not the runner (`EX-11`) |
+| 9 | The tablet's screen timeout is set to never (`screen_off_timeout` is 2147483647, read in T1). With the user's agreement, set it to 30 s (`adb shell settings put system screen_off_timeout 30000`), and put it back to 2147483647 afterwards. Leave the runner paused for over a minute, then wait on the list. | The screen stays on in the runner. On the list, it turns off after 30 s (`NF-2`). |
+| 10 | Start a workout, then end the app's process as §4.3.5 says (Home, Settings, Home, `run-as … kill -9`). Reopen it from Recents. Repeat, and reopen it from the launcher. | The workout list, not the runner, both times (`EX-11`) |
 | 11 | Turn voice cues off, then start a workout | Get ready counts down at once. Only the chime is heard (`TTS-9`). Turn them back on. |
 | 12 | Force-stop the app and `com.google.android.tts`, open the app, and start a workout at once | "Getting ready…" until the audio is ready, then get ready with "Get ready in" (Q3) |
 | 13 | Read the app's logcat during steps 1–12 | No crash, and no unexpected `WorkoutAudio` or `WorkoutStorage` warning |
@@ -777,3 +789,4 @@ None at the moment. New questions are numbered from Q7.
 |---|---|---|
 | 0.1 | 2026-11-05 | First draft, based on specification v0.8 and plan v0.2 |
 | 0.2 | 2026-11-05 | Q1 to Q6 answered as assumed. Quotes specification v0.9, which adds Back on the runner (Q1) and the completed screen's counts (Q2). Status `Ready`. |
+| 0.3 | 2026-11-05 | T1 measurements, the design unchanged: all three `EX-10` cases give `ON_STOP`; turning the tablet over doesn't recreate the activity; `recreate()` sets `isChangingConfigurations`; the content area is 960 × 542 dp; Android rebuilds the runner after ending the app's process, and how to make it end it (§4.3.4, §4.3.5, §4.3.9, manual checks 9 and 10). |

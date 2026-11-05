@@ -59,7 +59,7 @@ Gradle finds adb by itself, so the Gradle tasks need no path.
 | App logs | `adb logcat -d --pid=$(adb shell pidof -s io.github.davamix.workouttimer.debug) \| tail -200`. Clear the log first with `adb logcat -c`. |
 | Crash logs | `adb logcat -d -b crash \| tail -100` |
 | Send the app to the background (`EX-10`) | `adb shell input keyevent KEYCODE_HOME` |
-| Simulate Android closing the app (`EX-11`) | Background the app, then run `adb shell am kill io.github.davamix.workouttimer.debug` |
+| Simulate Android closing the app (`EX-11`) | `am kill` doesn't end the process on this tablet, even when it's cached. Press Home, open another app (`adb shell am start -a android.settings.SETTINGS`) and press Home again, so the app is no longer the "previous" one. Then `adb shell run-as io.github.davamix.workouttimer.debug kill -9 $(adb shell pidof io.github.davamix.workouttimer.debug)`. Logcat shows "Process … has died: cch CAC", as for a low-memory kill, and the task stays in Recents: reopening it rebuilds the activity from its saved state (P7 T1). |
 | Tap a point | `adb shell input tap <x> <y>`, using pixel coordinates from a screenshot |
 
 ## Waiting for a text on screen
@@ -120,6 +120,8 @@ A reboot needs the user at the tablet. Until the screen is unlocked once after b
 ## Notes
 
 - **Slow first launch:** the first launch after installing takes 30–75 s, because Android 8 compiles the debug APK on the device. Later cold starts take about 2 s. Measure timing on the second launch.
-- **Orientation:** don't change the tablet's rotation settings. A person has to turn the tablet to check how the app follows it.
+- **Orientation:** don't change the tablet's rotation settings. A person has to turn the tablet to check how the app follows it. Turning it over (180°) only changes the display's rotation: the activity gets no callback and isn't recreated (P7 T1).
+- **Screen timeout:** set to never (`settings get system screen_off_timeout` gives 2147483647). Checking that the app keeps the screen on needs a shorter timeout for a while; ask the user before changing it, and put it back afterwards.
+- **No lock screen:** after the power button, waking the tablet resumes the app directly.
 - **Audio:** cues can't be checked through adb. Ask the user to listen, and record the result in the handover. The audio debug screen runs a workout with its cues before the runner screen exists.
 - **`am instrument` output** has `\r\n` line endings and ends with blank lines, so `tail -2` shows nothing useful. Use `tail -8`, or pipe it through `tr -d '\r' | grep -v '^$'`.
