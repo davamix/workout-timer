@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress: all tasks done; pull request [#7](https://github.com/davamix/workout-timer/pull/7) is waiting for the user to merge it |
+| **Status** | Done. Merged in pull request [#7](https://github.com/davamix/workout-timer/pull/7) on 2026-11-05. |
 | **Spec** | [SPEC.md](SPEC.md), version v0.4 |
 | **Branch** | `phase/p7-runner-ui` |
 | **Last session** | 2026-11-05 |
@@ -11,21 +11,11 @@ This document tracks the phase as it's built. Update it at the end of every sess
 
 ## Prompt to start or continue
 
-Paste this prompt into a new Claude Code session to start or continue the phase. When the phase is done, replace it with "Phase done: no prompt needed."
-
-```text
-Start or continue phase P7 (Workout runner UI) of the workout timer.
-
-1. Use the phase-start skill for P7. Read only docs/phases/P7-runner-ui/HANDOVER.md and SPEC.md; they contain everything needed.
-2. Carry on from "Next steps" in the handover. Work through the tasks in SPEC.md §7 in order, on branch phase/p7-runner-ui. Commit after each task, once ./gradlew build passes.
-3. Follow SPEC.md. If something in it is wrong or unclear, stop and ask me before changing course. Record every decision or deviation in the handover.
-4. All tasks are done, and pull request #7 is open. First check whether I have merged it (gh pr view 7): if so, use the phase-close skill. If not, deal with any review comments on the branch. connectedDebugAndroidTest uninstalls the app and wipes its workouts: to keep them, run test classes with am instrument (tablet skill).
-5. Before the session ends, or once all tasks are done, use the handover skill. When the done criteria pass, open the pull request and wait for me to merge it.
-```
+Phase done: no prompt needed.
 
 ## Current state
 
-All tasks are done. Pull request [#7](https://github.com/davamix/workout-timer/pull/7) is open; CI passed on `79a2f54` (run 42090026539).
+Merged into `main` in pull request [#7](https://github.com/davamix/workout-timer/pull/7) on 2026-11-05. CI passed on the branch's last commits (`79a2f54` and `7bdd9d4`).
 
 - **What works:** a workout runs on the tablet from the list's Start to the completed screen, with its cues.
   - It shows "Getting ready…" while the audio prepares.
@@ -42,8 +32,9 @@ All tasks are done. Pull request [#7](https://github.com/davamix/workout-timer/p
 
 ## Next steps
 
-1. If the user has merged pull request #7, use the `phase-close` skill on `main`.
-2. Otherwise, deal with any review comments on `phase/p7-runner-ui`, then push and wait for CI again (handover skill, step 3).
+None for P7.
+
+P8 (Integration and v1.0) can start now: all its dependencies (P3, P5, P6, P7) are `Done`. Its SPEC.md and HANDOVER.md don't exist yet; the `phase-docs` skill writes them.
 
 ## Tasks
 
@@ -57,7 +48,7 @@ The task IDs come from SPEC.md §7.
 | T4 | Done | `RunnerContent`, `RunnerIcons`, `PhaseColors.OnPhase` and `OnPaused`, `strings_runner.xml`; `RunnerContentTest` (14 tests, on the tablet). Paused layout changed with the user (Q7, SPEC v0.4). |
 | T5 | Done | `RunnerScreen` entry, `CompletedScreen` and `CompletedContent`, `CompletedRoute`, `AppNavHost`; placeholders removed; `NavigationSmokeTest` updated; `CompletedScreenTest` (5 tests) |
 | T6 | Done | `RunnerScreenTest` (6), `RunnerActivityTest` (4), `SilentAudio.kt`. Without the `isChangingConfigurations` check, `recreationKeepsTheWorkoutRunning` fails, so it guards NF-3. All 80 instrumented tests pass on the tablet. |
-| T7 | In review | Manifests and text checked; manual checks passed (below); pull request #7 |
+| T7 | Done | Manifests and text checked; manual checks passed (below); pull request #7, merged |
 
 ## Decisions and deviations
 
@@ -111,6 +102,10 @@ P7 completes the pending wiring that P4, P5 and P6 left for it (SPEC §4.5).
 ## Session log
 
 Newest first.
+
+### 2026-11-05 (close)
+
+- The user merged pull request #7. P7 is closed: `Done` in plan §5.1, done criteria ticked in SPEC.md §8.
 
 ### 2026-11-05
 

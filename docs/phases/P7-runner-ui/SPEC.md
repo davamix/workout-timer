@@ -756,16 +756,16 @@ Run them with `./gradlew installDebug`, after the instrumented tests, which unin
 
 The checks that must all pass before the phase is merged.
 
-- [ ] All tasks done
-- [ ] Unit tests and lint pass locally and in CI
-- [ ] Instrumented tests pass on the tablet (`connectedDebugAndroidTest`), including the updated `NavigationSmokeTest`
-- [ ] UI tests cover pause, resume, next, previous and stop (plan §5.2)
-- [ ] Manual checks on the tablet pass, including reading the screen from 3 m and turning the tablet over while a workout runs (plan §5.2)
-- [ ] The merged manifests gain no permission and no component
-- [ ] P7's Kotlin code holds no user-facing text: it's all in `strings_runner.xml` and `strings_completed.xml`
-- [ ] No placeholder code is left (`PlaceholderScreen`, `placeholder_note`, `runner_finish`)
-- [ ] `:core` is unchanged
-- [ ] HANDOVER.md is up to date, and the plan's status table is updated
+- [x] All tasks done
+- [x] Unit tests and lint pass locally and in CI
+- [x] Instrumented tests pass on the tablet (`connectedDebugAndroidTest`), including the updated `NavigationSmokeTest`
+- [x] UI tests cover pause, resume, next, previous and stop (plan §5.2)
+- [x] Manual checks on the tablet pass, including reading the screen from 3 m and turning the tablet over while a workout runs (plan §5.2)
+- [x] The merged manifests gain no permission and no component
+- [x] P7's Kotlin code holds no user-facing text: it's all in `strings_runner.xml` and `strings_completed.xml`
+- [x] No placeholder code is left (`PlaceholderScreen`, `placeholder_note`, `runner_finish`)
+- [x] `:core` is unchanged
+- [x] HANDOVER.md is up to date, and the plan's status table is updated
 
 ## 9. Open questions
 
