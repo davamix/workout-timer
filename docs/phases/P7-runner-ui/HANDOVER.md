@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | In progress |
-| **Spec** | [SPEC.md](SPEC.md), version v0.2 |
+| **Spec** | [SPEC.md](SPEC.md), version v0.3 |
 | **Branch** | `phase/p7-runner-ui` |
 | **Last session** | 2026-11-05 |
 
@@ -25,11 +25,12 @@ Start or continue phase P7 (Workout runner UI) of the workout timer.
 
 ## Current state
 
-The SPEC is `Ready` (v0.2, all six questions answered as assumed), and the branch exists. No code yet: the runner and completed screens are still P1's placeholders, and Start on the list opens a runner placeholder with a Finish button.
+T1 is done: the measurements confirm the design, and SPEC v0.3 records them (§4.3.4, §4.3.5, §4.3.9). No runner code yet: the runner and completed screens are still P1's placeholders, and Start on the list opens a runner placeholder with a Finish button.
 
 ## Next steps
 
-1. `T1`: the lifecycle, content-area and process-death measurements on the tablet (SPEC §7). The user turns the tablet over during the lifecycle probe.
+1. `T2`: `ui/runner/RunnerView.kt` (`RunnerView`, `toRunnerView()`, `formatPhaseTime()`) and `RunnerViewTest`, as SPEC §4.2 and §4.3.2 describe.
+2. Then `T3`, the ViewModel.
 
 ## Tasks
 
@@ -37,7 +38,7 @@ The task IDs come from SPEC.md §7.
 
 | Task | Status | Notes |
 |---|---|---|
-| T1 | To do | Measure on the tablet: lifecycle events, recreation, content area, process death |
+| T1 | Done | Results in SPEC v0.3. The probe was deleted. |
 | T2 | To do | `RunnerView.kt` |
 | T3 | To do | `RunnerViewModel` |
 | T4 | To do | `RunnerContent`, icons, colours, sizes |
@@ -54,7 +55,8 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 
 ## Known issues
 
-None yet.
+- **`am kill` doesn't end the app on this tablet,** even when it's cached. To check `EX-11`, end the cached process with `run-as … kill -9` instead (SPEC §4.3.5; the tablet skill now says so).
+- **The tablet's screen timeout is "never"** (`screen_off_timeout` 2147483647). Manual check 9 (`NF-2`) needs it at 30 s for a while, with the user's agreement, and then put back.
 
 ## Pending wiring
 
@@ -76,5 +78,5 @@ Newest first.
 
 ### 2026-11-05
 
-- Done: SPEC v0.1 written, reviewed, and v0.2 marked `Ready`, with specification v0.9 (Back on the runner, the completed screen's counts). Phase marked in progress; branch `phase/p7-runner-ui` created.
-- Notes: nothing implemented yet.
+- Done: SPEC v0.1 written, reviewed, and v0.2 marked `Ready`, with specification v0.9 (Back on the runner, the completed screen's counts). Phase marked in progress; branch `phase/p7-runner-ui` created. T1: the lifecycle probe, run twice (the user turned the tablet over during the first run), and the process-death check from the launcher and from Recents. Results in SPEC v0.3, merged from `main`. The tablet skill's way of ending the app was wrong (`am kill`); fixed on `main`.
+- Notes: Home's `onStop` comes 300–560 ms after `onPause`; Recents' and the power button's about 50–70 ms after.
