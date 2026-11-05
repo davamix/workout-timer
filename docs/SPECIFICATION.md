@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.9, P7 review applied |
+| **Status** | Draft v0.10, P7 paused layout |
 | **Last updated** | 2026-11-05 |
 | **Platform** | Android tablet, single user, personal use |
 
@@ -322,9 +322,8 @@ Paused:
 |                            PAUSED                            |
 |                            00:27                             |
 |                                                              |
-|         [ |< Previous ]   [ > Resume ]   [ Next >| ]         |
 |                                                              |
-|                           [ Stop ]                           |
+|  [ |< Previous ]  [ > Resume ]  [ Next >| ]      [ Stop ]    |
 |                                                              |
 +--------------------------------------------------------------+
 ```
@@ -407,3 +406,4 @@ Not planned for v1; listed so they are not lost.
 | 0.7 | 2026-11-03 | From the P4 spec review (P4 Q1 and Q2): Next and Previous never play the round-end sound (§5.1). The completed screen's total time is the planned duration (§6). |
 | 0.8 | 2026-11-04 | From the P5 spec review (P5 Q3 to Q5): the voice and the round-end sound use the media volume, which the volume keys always control (§5.3). Next on the last exercise also says "Workout complete. Well done!" (§5.1). A message when the English voice is missing is a future idea (§10). |
 | 0.9 | 2026-11-05 | From the P7 spec review (P7 Q1 and Q2): on the runner, the system Back button pauses a running workout and asks to stop a paused one. The completed screen's round and exercise counts are the workout's, like its total time (§6). |
+| 0.10 | 2026-11-05 | From P7 T4 (P7 Q7): in the paused sketch, Stop is at the end of the row of buttons rather than under it, so the time has room to stay large (§6). |

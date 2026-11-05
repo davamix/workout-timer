@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready, v0.3 |
+| **Status** | Ready, v0.4 |
 | **Phase** | P7, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P4 (done). It also uses P2, P3, P5 and P6, all done. |
 | **Branch** | `phase/p7-runner-ui` |
@@ -27,14 +27,14 @@ Later phases build on it:
 
 ## 2. Requirements covered
 
-Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.9.
+Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.10.
 
 | ID | Requirement (quoted) | What this phase does for it |
 |---|---|---|
 | UI-1 | "Shows the current **round name**." | The header: "Round 2/3 · Legs" (§4.3.2). |
 | UI-2 | "Shows the current **exercise name**." | The title during an exercise (§4.3.2). |
 | UI-3 | "Shows the **time**: the remaining time of the **current phase only** (exercise, rest or get ready) as `mm:ss`, rounded up to the whole second. It shows `00:40` at the start of a 40 s exercise and `00:01` during its last second. The remaining time of the whole workout is not shown." | `formatPhaseTime()` of the session's `remainingSeconds`, which P4 already rounds up (§4.3.2). |
-| UI-4 | "Has a control to **pause / resume**." | Pause while running, Resume while paused, in the same place (§4.3.3). |
+| UI-4 | "Has a control to **pause / resume**." | Pause while running, Resume while paused (§4.3.3). |
 | UI-5 | "During a rest, shows "Rest" with its remaining time and the name and duration of the **next exercise**. If a new round starts after the rest, the next round's name is shown too." | "REST", the time, "Next: Lunges (40 s)", and "Next round: Core" after a round rest (§4.3.2). |
 | UI-6 | "Shows progress: exercise *n* of *m* in the round, round *n* of *m*." | The header: "Round 2/3" on the left, "Exercise 2/4" on the right during an exercise (§4.3.2). |
 | UI-7 | "Exercise, rest and paused states each have their own background colour, so the current state is clear from a distance." | `PhaseColors` from P1, with get ready's own colour too (§4.3.9). |
@@ -145,9 +145,8 @@ Paused:
 |                            PAUSED                            |
 |                            00:27                             |
 |                                                              |
-|         [ |< Previous ]   [ > Resume ]   [ Next >| ]         |
 |                                                              |
-|                           [ Stop ]                           |
+|  [ |< Previous ]  [ > Resume ]  [ Next >| ]      [ Stop ]    |
 |                                                              |
 +--------------------------------------------------------------+
 ```
@@ -496,7 +495,7 @@ Round rest:
 #### 4.3.3 Controls
 
 - **Running** (`UI-10`): only Pause, large and centred under the time.
-- **Paused** (`UI-11`): Previous, Resume and Next in a row, with Stop under them, as in the sketch. Resume sits where Pause was (`UI-4`).
+- **Paused** (`UI-11`): one row of buttons, as in the sketch: Previous, Resume and Next, then a gap, and Stop at the right end (Q7). With Stop in the same row rather than under it, the time keeps room to stay large while paused. Resume sits a little left of where Pause was.
 - **Previous in get ready** is shown disabled (Q5), from `canGoPrevious`, so the layout doesn't change between phases. The specification says it's "Not available" there (`EX-9`).
 - **Next and Previous** call the session at once, without asking (`EX-9`).
 - **Stop** opens a dialog (`EX-8`): "Stop the workout?", with Stop and Cancel. Stop calls `session.stop()`, and the runner returns to the list (§4.3.7). Cancel, Back or a tap outside the dialog closes it, and the workout stays paused. The dialog's state is in the ViewModel, so it survives a configuration change.
@@ -598,19 +597,19 @@ P7 adds the text colours to `PhaseColors`. After the 3 m check (T7), the colours
 
 **Icons.** `material-icons-core` has only `PlayArrow` of the five, and the extended icon library is very large. `RunnerIcons.kt` draws all five as `ImageVector`s from simple shapes: two bars (Pause), a triangle (Resume), a bar and a triangle (Previous), a triangle and a bar (Next), and a square (Stop). It's our own drawing, so no third-party artwork comes into the repo, as with the sound (D-10).
 
-**Text sizes.** Starting points; T4 fits them on the tablet, and T7 confirms them from 3 m:
+**Text sizes,** as fitted on the tablet in T4. T7 confirms them from 3 m:
 
-| Element | Running | Paused |
-|---|---|---|
-| Time | about 200 sp, bold | about 150 sp, to make room for the buttons |
-| Title (name, "GET READY", "REST") | about 80 sp, one line, shrinking to about 48 sp for long names | the same |
-| "PAUSED" | — | about 48 sp |
-| Header | about 36 sp | the same |
-| "Next:" lines | about 40 sp | the same |
+| Element | Size |
+|---|---|
+| Time | Bold. It fills the height the other elements leave, between 48 and 220 sp: about 200 sp in an exercise and 170 sp in a round rest while running; about 200 sp and 120 sp while paused. |
+| Title (name, "GET READY", "REST") | Bold, one line in an 80 dp box: up to 72 sp, shrinking to 36 sp for long names, then cut with an ellipsis |
+| "PAUSED" | 36 sp, bold |
+| Header, "Next:" lines | 30 sp, one line each, cut with an ellipsis |
+| Button labels | 28 sp, with a 36 dp icon |
 
 Rules:
 
-- The time is always the largest text.
+- The time is always the largest text. Its size changes with the layout, between an exercise and a rest and when pausing, never while it counts.
 - Its digits all have the same width, so the time doesn't shift as it counts. Roboto's do; keep it so.
 - Every state fits on screen without scrolling, in the content area of 960 × 542 dp measured in T1: 600 dp minus a 24 dp status bar and a 33 dp navigation bar.
 - Sizes are in `sp`, like the rest of the app.
@@ -770,7 +769,7 @@ The checks that must all pass before the phase is merged.
 
 ## 9. Open questions
 
-None at the moment. New questions are numbered from Q7.
+None at the moment. New questions are numbered from Q8.
 
 ### Answered
 
@@ -782,6 +781,7 @@ None at the moment. New questions are numbered from Q7.
 | Q4 | What does the header show during a round rest? The current round has just ended, and the next one is named below the time (`UI-5`). | **The round that just ended,** as during its exercises: "Round 1/2 · Warm-up", with "Next round: Core" and "Next: Plank (60 s)" below the time (§4.3.2). |
 | Q5 | Previous isn't available in get ready (`EX-9`). Is it hidden or disabled? | **Shown disabled,** so the paused layout is the same in every phase (§4.3.3). |
 | Q6 | The sketches show the exercise name in capitals ("SQUATS"). Are names shown in capitals, or as written? | **As written,** because long names read better in mixed case. The fixed words "GET READY", "REST" and "PAUSED" are in capitals (§4.2, main texts). |
+| Q7 | Found in T4, on the tablet: in the 960 × 542 dp content area, with Stop on its own row under Previous, Resume and Next as sketched, the paused time shrank to about 125 sp in an exercise, and to about 50 sp in a round rest, which also shows two "Next" lines. | **Stop goes at the right end of the same row,** after a gap. The paused time is then about 200 sp in an exercise and 120 sp in a round rest. Resume sits about 95 dp left of the centre. The user chose it from screenshots of both layouts. Specification §6's paused sketch shows it since v0.10 (§4.3.3). |
 
 ## 10. Change log
 
@@ -790,3 +790,4 @@ None at the moment. New questions are numbered from Q7.
 | 0.1 | 2026-11-05 | First draft, based on specification v0.8 and plan v0.2 |
 | 0.2 | 2026-11-05 | Q1 to Q6 answered as assumed. Quotes specification v0.9, which adds Back on the runner (Q1) and the completed screen's counts (Q2). Status `Ready`. |
 | 0.3 | 2026-11-05 | T1 measurements, the design unchanged: all three `EX-10` cases give `ON_STOP`; turning the tablet over doesn't recreate the activity; `recreate()` sets `isChangingConfigurations`; the content area is 960 × 542 dp; Android rebuilds the runner after ending the app's process, and how to make it end it (§4.3.4, §4.3.5, §4.3.9, manual checks 9 and 10). |
+| 0.4 | 2026-11-05 | Q7, found in T4: while paused, Stop is at the end of the row of buttons, not under it, so the time stays large (§4.3.3, the paused sketch). Text sizes as fitted on the tablet (§4.3.9). Quotes specification v0.10. |
