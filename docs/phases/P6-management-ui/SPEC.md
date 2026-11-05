@@ -739,15 +739,15 @@ Run them with `./gradlew installDebug`, after the instrumented tests, which unin
 
 The checks that must all pass before the phase is merged.
 
-- [ ] All tasks done
-- [ ] Unit tests and lint pass locally and in CI
-- [ ] Instrumented tests pass on the tablet (`connectedDebugAndroidTest`), including the updated `NavigationSmokeTest`
-- [ ] Compose UI tests cover creating, editing and validating a workout (plan §5.2)
-- [ ] Manual checks on the tablet pass
-- [ ] The merged manifests gain no permission and no component
-- [ ] P6's Kotlin code holds no user-facing text: it's all in `strings_list.xml`, `strings_editor.xml` and `strings_settings.xml`
-- [ ] `:core` is unchanged
-- [ ] HANDOVER.md is up to date, and the plan's status table is updated
+- [x] All tasks done
+- [x] Unit tests and lint pass locally and in CI
+- [x] Instrumented tests pass on the tablet (`connectedDebugAndroidTest`), including the updated `NavigationSmokeTest`
+- [x] Compose UI tests cover creating, editing and validating a workout (plan §5.2)
+- [x] Manual checks on the tablet pass
+- [x] The merged manifests gain no permission and no component
+- [x] P6's Kotlin code holds no user-facing text: it's all in `strings_list.xml`, `strings_editor.xml` and `strings_settings.xml`
+- [x] `:core` is unchanged
+- [x] HANDOVER.md is up to date, and the plan's status table is updated
 
 ## 9. Open questions
 

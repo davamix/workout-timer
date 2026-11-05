@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress: all tasks done; pull request [#6](https://github.com/davamix/workout-timer/pull/6) is waiting for the user to merge it |
+| **Status** | Done. Merged in pull request [#6](https://github.com/davamix/workout-timer/pull/6) on 2026-11-05. |
 | **Spec** | [SPEC.md](SPEC.md), version v0.4 |
 | **Branch** | `phase/p6-management-ui` |
 | **Last session** | 2026-11-05 |
@@ -11,21 +11,11 @@ This document tracks the phase as it's built. Update it at the end of every sess
 
 ## Prompt to start or continue
 
-Paste this prompt into a new Claude Code session to start or continue the phase. When the phase is done, replace it with "Phase done: no prompt needed."
-
-```text
-Start or continue phase P6 (Workout management UI) of the workout timer.
-
-1. Use the phase-start skill for P6. Read only docs/phases/P6-management-ui/HANDOVER.md and SPEC.md; they contain everything needed.
-2. Carry on from "Next steps" in the handover. Work through the tasks in SPEC.md §7 in order, on branch phase/p6-management-ui. Commit after each task, once ./gradlew build passes.
-3. Follow SPEC.md. If something in it is wrong or unclear, stop and ask me before changing course. Record every decision or deviation in the handover.
-4. All tasks are done and pull request #6 is open. First check with gh whether it has been merged or has review comments. If it's merged, use the phase-close skill instead. If there are comments, fix them on the branch; after a code change, rerun the instrumented tests on the tablet (the tablet must be connected).
-5. Before the session ends, or once all tasks are done, use the handover skill. When the done criteria pass, open the pull request and wait for me to merge it.
-```
+Phase done: no prompt needed.
 
 ## Current state
 
-All eight tasks are done. Pull request [#6](https://github.com/davamix/workout-timer/pull/6) is open and waiting for the user to merge it. CI passed on it (2m27s on `0a41add`, the last code and SPEC change).
+All eight tasks are done and merged into `main` through pull request [#6](https://github.com/davamix/workout-timer/pull/6) on 2026-11-05. CI passed on the pull request (2m27s on `0a41add`, the last code and SPEC change, and again on the handover commit `71ec660`).
 
 - **Screens:** the workout list, the editor and settings replace their P1 placeholders, and use P3's real storage through `AppContainer`.
 - **Build:** `./gradlew build` passes, with 411 unit tests (166 in `:app`, 93 of them new; 245 in `:core`) and 0 failures. Lint, ktlint and the no-INTERNET check are clean.
@@ -41,8 +31,11 @@ On the tablet, the debug app holds the user's "Example" workout from the manual 
 
 ## Next steps
 
-1. Wait for the user to merge pull request #6. Fix any review comments on the branch first.
-2. After the merge, use the `phase-close` skill on `main`.
+None for P6.
+
+Phases that can start now, with all their dependencies `Done` (plan §5.1):
+
+- **P7, Workout runner UI** (depends on P4). It has no SPEC.md or HANDOVER.md yet; the `phase-docs` skill writes them. It completes P5's audio wiring in the runner, and P6's "Pending wiring" below.
 
 ## Tasks
 
@@ -57,7 +50,7 @@ The task IDs come from SPEC.md §7.
 | T5 | Done | The whole editor screen, including what SPEC §7 lists under T6 (move, duplicate, remove, add, the discard dialog, `BackHandler`, not found), because it lives in the same composables. Checked on the tablet in screenshots: a new workout, an edited one, the keyboard over a rest field, and the validation messages. `NavigationSmokeTest`'s editor test now leaves with Cancel. |
 | T6 | Done | `WorkoutEditorScreenTest` (13) passes on the tablet. It creates the §4.4 example by typing, and covers editing, own and linked values, unused rests, structure, validation, leaving, not found and touch targets. The round header now has its own tag, `round-header-<id>`. |
 | T7 | Done | `SettingsViewModelTest` (4); `SettingsScreenTest` (4) passes on the tablet. The screen was checked in a screenshot. |
-| T8 | In review | `connectedDebugAndroidTest`: 51 tests, 0 failures, 3 skipped. Merged manifests unchanged against `main`. No user-facing literals in P6's Kotlin code. The user ran the manual checks on the tablet, and all pass; persistence and the log were checked over adb. KDoc on the public API. SPEC v0.4. Pull request [#6](https://github.com/davamix/workout-timer/pull/6). |
+| T8 | Done | `connectedDebugAndroidTest`: 51 tests, 0 failures, 3 skipped. Merged manifests unchanged against `main`. No user-facing literals in P6's Kotlin code. The user ran the manual checks on the tablet, and all pass; persistence and the log were checked over adb. KDoc on the public API. SPEC v0.4. Pull request [#6](https://github.com/davamix/workout-timer/pull/6). |
 
 ## Decisions and deviations
 
@@ -121,6 +114,10 @@ The other classes are `ui.list.WorkoutListScreenTest`, `ui.settings.SettingsScre
 ## Session log
 
 Newest first.
+
+### 2026-11-05 (close)
+
+- The user merged pull request [#6](https://github.com/davamix/workout-timer/pull/6). P6 is closed: `Done` in plan §5.1, done criteria ticked in SPEC.md §8.
 
 ### 2026-11-05
 
