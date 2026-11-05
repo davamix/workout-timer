@@ -19,5 +19,11 @@ data class RunnerRoute(
     val workoutId: String,
 )
 
+/** The completed screen, with everything it shows, so it also comes back after Android closes the app (P7). */
 @Serializable
-data object CompletedRoute
+data class CompletedRoute(
+    val workoutName: String,
+    val totalSeconds: Int,
+    val roundCount: Int,
+    val exerciseCount: Int,
+)

@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- The completed screen (P7). -->
 <resources>
-    <string name="completed_title">Workout complete</string>
+    <string name="completed_title">Well done!</string>
+    <!-- The workout's name. -->
+    <string name="completed_workout">%1$s is complete.</string>
+    <!-- The planned total time, then the number of rounds and of exercises (specification §6). -->
+    <string name="completed_summary">Total time %1$s · %2$s · %3$s</string>
+    <plurals name="completed_rounds">
+        <item quantity="one">%d round</item>
+        <item quantity="other">%d rounds</item>
+    </plurals>
+    <plurals name="completed_exercises">
+        <item quantity="one">%d exercise</item>
+        <item quantity="other">%d exercises</item>
+    </plurals>
     <string name="completed_back_to_list">Back to list</string>
 </resources>
