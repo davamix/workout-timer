@@ -25,12 +25,12 @@ Start or continue phase P7 (Workout runner UI) of the workout timer.
 
 ## Current state
 
-T1 is done: the measurements confirm the design, and SPEC v0.3 records them (§4.3.4, §4.3.5, §4.3.9). No runner code yet: the runner and completed screens are still P1's placeholders, and Start on the list opens a runner placeholder with a Finish button.
+T1–T3 are done. The measurements confirm the design (SPEC v0.3). The runner's logic is in place and unit-tested: `RunnerView` (what each state shows) and `RunnerViewModel` (starting, commands, Stop dialog, Back, foreground, rebuilt runner, completed summary), with the real session and cue player. Nothing draws them yet: the runner and completed screens are still P1's placeholders, and `WorkoutSummary` sits in the placeholder's `CompletedScreen.kt` until T5.
 
 ## Next steps
 
-1. `T2`: `ui/runner/RunnerView.kt` (`RunnerView`, `toRunnerView()`, `formatPhaseTime()`) and `RunnerViewTest`, as SPEC §4.2 and §4.3.2 describe.
-2. Then `T3`, the ViewModel.
+1. `T4`: `RunnerContent` for every state of SPEC §4.3.2 (starting, unavailable, running and paused looks, the Stop dialog), `RunnerIcons.kt`, the text colours in `PhaseColors`, and `strings_runner.xml`. Fit the sizes into the measured 960 × 542 dp, with screenshots on the tablet. Test: `RunnerContentTest`.
+2. Then `T5`: the `RunnerScreen` entry, the completed screen and navigation.
 
 ## Tasks
 
@@ -39,8 +39,8 @@ The task IDs come from SPEC.md §7.
 | Task | Status | Notes |
 |---|---|---|
 | T1 | Done | Results in SPEC v0.3. The probe was deleted. |
-| T2 | To do | `RunnerView.kt` |
-| T3 | To do | `RunnerViewModel` |
+| T2 | Done | `RunnerView.kt`; `RunnerViewTest` (18 tests) |
+| T3 | Done | `RunnerViewModel.kt`; `RunnerViewModelTest` (28 tests), `GatedSpeaker`. No new dependency: `createSavedStateHandle()` comes with `navigation-compose`. |
 | T4 | To do | `RunnerContent`, icons, colours, sizes |
 | T5 | To do | `RunnerScreen` entry, completed screen, navigation, placeholders removed |
 | T6 | To do | Instrumented flows |
@@ -52,6 +52,8 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-11-05 | `confirmStop()` does nothing unless the Stop dialog is open. The Stop dialog closes by itself if the workout stops being paused. | A stop always goes through the confirmation (`EX-8`), and the dialog never shows over a running workout. |
+| 2026-11-05 | Back while starting cancels the start: no session is created, even if the audio becomes ready afterwards. | Leaving must not start a workout in the background (`EX-10`). |
 
 ## Known issues
 
