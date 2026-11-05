@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | In progress |
-| **Spec** | [SPEC.md](SPEC.md), version v0.3 |
+| **Status** | In progress: all tasks done; pull request [#6](https://github.com/davamix/workout-timer/pull/6) is waiting for the user to merge it |
+| **Spec** | [SPEC.md](SPEC.md), version v0.4 |
 | **Branch** | `phase/p6-management-ui` |
-| **Last session** | 2026-11-04 |
+| **Last session** | 2026-11-05 |
 
 This document tracks the phase as it's built. Update it at the end of every session, so the next one can continue from here.
 
@@ -19,17 +19,30 @@ Start or continue phase P6 (Workout management UI) of the workout timer.
 1. Use the phase-start skill for P6. Read only docs/phases/P6-management-ui/HANDOVER.md and SPEC.md; they contain everything needed.
 2. Carry on from "Next steps" in the handover. Work through the tasks in SPEC.md §7 in order, on branch phase/p6-management-ui. Commit after each task, once ./gradlew build passes.
 3. Follow SPEC.md. If something in it is wrong or unclear, stop and ask me before changing course. Record every decision or deviation in the handover.
-4. The tablet must be connected for T1 (the keyboard probe) and from T3 on (Compose UI tests and screenshots). Use the real repositories from AppContainer in the app; tests build the ViewModels with the in-memory ones. P2, P3 and P5 are merged, so no fakes are needed. P7 may run in parallel in another worktree: in shared files (the catalog, app/build.gradle.kts, AppNavHost, the manifest, NavigationSmokeTest), change only P6's own entries.
+4. All tasks are done and pull request #6 is open. First check with gh whether it has been merged or has review comments. If it's merged, use the phase-close skill instead. If there are comments, fix them on the branch; after a code change, rerun the instrumented tests on the tablet (the tablet must be connected).
 5. Before the session ends, or once all tasks are done, use the handover skill. When the done criteria pass, open the pull request and wait for me to merge it.
 ```
 
 ## Current state
 
-SPEC.md is `Ready`. The review confirmed all eight draft assumptions (Q1–Q8). T1's keyboard measurements confirmed §4.3.6, and are recorded there in SPEC v0.3: `MainActivity` gets `adjustResize` in T5. No app code yet.
+All eight tasks are done. Pull request [#6](https://github.com/davamix/workout-timer/pull/6) is open and waiting for the user to merge it. CI passed on it (2m27s on `0a41add`, the last code and SPEC change).
+
+- **Screens:** the workout list, the editor and settings replace their P1 placeholders, and use P3's real storage through `AppContainer`.
+- **Build:** `./gradlew build` passes, with 411 unit tests (166 in `:app`, 93 of them new; 245 in `:core`) and 0 failures. Lint, ktlint and the no-INTERNET check are clean.
+- **Tablet:** `connectedDebugAndroidTest` runs 51 tests: 0 failures, and 3 skipped on purpose (P3's `PersistenceCheck`).
+- **Manual checks** (SPEC §6) pass:
+  - the user ran the steps on the screens, and judged the touch targets and the text easy to use at arm's length;
+  - a force-stop keeps the workout and the voice setting;
+  - the log shows no crash and no storage warning.
+- **Unchanged:** the merged debug and release manifests have the same permissions and components as `main`, and `:core` is untouched.
+- **SPEC v0.4** records the editor's layout as built (Q9).
+
+On the tablet, the debug app holds the user's "Example" workout from the manual checks, and voice cues are on.
 
 ## Next steps
 
-1. `T2`: the foundations (SPEC §7). Add the dependencies, `TotalDuration.kt`, `WorkoutForm.kt`, `EditorErrors.kt`, `MainDispatcherExtension` and `TestRepositories.kt`, with their unit tests.
+1. Wait for the user to merge pull request #6. Fix any review comments on the branch first.
+2. After the merge, use the `phase-close` skill on `main`.
 
 ## Tasks
 
@@ -44,13 +57,13 @@ The task IDs come from SPEC.md §7.
 | T5 | Done | The whole editor screen, including what SPEC §7 lists under T6 (move, duplicate, remove, add, the discard dialog, `BackHandler`, not found), because it lives in the same composables. Checked on the tablet in screenshots: a new workout, an edited one, the keyboard over a rest field, and the validation messages. `NavigationSmokeTest`'s editor test now leaves with Cancel. |
 | T6 | Done | `WorkoutEditorScreenTest` (13) passes on the tablet. It creates the §4.4 example by typing, and covers editing, own and linked values, unused rests, structure, validation, leaving, not found and touch targets. The round header now has its own tag, `round-header-<id>`. |
 | T7 | Done | `SettingsViewModelTest` (4); `SettingsScreenTest` (4) passes on the tablet. The screen was checked in a screenshot. |
-| T8 | To do | |
+| T8 | In review | `connectedDebugAndroidTest`: 51 tests, 0 failures, 3 skipped. Merged manifests unchanged against `main`. No user-facing literals in P6's Kotlin code. The user ran the manual checks on the tablet, and all pass; persistence and the log were checked over adb. KDoc on the public API. SPEC v0.4. Pull request [#6](https://github.com/davamix/workout-timer/pull/6). |
 
 ## Decisions and deviations
 
 Anything decided during implementation that isn't in SPEC.md, or that changes it. A change to a requirement goes into SPEC.md or SPECIFICATION.md first.
 
-None of these change SPEC.md. They settle points it doesn't specify.
+Most settle points SPEC.md leaves open. The three about the editor's fields went into SPEC v0.4 (Q9), so the SPEC matches the code.
 
 | Date | Decision | Reason |
 |---|---|---|
@@ -60,9 +73,9 @@ None of these change SPEC.md. They settle points it doesn't specify.
 | 2026-11-04 | Callbacks that take an ID go through `NavBackStackEntry.ifResumed` in `AppNavHost`, a private helper. | It is `dropUnlessResumed` for callbacks with an argument (SPEC §4.3.9). |
 | 2026-11-04 | Besides `edit` and `addRound`, the editor ViewModel has `addExercise`, `duplicateRound` and `duplicateExercise`. All four return the new item's ID. | The screen needs the ID to scroll to the new item and focus a new exercise (SPEC §4.3.3). They use the ViewModel's `newId`, so tests get fixed IDs. |
 | 2026-11-04 | The editor ignores edits, and `requestClose`, while a save runs. | Edits made during a save would be lost when the editor closes after it. The save closes the editor anyway. |
-| 2026-11-04 | Own-value fields (exercise duration and rest, round rest) have no floating label. The exercises are a table under one header row (Exercise · Duration · Rest), and the round rest has an inline label. The workout name, round name and defaults keep floating labels. | With a label, Material 3's value-based `OutlinedTextField` hides the placeholder until the field has focus, so a linked value wouldn't show its default. The `labelPosition` option that avoids this exists only on the `TextFieldState` overload. The table is also more compact above the keyboard. |
-| 2026-11-04 | The placeholder is the default's number alone, dimmed to 60 %. The unit "s" is the field's suffix. | Without a label, Material shows the suffix on an empty field too, so "40 s" read "40 s s". At full strength, a placeholder looked like a typed value. |
-| 2026-11-04 | "Not used" texts are "Not used: last exercise" and "Not used: last round", and seconds fields are 200 dp wide. | SPEC §4.2's "Not used: last exercise of the round" wraps to three lines in a field, and at 170 dp even "last round" wrapped. SPEC §4.2 says the wording may change. |
+| 2026-11-04 | Own-value fields (exercise duration and rest, round rest) have no floating label. The exercises are a table under one header row (Exercise · Duration · Rest), and the round rest has an inline label. The workout name, round name and defaults keep floating labels. | With a label, Material 3's value-based `OutlinedTextField` hides the placeholder until the field has focus, so a linked value wouldn't show its default. The `labelPosition` option that avoids this exists only on the `TextFieldState` overload. The table is also more compact above the keyboard. In SPEC v0.4 (Q9). |
+| 2026-11-04 | The placeholder is the default's number alone, dimmed to 60 %. The unit "s" is the field's suffix. | Without a label, Material shows the suffix on an empty field too, so "40 s" read "40 s s". At full strength, a placeholder looked like a typed value. In SPEC v0.4 (Q9). |
+| 2026-11-04 | "Not used" texts are "Not used: last exercise" and "Not used: last round", and seconds fields are 200 dp wide. | SPEC §4.2's "Not used: last exercise of the round" wraps to three lines in a field, and at 170 dp even "last round" wrapped. In SPEC v0.4 (Q9). |
 | 2026-11-04 | The editor's content takes an `EditorActions` interface, which the ViewModel implements, instead of ten callbacks. | Shorter signatures for the composables. Tests still drive the real ViewModel. |
 | 2026-11-04 | `assertTouchTargetsAtLeast` checks the touch bounds of the clickable nodes that are fully on screen, and skips the others. | In Material 3 1.4 an `IconButton` lays out at 40 dp; `minimumInteractiveComponentSize` widens only its touch area to 48 dp. Touch bounds are clipped to the screen, so a row half scrolled out of the editor would read as too small. |
 | 2026-11-04 | System Back in the editor tests closes the soft keyboard first (`closeSoftKeyboard()`, then `pressBack()`). | With the keyboard up, Back only closes the keyboard. |
@@ -72,7 +85,9 @@ None of these change SPEC.md. They settle points it doesn't specify.
 
 ## Known issues
 
-None yet.
+- **The keyboard takes a lot of the screen.** SwiftKey's letter keyboard is 372 dp tall in landscape, which leaves 204 dp for the editor: the top bar and about one exercise row. The number pad is about 210 dp tall, so more of the form stays visible while typing durations and rests. With `adjustResize`, the focused field always stays visible (SPEC §4.3.6).
+- **Instrumented tests uninstall the app.** `connectedDebugAndroidTest` wipes the user's workouts in the debug app on the tablet. To keep them, run single classes with `am instrument` (tablet skill).
+- **`sun.misc.Unsafe` warnings:** ktlint prints them on JDK 25. They are harmless (noted in P1).
 
 ## Pending wiring
 
@@ -89,14 +104,42 @@ Connections this phase leaves for later phases:
 ## How to verify
 
 ```
-./gradlew build                        # unit tests, lint, ktlint, no-INTERNET check
-./gradlew connectedDebugAndroidTest    # Compose UI tests on the tablet (uninstalls the app afterwards)
+./gradlew build                        # 411 unit tests (166 :app, 245 :core), lint, ktlint, no-INTERNET check
+./gradlew connectedDebugAndroidTest    # tablet: 51 tests, 3 skipped (uninstalls the app afterwards)
 ./gradlew installDebug                 # then the manual checks in SPEC.md §6
 ```
+
+To run P6's screen tests and keep the app's data (Git Bash, `MSYS_NO_PATHCONV=1`, see the tablet skill):
+
+```
+./gradlew installDebug installDebugAndroidTest
+adb shell am instrument -w -e class io.github.davamix.workouttimer.ui.editor.WorkoutEditorScreenTest io.github.davamix.workouttimer.debug.test/androidx.test.runner.AndroidJUnitRunner | tail -8
+```
+
+The other classes are `ui.list.WorkoutListScreenTest`, `ui.settings.SettingsScreenTest` and `NavigationSmokeTest`.
 
 ## Session log
 
 Newest first.
+
+### 2026-11-05
+
+- Done:
+  - The user ran the manual checks on the tablet, and all pass. Over adb: "Example" and voice cues off survived a force-stop, and the log showed no crash or storage warning. Voice cues were turned back on afterwards.
+  - SPEC v0.4 went to `main` and was merged into the branch: the editor's fields as built (Q9).
+  - Pull request [#6](https://github.com/davamix/workout-timer/pull/6) opened. CI passed on `0a41add` (2m27s).
+- Notes: `connectedDebugAndroidTest` wasn't rerun for the handover. It ran on the last code commit, and only documents changed since; another run would have deleted the user's workout.
+
+### 2026-11-04 (implementation)
+
+- Done:
+  - T1: the keyboard probe ran on the tablet. SPEC v0.3 records its measurements, and the probe was deleted.
+  - T2–T7 implemented, one commit per task. Each screen was checked in screenshots on the tablet.
+  - T8: the full instrumented suite passes, and the merged manifests and the no-literal-text check are clean.
+- Notes:
+  - Compose snapshot state (`mutableStateOf`) works in JVM unit tests, so the editor ViewModel is tested without a device.
+  - In Compose tests, the soft keyboard eats the first Back. Close it with `closeSoftKeyboard()` first.
+  - The tablet's keyboard is SwiftKey. Its number pad is much shorter than its letter keyboard.
 
 ### 2026-11-04
 
