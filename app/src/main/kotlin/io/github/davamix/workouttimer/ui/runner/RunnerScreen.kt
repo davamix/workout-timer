@@ -1,5 +1,8 @@
 package io.github.davamix.workouttimer.ui.runner
 
+import android.view.WindowManager
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -30,6 +33,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,22 +47,61 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.davamix.workouttimer.R
-import io.github.davamix.workouttimer.ui.common.PlaceholderScreen
+import io.github.davamix.workouttimer.ui.completed.WorkoutSummary
 import io.github.davamix.workouttimer.ui.theme.PhaseColors
+import kotlinx.coroutines.flow.first
 
-// Placeholder entry until P7 T5.
+/**
+ * The runner screen (P7 SPEC §4.3): it runs the workout [workoutId] through its [viewModel], and draws it with
+ * [RunnerContent].
+ *
+ * - It keeps the screen on while it's shown (NF-2, §4.3.6).
+ * - It pauses the workout when the app leaves the foreground, but not for a configuration change (EX-10, NF-3,
+ *   §4.3.4).
+ * - System Back goes to the ViewModel (P7 Q1).
+ * - It reports each outcome once, after waiting until it's resumed (§4.3.7). A runner rebuilt after Android closed the
+ *   app is composed before it's resumed, so the callbacks mustn't go through `dropUnlessResumed`, which would drop them.
+ *
+ * @param onCompleted The workout completed: open the completed screen with this summary (EX-6).
+ * @param onExit The runner is done without completing: return to the workout list (EX-8, EX-11, Back).
+ */
 @Composable
 fun RunnerScreen(
     workoutId: String,
-    onFinished: () -> Unit,
+    onCompleted: (WorkoutSummary) -> Unit,
+    onExit: () -> Unit,
+    viewModel: RunnerViewModel = viewModel(factory = RunnerViewModel.factory(workoutId)),
 ) {
-    PlaceholderScreen(
-        title = stringResource(R.string.runner_title),
-        subtitle = stringResource(R.string.runner_workout_id, workoutId),
-    ) {
-        Button(onClick = onFinished) { Text(stringResource(R.string.runner_finish)) }
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val activity = LocalActivity.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+
+    DisposableEffect(activity) {
+        val window = activity?.window
+        window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose { window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
     }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        // A configuration change stops the activity too, just before recreating it; the workout carries on.
+        if (activity?.isChangingConfigurations != true) viewModel.onScreenStopped()
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_START) { viewModel.onScreenStarted() }
+    BackHandler(enabled = state !is RunnerState.Completed && state !is RunnerState.Exited) { viewModel.back() }
+
+    val outcome = state
+    LaunchedEffect(outcome) {
+        if (outcome !is RunnerState.Completed && outcome !is RunnerState.Exited) return@LaunchedEffect
+        lifecycle.currentStateFlow.first { it.isAtLeast(Lifecycle.State.RESUMED) }
+        if (outcome is RunnerState.Completed) onCompleted(outcome.summary) else onExit()
+    }
+
+    RunnerContent(state, viewModel)
 }
 
 /**

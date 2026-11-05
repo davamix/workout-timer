@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import io.github.davamix.workouttimer.ui.completed.CompletedScreen
+import io.github.davamix.workouttimer.ui.completed.WorkoutSummary
 import io.github.davamix.workouttimer.ui.editor.WorkoutEditorScreen
 import io.github.davamix.workouttimer.ui.list.WorkoutListScreen
 import io.github.davamix.workouttimer.ui.runner.RunnerScreen
@@ -40,19 +41,22 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
             SettingsScreen(onBack = dropUnlessResumed { navController.popBackStack() })
         }
         composable<RunnerRoute> { entry ->
+            // The runner calls these once each, after waiting until it's resumed (P7 SPEC §4.3.7). dropUnlessResumed
+            // would drop the call of a runner rebuilt after Android closed the app, which is composed before then.
             RunnerScreen(
                 workoutId = entry.toRoute<RunnerRoute>().workoutId,
-                onFinished =
-                    dropUnlessResumed {
-                        // The runner leaves the back stack, so Back on the completed screen returns to the list.
-                        navController.navigate(CompletedRoute) {
-                            popUpTo<RunnerRoute> { inclusive = true }
-                        }
-                    },
+                onCompleted = { summary ->
+                    // The runner leaves the back stack, so Back on the completed screen returns to the list.
+                    navController.navigate(summary.toRoute()) {
+                        popUpTo<RunnerRoute> { inclusive = true }
+                    }
+                },
+                onExit = { navController.popBackStack(WorkoutListRoute, inclusive = false) },
             )
         }
-        composable<CompletedRoute> {
+        composable<CompletedRoute> { entry ->
             CompletedScreen(
+                summary = entry.toRoute<CompletedRoute>().toSummary(),
                 onBackToList = dropUnlessResumed { navController.popBackStack(WorkoutListRoute, inclusive = false) },
             )
         }
@@ -66,3 +70,7 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
 private inline fun NavBackStackEntry.ifResumed(action: () -> Unit) {
     if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) action()
 }
+
+private fun WorkoutSummary.toRoute() = CompletedRoute(workoutName, totalSeconds, roundCount, exerciseCount)
+
+private fun CompletedRoute.toSummary() = WorkoutSummary(workoutName, totalSeconds, roundCount, exerciseCount)

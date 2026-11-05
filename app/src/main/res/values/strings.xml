@@ -3,5 +3,4 @@
 <resources>
     <string name="app_name">Workout Timer</string>
     <string name="action_back">Back</string>
-    <string name="placeholder_note">Placeholder screen</string>
 </resources>
