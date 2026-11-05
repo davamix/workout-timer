@@ -25,19 +25,32 @@ Start or continue phase P7 (Workout runner UI) of the workout timer.
 
 ## Current state
 
-T1–T5 are done. A workout runs from the list's Start on the tablet, with its cues, to the completed screen. The runner's logic is unit-tested (`RunnerView`, `RunnerViewModel`), and its content and the completed screen have Compose tests that pass on the tablet. A short live check on the tablet confirmed:
+T1–T6 are done, and T7 is under way. A workout runs from the list's Start on the tablet, with its cues, to the completed screen. Every instrumented test passes on the tablet (80, run with `am instrument` to keep the app's data). The merged manifests are unchanged, and P7's Kotlin holds no user-facing text.
 
-- the window has `FLAG_KEEP_SCREEN_ON` while the runner is open, and not on the list afterwards;
-- Home pauses the workout;
-- Back while paused opens the Stop dialog;
-- Stop returns to the list.
+Manual checks (SPEC §6) done through adb on 2026-11-05, all as expected:
 
-The placeholders are gone.
+| Check | Result |
+|---|---|
+| 8 | Recents (back at 00:09) and the power button (back at 00:05) left the workout paused. Home did too, in T5's live check. |
+| 4 | Next went to Arm circles, paused at 00:10. Previous went back to Jumping jacks at 00:30. |
+| 5 | Stop, then Cancel: still paused |
+| 6 | Back while paused opens the Stop dialog; Back again closes it |
+| 10 | The cached process was ended with `run-as … kill -9`. Reopening from the launcher, and again from Recents, showed the workout list. |
+| 13 | No crash, and no `WorkoutAudio` or `WorkoutStorage` warning |
+
+The keep-screen-on flag is set while the runner is open, and cleared on the list.
 
 ## Next steps
 
-1. `T6`: `RunnerScreenTest` (a real ViewModel with in-memory repositories and `SilentAudio.kt`) and `RunnerActivityTest` (in `MainActivity`: `recreate()`, `moveToState(CREATED)`, the keep-screen-on flag), as SPEC §6 describes. Then run every instrumented test with `connectedDebugAndroidTest`.
-2. Then `T7`: manifests, the text check, the manual checks with the user, KDoc, the pull request.
+1. The manual checks that need the user (SPEC §6):
+   - **1:** the whole §4.4 example by ear, voice on.
+   - **2:** reading from 3 m.
+   - **3:** speech stops on pause.
+   - **7:** turning the tablet over while running, paused, and with the Stop dialog open.
+   - **9:** the screen timeout, at 30 s for a while; it needs the user's agreement to change the setting.
+   - **11:** voice off, chime only.
+   - **12:** the cold start, "Getting ready…", then "Get ready in".
+2. Then `connectedDebugAndroidTest` (it uninstalls the app and deletes the "Example" workout, so after the manual checks), KDoc review, `./gradlew build`, the handover skill, and the pull request.
 
 ## Tasks
 
@@ -50,8 +63,8 @@ The task IDs come from SPEC.md §7.
 | T3 | Done | `RunnerViewModel.kt`; `RunnerViewModelTest` (28 tests), `GatedSpeaker`. No new dependency: `createSavedStateHandle()` comes with `navigation-compose`. |
 | T4 | Done | `RunnerContent`, `RunnerIcons`, `PhaseColors.OnPhase` and `OnPaused`, `strings_runner.xml`; `RunnerContentTest` (14 tests, on the tablet). Paused layout changed with the user (Q7, SPEC v0.4). |
 | T5 | Done | `RunnerScreen` entry, `CompletedScreen` and `CompletedContent`, `CompletedRoute`, `AppNavHost`; placeholders removed; `NavigationSmokeTest` updated; `CompletedScreenTest` (5 tests). On the tablet, with `RunnerContentTest`: 25 tests pass. |
-| T6 | To do | Instrumented flows |
-| T7 | To do | Manifests, text check, manual checks, KDoc, pull request |
+| T6 | Done | `RunnerScreenTest` (6), `RunnerActivityTest` (4), `SilentAudio.kt`. Without the `isChangingConfigurations` check, `recreationKeepsTheWorkoutRunning` fails, so it guards NF-3. All 80 instrumented tests pass on the tablet. |
+| T7 | Doing | Manifests and text check done. Manual checks through adb done (see Current state); the user's part is next. |
 
 ## Decisions and deviations
 
