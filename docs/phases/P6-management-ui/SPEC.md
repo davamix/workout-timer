@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready, v0.3 |
+| **Status** | Ready, v0.4 |
 | **Phase** | P6, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P2 (done). It also uses P3 and P5, both done. |
 | **Branch** | `phase/p6-management-ui` |
@@ -182,7 +182,7 @@ app/src/test/kotlin/io/github/davamix/workouttimer/ui/
 
 app/src/androidTest/kotlin/io/github/davamix/workouttimer/ui/
 ├── UiTestWorkouts.kt                     fixtures: the §4.4 example (androidTest can't see app/src/test)
-├── TouchTargets.kt                       helper: asserts every clickable node is at least 48 × 48 dp
+├── TouchTargets.kt                       helper: asserts every clickable node fully on screen has a touch area of at least 48 × 48 dp
 ├── list/WorkoutListScreenTest.kt
 ├── editor/WorkoutEditorScreenTest.kt
 └── settings/SettingsScreenTest.kt
@@ -421,7 +421,7 @@ The final wording can change in review. Formats use numbered placeholders.
 | File | Texts |
 |---|---|
 | `strings_list.xml` | "Workouts" (exists) · "New workout" (exists) · "Settings" (exists) · "No workouts yet. Create one to get started." · "Total %1$s" · "Start" · "Edit" · "Duplicate" · "Delete" · "%1$s (copy)" · "Delete \"%1$s\"?" · "This can't be undone." · "Cancel" · "Couldn't duplicate the workout." · "Couldn't delete the workout." |
-| `strings_editor.xml` | "New workout", "Edit workout" (exist) · "Save" · "Cancel" · "Total %1$s" · "Workout name" · "Defaults" · "Exercise duration" · "Rest between exercises" · "Rest between rounds" · "Round %1$d" · "Round name" · "Round rest" · "Exercise" · "Duration" · "Rest" · "s" · "Default" · "Use default" · "Not used: last exercise of the round" · "Not used: last round" · "Add round" · "Add exercise" · "Move up" · "Move down" · "More actions" · "Duplicate" · "Remove" · "Enter a name" · "From %1$d to %2$d s" · "Add at least one round" · "Add at least one exercise" · "Check the highlighted fields." · "Couldn't save the workout. Your changes are still here." · "Discard changes?" · "Your changes to this workout haven't been saved." · "Keep editing" · "Discard" · "This workout no longer exists." |
+| `strings_editor.xml` | "New workout", "Edit workout" (exist) · "Save" · "Cancel" · "Total %1$s" · "Workout name" · "Defaults" · "Exercise duration" · "Rest between exercises" · "Rest between rounds" · "Round %1$d" · "Round name" · "Round rest" · "Exercise" · "Duration" · "Rest" · "s" · "Default" · "Use default" · "Not used: last exercise" · "Not used: last round" · "Add round" · "Add exercise" · "Move up" · "Move down" · "More actions" · "Duplicate" · "Remove" · "Enter a name" · "From %1$d to %2$d s" · "Add at least one round" · "Add at least one exercise" · "Check the highlighted fields." · "Couldn't save the workout. Your changes are still here." · "Discard changes?" · "Your changes to this workout haven't been saved." · "Keep editing" · "Discard" · "This workout no longer exists." |
 | `strings_settings.xml` | "Settings" (exists) · "Voice cues" · "Speak exercise names and countdowns. The round-end sound plays either way." · "Couldn't save the setting." |
 
 ### 4.3 Behaviour
@@ -457,28 +457,36 @@ The final wording can change in review. Formats use numbered placeholders.
 +------------------------------------------------------------------------------+
 | ←  Edit workout                         Total 4:23      [ Cancel ]  [ Save ] |
 +------------------------------------------------------------------------------+
-|  Workout name [ Example                     ]                                |
-|  Defaults  Exercise duration [ 40 ] s   Rest between exercises [ 15 ] s      |
-|            Rest between rounds [ 60 ] s                                      |
+|  Workout name                                                                |
+|  [ Example                       ]                                           |
+|  Defaults                                                                    |
+|  Exercise duration       Rest between exercises       Rest between rounds    |
+|  [ 40 s              ]   [ 15 s                   ]   [ 60 s              ]  |
 |                                                                              |
 |  +- Round 1 ---------------------------------------------------- ↑  ↓  ⋮ -+  |
-|  |  Round name [ Warm-up        ]   Round rest [ 30 ] s                    |  |
-|  |  1  Exercise [ Jumping jacks  ]  Duration [ 30 ] s  Rest [ 15 ] s ↑ ↓ ⋮ |  |
-|  |                                                       Default           |  |
-|  |  2  Exercise [ Arm circles    ]  Duration [ 10 ] s  Rest [  5 ] s ↑ ↓ ⋮ |  |
-|  |  3  Exercise [ High knees     ]  Duration [ 40 ] s  Rest [ 15 ] s ↑ ↓ ⋮ |  |
-|  |                                  Default            Not used: last ...  |  |
-|  |  [ + Add exercise ]                                                     |  |
-|  +-------------------------------------------------------------------------+  |
+|  |  Round name                                                            |  |
+|  |  [ Warm-up                ]   Round rest [ 30 s × ]                    |  |
+|  |      Exercise                 Duration       Rest                      |  |
+|  |  1   [ Jumping jacks     ]    [ 30 s × ]     [ 15 s ]          ↑ ↓ ⋮   |  |
+|  |                                              Default                   |  |
+|  |  2   [ Arm circles       ]    [ 10 s × ]     [  5 s × ]        ↑ ↓ ⋮   |  |
+|  |  3   [ High knees        ]    [ 40 s ]       [ 15 s ]          ↑ ↓ ⋮   |  |
+|  |                               Default        Not used: last exercise   |  |
+|  |  [ + Add exercise ]                                                    |  |
+|  +------------------------------------------------------------------------+  |
 |  +- Round 2 ---------------------------------------------------- ↑  ↓  ⋮ -+  |
-|  |  Round name [ Core           ]   Round rest [ 60 ] s  Not used: last round |
-|  |  ...                                                                    |  |
-|  +-------------------------------------------------------------------------+  |
+|  |  [ Core                  ]   Round rest [ 60 s ]  Not used: last round |  |
+|  |  ...                                                                   |  |
+|  +------------------------------------------------------------------------+  |
 |  [ + Add round ]                                                             |
 +------------------------------------------------------------------------------+
 ```
 
-The form scrolls (a `LazyColumn` keyed by round and exercise ID). The top bar, with the total, Cancel and Save, stays in place.
+`×` is the "Use default" button of an own value. Linked values show the default as a dimmed placeholder.
+
+The form scrolls: a `LazyColumn` with the workout section, one card per round (keyed by round ID), then Add round. The top bar, with the total, Cancel and Save, stays in place.
+
+- **Labels:** the workout name, the round name and the three defaults have floating labels. Own-value fields have none: with a label, Material 3's value-based `OutlinedTextField` hides the placeholder until the field has focus, so a linked value wouldn't show its default. (The `labelPosition` option that avoids this exists only on the `TextFieldState` overload.) So a round's exercises are a table under one header row (Exercise · Duration · Rest), and the round rest has an inline label. The table is also compact above the keyboard (§4.3.6). Seconds fields are 200 dp wide.
 
 - **Opening:**
   - `workoutId == null`: a new form (Q2). The name is empty; the defaults are 40 s, 15 s and 60 s (the §4.4 example's); there is one round, "Round 1", with one exercise to name.
@@ -487,11 +495,11 @@ The form scrolls (a `LazyColumn` keyed by round and exercise ID). The top bar, w
 - **Time fields:** whole seconds (Q3), with a number keyboard and the suffix "s". A field keeps only digits, at most 4 (`timeText`), so it can hold 9999; validation rejects anything over 5999.
 - **Defaults** are required. An empty default shows the range error once errors are shown (§4.3.4).
 - **Own values** (§4.2):
-  - An empty own field is linked to its default. It shows the default's value as a dimmed placeholder, with "Default" as its supporting text.
+  - An empty own field is linked to its default. It shows the default's value, the number alone, as a placeholder dimmed to 60 %, with "Default" as its supporting text. The unit "s" is the field's suffix.
   - Typing a number sets an own value, even one equal to the default. A trailing "Use default" button, or clearing the text, links it to the default again.
   - Changing a default changes every linked placeholder at once; own values keep theirs.
 - **Unused rests** (§4.2): the rest of the last exercise of each round, and the round rest of the last round.
-  - They are dimmed and labelled "Not used: last exercise of the round" or "Not used: last round". Their values are kept.
+  - They are dimmed and labelled "Not used: last exercise" or "Not used: last round". Their values are kept.
   - They stay editable. An own value is validated even where it's unused (P2), so a read-only field could hold an error the user can't fix.
   - The marking follows the position live: adding, moving or removing an exercise or a round updates it.
 - **Total:** "Total *m:ss*" in the top bar, from `form.toWorkout().estimatedTotalSeconds()`. It updates with every edit, and works on an invalid workout: rounds without exercises are ignored, and negative values count as 0 (P2).
@@ -743,7 +751,7 @@ The checks that must all pass before the phase is merged.
 
 ## 9. Open questions
 
-None at the moment. New questions are numbered from Q9.
+None at the moment. New questions are numbered from Q10.
 
 ### Answered
 
@@ -757,6 +765,7 @@ None at the moment. New questions are numbered from Q9.
 | Q6 | What does Duplicate on the list do? | **It saves a copy called "*name* (copy)" at once,** which appears in the list. The editor doesn't open. |
 | Q7 | Does removing a round or an exercise ask for confirmation? | **No.** Nothing is saved until Save, and leaving without saving asks before discarding (`WM-10`). |
 | Q8 | Where can an exercise be moved? | **Up and down within its round only.** To move one to another round, add it there and remove it here. |
+| Q9 | Found in T5: with a floating label, Material 3's value-based text field hides the placeholder until the field has focus, so a linked value wouldn't show its default. And "Not used: last exercise of the round" wrapped to three lines in a seconds field. | **Own-value fields have no floating label.** A round's exercises are a table under one header row (Exercise · Duration · Rest), and the round rest has an inline label. The placeholder is the default's number alone, dimmed. The "Not used" texts are "Not used: last exercise" and "Not used: last round", and seconds fields are 200 dp wide (§4.3.2). The user checked the result on the tablet. |
 
 ## 10. Change log
 
@@ -765,3 +774,4 @@ None at the moment. New questions are numbered from Q9.
 | 0.1 | 2026-11-04 | First draft |
 | 0.2 | 2026-11-04 | Q1–Q8 answered, confirming the draft assumptions. No specification change: they settle UI details. Status `Ready`. |
 | 0.3 | 2026-11-04 | T1 done: the keyboard measurements are in §4.3.6. They confirm the draft's assumptions, so `MainActivity` gets `adjustResize`. With the keyboard up, 204 dp of the screen stay visible, so the top bar and the exercise rows stay compact. |
+| 0.4 | 2026-11-05 | Matches the code after T5 (Q9): own-value fields have no floating label, so the exercises are a table under column headers; the editor sketch in §4.3.2 is redrawn; the "Not used" texts are shorter. The touch-target helper checks the nodes fully on screen (§4.1). |
