@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | In progress |
-| **Spec** | [SPEC.md](SPEC.md), version v0.3 |
+| **Spec** | [SPEC.md](SPEC.md), version v0.4 |
 | **Branch** | `phase/p7-runner-ui` |
 | **Last session** | 2026-11-05 |
 
@@ -25,12 +25,12 @@ Start or continue phase P7 (Workout runner UI) of the workout timer.
 
 ## Current state
 
-T1–T3 are done. The measurements confirm the design (SPEC v0.3). The runner's logic is in place and unit-tested: `RunnerView` (what each state shows) and `RunnerViewModel` (starting, commands, Stop dialog, Back, foreground, rebuilt runner, completed summary), with the real session and cue player. Nothing draws them yet: the runner and completed screens are still P1's placeholders, and `WorkoutSummary` sits in the placeholder's `CompletedScreen.kt` until T5.
+T1–T4 are done. The measurements confirm the design (SPEC v0.3). The runner's logic is unit-tested: `RunnerView` (what each state shows) and `RunnerViewModel` (starting, commands, Stop dialog, Back, foreground, rebuilt runner, completed summary), with the real session and cue player. `RunnerContent` draws every state, checked on the tablet; with Stop in the paused row of buttons (SPEC v0.4, Q7). Nothing opens it yet: `RunnerScreen` is still the placeholder entry, the completed screen is still P1's placeholder, and `WorkoutSummary` sits in the placeholder's `CompletedScreen.kt` until T5.
 
 ## Next steps
 
-1. `T4`: `RunnerContent` for every state of SPEC §4.3.2 (starting, unavailable, running and paused looks, the Stop dialog), `RunnerIcons.kt`, the text colours in `PhaseColors`, and `strings_runner.xml`. Fit the sizes into the measured 960 × 542 dp, with screenshots on the tablet. Test: `RunnerContentTest`.
-2. Then `T5`: the `RunnerScreen` entry, the completed screen and navigation.
+1. `T5`: the real `RunnerScreen` entry (SPEC §4.3.3–§4.3.7: keeping the screen on, `LifecycleEventEffect` for `ON_STOP` and `ON_START` with the `isChangingConfigurations` check, `BackHandler`, the outcomes after `RESUMED`); the completed screen and `strings_completed.xml`; `CompletedRoute` and both entries in `AppNavHost`. Delete `PlaceholderScreen`, `placeholder_note` and the placeholder's `runner_title`, `runner_workout_id` and `runner_finish`. Update `NavigationSmokeTest`. Test: `CompletedScreenTest`.
+2. Then `T6`: `RunnerScreenTest` and `RunnerActivityTest`.
 
 ## Tasks
 
@@ -41,7 +41,7 @@ The task IDs come from SPEC.md §7.
 | T1 | Done | Results in SPEC v0.3. The probe was deleted. |
 | T2 | Done | `RunnerView.kt`; `RunnerViewTest` (18 tests) |
 | T3 | Done | `RunnerViewModel.kt`; `RunnerViewModelTest` (28 tests), `GatedSpeaker`. No new dependency: `createSavedStateHandle()` comes with `navigation-compose`. |
-| T4 | To do | `RunnerContent`, icons, colours, sizes |
+| T4 | Done | `RunnerContent`, `RunnerIcons`, `PhaseColors.OnPhase` and `OnPaused`, `strings_runner.xml`; `RunnerContentTest` (14 tests, on the tablet). Paused layout changed with the user (Q7, SPEC v0.4). |
 | T5 | To do | `RunnerScreen` entry, completed screen, navigation, placeholders removed |
 | T6 | To do | Instrumented flows |
 | T7 | To do | Manifests, text check, manual checks, KDoc, pull request |
@@ -54,11 +54,17 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 |---|---|---|
 | 2026-11-05 | `confirmStop()` does nothing unless the Stop dialog is open. The Stop dialog closes by itself if the workout stops being paused. | A stop always goes through the confirmation (`EX-8`), and the dialog never shows over a running workout. |
 | 2026-11-05 | Back while starting cancels the start: no session is created, even if the audio becomes ready afterwards. | Leaving must not start a workout in the background (`EX-10`). |
+| 2026-11-05 | The time and the title use `BasicText` with `TextAutoSize.StepBased`: the title in a fixed 80 dp box (72 → 36 sp), the time in the height left over (220 → 48 sp). In SPEC v0.4. | One layout fits every state in 542 dp. The exercise, the state that matters most from 3 m, gets the largest time. |
+| 2026-11-05 | Stop is at the end of the paused row of buttons (Q7, SPEC v0.4, specification v0.10). | With Stop on its own row, the paused time shrank to about 50 sp in a round rest. The user chose this from screenshots of both layouts. |
+| 2026-11-05 | The unavailable screen sits in a `Surface`. | Without it, nothing set the content colour, and its text was black on the dark background (found in the gallery screenshots). |
 
 ## Known issues
 
 - **`am kill` doesn't end the app on this tablet,** even when it's cached. To check `EX-11`, end the cached process with `run-as … kill -9` instead (SPEC §4.3.5; the tablet skill now says so).
 - **The tablet's screen timeout is "never"** (`screen_off_timeout` 2147483647). Manual check 9 (`NF-2`) needs it at 30 s for a while, with the user's agreement, and then put back.
+- **`captureToImage()` can't capture dialogs below API 28.** The Stop dialog's look is checked on the device in T6 and T7 instead.
+- **Checking the screens' look:** a throwaway instrumented test (not committed) drew each `RunnerState` with `RunnerContent`, saved `captureToImage()` as PNGs in the app's cache, and `adb exec-out run-as … cat cache/<file>` pulled them. It's faster than driving the app to each state. A few `gallery-*.png` files are left in the debug app's cache; the next `connectedDebugAndroidTest` uninstall removes them.
+- **Piping Gradle through `grep | tail` hides its exit code,** so `./gradlew … | grep … && adb shell am instrument …` runs the old test APK when the build fails. With `set -o pipefail`, `grep -v` returns 1 when nothing is left to print, which looks like a failed build. Write Gradle's output to a file and check `$?` instead. (Proposed for CLAUDE.md and the tablet skill.)
 
 ## Pending wiring
 
