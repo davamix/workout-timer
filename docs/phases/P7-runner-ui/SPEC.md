@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.1 |
+| **Status** | Ready, v0.2 |
 | **Phase** | P7, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P4 (done). It also uses P2, P3, P5 and P6, all done. |
 | **Branch** | `phase/p7-runner-ui` |
@@ -27,7 +27,7 @@ Later phases build on it:
 
 ## 2. Requirements covered
 
-Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.8.
+Quoted from [SPECIFICATION.md](../../SPECIFICATION.md) v0.9.
 
 | ID | Requirement (quoted) | What this phase does for it |
 |---|---|---|
@@ -104,8 +104,8 @@ In the timeline, these are phase indexes 0 to 9.
 
 | Screen | Purpose | Main actions |
 |---|---|---|
-| **Workout runner** | Runs the workout (see §5.1–§5.3) | Running: pause. Paused: resume, previous, next, stop. |
-| **Workout completed** | Shows a "Well done!" message and a short summary (total time, rounds and exercises done). The total time is the workout's planned duration (`WM-6`), not the time spent running, so pauses and skipped exercises don't change it. | Back to list |
+| **Workout runner** | Runs the workout (see §5.1–§5.3) | Running: pause. Paused: resume, previous, next, stop. The system Back button pauses a running workout; on a paused one, it asks to stop, as Stop does (`EX-8`). |
+| **Workout completed** | Shows a "Well done!" message and a short summary: the total time, and the number of rounds and exercises. All three are the workout's planned values: the total time is its planned duration (`WM-6`), not the time spent running, and the counts include every round and exercise. Pauses and skipped exercises don't change them. | Back to list |
 
 "All screens are landscape." The tablet's screen is 960 × 600 dp in landscape. The specification's sketches, "low fidelity, layout only":
 
@@ -758,10 +758,14 @@ The checks that must all pass before the phase is merged.
 
 ## 9. Open questions
 
-| # | Question | Draft assumption |
+None at the moment. New questions are numbered from Q7.
+
+### Answered
+
+| # | Question | Decision |
 |---|---|---|
-| Q1 | What does the system Back button do on the runner? The specification doesn't say. Leaving at once would end a workout without the confirmation `EX-8` asks for. | **It's one step towards leaving:** while running, it pauses; while paused, it opens the Stop dialog; with the dialog open, it closes it. While starting, or when the workout can't run, it returns to the list (§4.3.3). |
-| Q2 | The completed screen shows "rounds and exercises done" (specification §6). After Next has skipped some, are those the workout's counts, or only the exercises actually run? | **The workout's counts,** like the total time, which is the planned one (P4 Q2). The §4.4 example always shows 2 rounds and 5 exercises. If agreed, specification §6 is clarified first. |
+| Q1 | What does the system Back button do on the runner? The specification didn't say. Leaving at once would end a workout without the confirmation `EX-8` asks for. | **It's one step towards leaving:** while running, it pauses; while paused, it opens the Stop dialog; with the dialog open, it closes it. While starting, or when the workout can't run, it returns to the list (§4.3.3). Added to specification §6 (v0.9). |
+| Q2 | The completed screen shows "rounds and exercises done" (specification §6). After Next has skipped some, are those the workout's counts, or only the exercises actually run? | **The workout's counts,** like the total time, which is the planned one (P4 Q2). The §4.4 example always shows 2 rounds and 5 exercises. Specification §6 says so since v0.9. |
 | Q3 | What does the runner show while the audio is being prepared? It's usually instant, but up to 10 s within about 10 s of a cold start (P5). | **Get ready's background, the workout's name, a progress indicator and "Getting ready…"**, with no buttons. Back returns to the list (§4.3.1). |
 | Q4 | What does the header show during a round rest? The current round has just ended, and the next one is named below the time (`UI-5`). | **The round that just ended,** as during its exercises: "Round 1/2 · Warm-up", with "Next round: Core" and "Next: Plank (60 s)" below the time (§4.3.2). |
 | Q5 | Previous isn't available in get ready (`EX-9`). Is it hidden or disabled? | **Shown disabled,** so the paused layout is the same in every phase (§4.3.3). |
@@ -772,3 +776,4 @@ The checks that must all pass before the phase is merged.
 | Version | Date | Changes |
 |---|---|---|
 | 0.1 | 2026-11-05 | First draft, based on specification v0.8 and plan v0.2 |
+| 0.2 | 2026-11-05 | Q1 to Q6 answered as assumed. Quotes specification v0.9, which adds Back on the runner (Q1) and the completed screen's counts (Q2). Status `Ready`. |

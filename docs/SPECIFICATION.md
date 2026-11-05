@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.8, P5 review applied |
-| **Last updated** | 2026-11-04 |
+| **Status** | Draft v0.9, P7 review applied |
+| **Last updated** | 2026-11-05 |
 | **Platform** | Android tablet, single user, personal use |
 
 This document describes *what* the app does. Once it is agreed, it becomes the base for the implementation plan.
@@ -273,8 +273,8 @@ All screens are landscape.
 |---|---|---|
 | **Workout list** (home) | Shows saved workouts with their total duration | Start, edit, duplicate, delete (with confirmation), new workout, open settings |
 | **Workout editor** | Edits a workout's name, defaults, rounds and exercises, including their own durations and rests | Save, cancel (asks for confirmation if there are unsaved changes) |
-| **Workout runner** | Runs the workout (see §5.1–§5.3) | Running: pause. Paused: resume, previous, next, stop. |
-| **Workout completed** | Shows a "Well done!" message and a short summary (total time, rounds and exercises done). The total time is the workout's planned duration (`WM-6`), not the time spent running, so pauses and skipped exercises don't change it. | Back to list |
+| **Workout runner** | Runs the workout (see §5.1–§5.3) | Running: pause. Paused: resume, previous, next, stop. The system Back button pauses a running workout; on a paused one, it asks to stop, as Stop does (`EX-8`). |
+| **Workout completed** | Shows a "Well done!" message and a short summary: the total time, and the number of rounds and exercises. All three are the workout's planned values: the total time is its planned duration (`WM-6`), not the time spent running, and the counts include every round and exercise. Pauses and skipped exercises don't change them. | Back to list |
 | **Settings** | App-wide settings: voice cues on/off (`TTS-9`) | Back |
 
 Runner screen sketches (low fidelity, layout only):
@@ -406,3 +406,4 @@ Not planned for v1; listed so they are not lost.
 | 0.6 | 2026-11-03 | From the P2 spec review (P2 Q1 and Q2): `WM-7` now requires exercise names, and caps every duration and rest at 99:59. |
 | 0.7 | 2026-11-03 | From the P4 spec review (P4 Q1 and Q2): Next and Previous never play the round-end sound (§5.1). The completed screen's total time is the planned duration (§6). |
 | 0.8 | 2026-11-04 | From the P5 spec review (P5 Q3 to Q5): the voice and the round-end sound use the media volume, which the volume keys always control (§5.3). Next on the last exercise also says "Workout complete. Well done!" (§5.1). A message when the English voice is missing is a future idea (§10). |
+| 0.9 | 2026-11-05 | From the P7 spec review (P7 Q1 and Q2): on the runner, the system Back button pauses a running workout and asks to stop a paused one. The completed screen's round and exercise counts are the workout's, like its total time (§6). |
