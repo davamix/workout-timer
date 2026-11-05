@@ -28,18 +28,19 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 | Fix Kotlin formatting | `./gradlew ktlintFormat` |
 | Unit tests only | `./gradlew test` |
 | Install on the tablet | `./gradlew installDebug` |
-| Instrumented tests on the tablet | `./gradlew connectedDebugAndroidTest` (uninstalls the app afterwards) |
+| Instrumented tests on the tablet | `./gradlew connectedDebugAndroidTest` (uninstalls the app afterwards, which deletes its workouts). To keep them, the `tablet` skill's `instrument` helper runs the whole suite on the installed app. |
 
 - Gradle runs on Android Studio's JDK; `JAVA_HOME` already points to it.
 - `adb` is not on PATH. The `tablet` skill has the full path.
 - Run `ktlintFormat` as its own command, before `build`. In a single call (`./gradlew ktlintFormat build`), the ktlint check can still report violations that the format step has just fixed, and the build fails.
 - `ktlintFormat` can't fix every line that's too long. It can leave one half-wrapped, and `build` then fails on ktlint. Wrap such lines by hand, for example by moving part of an expression into a local `val`. The reports in `app/build/reports/ktlint/` (or `core/…`) name the file and line.
-- On JDK 25, ktlint prints harmless `sun.misc.Unsafe` warnings. To hide them and keep only real output (Git Bash):
+- On JDK 25, ktlint prints harmless `sun.misc.Unsafe` warnings. To hide them and keep only real output, write the output to a file and filter that (Git Bash):
 
   ```bash
-  ./gradlew build --console=plain -q 2>&1 | grep -v -i 'unsafe\|^WARNING'
+  mkdir -p build; ./gradlew build --console=plain -q > build/gradle.log 2>&1; echo "exit=$?"; grep -v -i 'unsafe\|^WARNING' build/gradle.log | tail -30
   ```
 
+- **Keep Gradle's exit code.** Don't pipe Gradle into `grep` or `tail` and chain the next step with `&&`: the pipe returns the last command's code, so the next step runs after a failed build. In P7, `am instrument` then ran an old test APK. `set -o pipefail` doesn't help, because `grep -v` returns 1 when it has nothing left to print. Use the file, as above, or the `tablet` skill's `gradle` helper, which does the same.
 - `-q` hides the test counts. To total the unit test results per module and test task, after a build:
 
   ```bash
@@ -61,6 +62,10 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - `:app` holds the Android code: `data/`, `audio/`, `ui/<feature>/`, `navigation/`, and `di/AppContainer.kt`.
 - The base package is `io.github.davamix.workouttimer`.
 - **Screens** (since P6): each has an entry composable that takes its ViewModel, defaulting to `viewModel(factory = …)`, and a stateless `…Content` composable that draws the state. The factory, in the ViewModel's companion, gets the container with `(this[APPLICATION_KEY] as WorkoutTimerApp).container`. Tests build the ViewModel directly, with fakes.
+- **Navigation:**
+  - **A click that navigates** goes through `dropUnlessResumed`, or `NavBackStackEntry.ifResumed` in `AppNavHost` when it takes an argument, so a double tap can't open a screen twice.
+  - **Navigation driven by a ViewModel state** works differently, for an outcome such as the runner's `Completed` or `Exited`. Report it once from a `LaunchedEffect` on that state, after waiting with `lifecycle.currentStateFlow.first { it.isAtLeast(RESUMED) }`, and pass a plain lambda.
+  - **Why the wait:** a screen Android rebuilds after closing the app is composed before its entry is resumed. `dropUnlessResumed` would silently drop its call (P7 SPEC §4.3.7).
 
 ## Conventions
 
@@ -80,6 +85,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
     - With the soft keyboard up, Back only closes the keyboard. Call `closeSoftKeyboard()` before `pressBack()`.
     - `and` and `or` on matchers are members and need no import. `assert(…)` on a node is an extension, imported from `androidx.compose.ui.test.assert`.
     - Check touch targets (`NF-6`) with `assertTouchTargetsAtLeast()`. Material 3 icon buttons lay out at 40 dp but take touches over 48 dp, so it checks the touch bounds of the nodes fully on screen.
+    - `captureToImage()` reads the colours and look of a screen in a test, for example a background colour from one pixel. It can't capture a dialog below API 28: it throws.
   - **JUnit 4 asserts:** `assertNotNull` returns nothing, so its result can't be used. To check a value and then use it, write `val voice = checkNotNull(x) { "No voice selected" }`.
   - **Fixtures:** `core/src/test/.../core/ExampleWorkouts.kt` for `:core` and `app/src/test/.../data/SampleWorkouts.kt` for `:app`. Both hold the specification §4.4 example. `:app` IDs only use characters that are valid in file names.
   - **Test helpers** (since P6):

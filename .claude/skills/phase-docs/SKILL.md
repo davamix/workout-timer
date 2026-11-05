@@ -42,8 +42,13 @@ Phase folders:
    - List the packages and files the phase owns. Name every shared file it changes.
    - Tasks: in order, each one session or less, with IDs `T1`, `T2`, …
    - **Measure first what the documents can't tell.** If the design depends on device or platform behaviour that nobody has measured, make a task that measures it on the tablet before the design relies on it. That covers timing, latency, and what Android does in the background or on a cold start. Use a throwaway probe (`tablet` skill, "Measuring device behaviour"), and say in §9 what the design assumes until then. In P5, the TTS start-up delay only came to light in T3, and forced SPEC v0.3 in the middle of the phase.
+   - **Check a screen's layout before relying on it.** For each screen the phase adds or changes:
+     - Give the SPEC the measured content area, 960 × 542 dp (`tablet` skill, "Device"). Size the layout and its text against that, not the 960 × 600 dp screen.
+     - Plan an early task that draws every state of the screen on the tablet, as screenshots (`tablet` skill, "Checking a screen in every state"). Later tasks that depend on the layout come after it.
+     - In P7, the sketched paused layout didn't fit 542 dp: the time shrank to about 50 sp. That forced SPEC v0.4 in T4.
    - **UI text is a suggestion.** List a screen's main texts so the review can see them, and say they are suggestions. The phase's `strings_<feature>.xml` is the source of the final wording. Changing it during implementation doesn't need a new SPEC version. Only text quoted from the specification is fixed. In P6, shortening one label still went into a SPEC version (v0.4).
    - Every covered requirement needs a test or a manual check in §6.
+   - **Instrumented tests in the tasks and done criteria:** write "every instrumented test passes on the tablet", without naming the command. `connectedDebugAndroidTest` uninstalls the app and deletes the user's workouts, and the manual checks often need them. A whole-suite `instrument` run (`tablet` skill) checks the same thing and keeps the app's data. In P7, naming the command turned that choice into a recorded deviation.
    - Anything unclear goes into §9 as a question, with the assumption the draft uses.
 6. **Write HANDOVER.md.** Copy `docs/phases/_templates/HANDOVER_TEMPLATE.md` as `HANDOVER.md`:
    - Status: Not started.

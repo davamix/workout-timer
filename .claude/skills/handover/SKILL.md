@@ -9,10 +9,10 @@ description: End-of-session routine for a workout-timer phase. It runs the check
 
 1. **Run the checks.**
    - Run `./gradlew ktlintFormat`, then `./gradlew build` as a separate command (see CLAUDE.md). The build covers compilation, unit tests, lint, ktlint and the no-INTERNET check. Total the test results with the one-liner in CLAUDE.md.
-   - **Instrumented tests:** if UI or Android code changed since the last full instrumented run, and the tablet is connected, run `./gradlew connectedDebugAndroidTest`. The `tablet` skill covers the device.
-     - It uninstalls the app when it ends, which deletes the debug app's data, such as workouts the user made during manual checks. If the user may have data there, ask first, or run only the changed test classes with `am instrument` (`tablet` skill), which keeps it.
-     - Afterwards, run `./gradlew installDebug` to leave the app installed.
-     - If only documents changed since a full run passed, don't run it again. Say which commit it ran on.
+   - **Instrumented tests:** if UI or Android code changed since the last full instrumented run, and the tablet is connected, run every instrumented test. The `tablet` skill covers the device.
+     - **The user may have data in the debug app,** such as workouts made for manual checks: run the whole suite with `gradle installDebug installDebugAndroidTest && instrument` (`tablet` skill, helpers). It runs the same tests and keeps the data.
+     - **Otherwise,** `./gradlew connectedDebugAndroidTest` works too. It uninstalls the app when it ends, which deletes that data; afterwards, run `./gradlew installDebug` to leave the app installed. If unsure, ask first.
+     - If only documents changed since a full run passed, don't run it again. Say which commit it ran on, and how.
    - **Merged manifests:** if dependencies or the manifest changed, check that the merged manifests gain no permission or component, with "Comparing the merged manifests with `main`" below.
    - When a unit test fails, print each failure's name and message with the one-liner in CLAUDE.md.
    - Note the results exactly. Don't call something passing unless it ran and passed.
