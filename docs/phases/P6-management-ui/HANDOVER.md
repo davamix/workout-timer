@@ -82,7 +82,8 @@ Connections this phase leaves for later phases:
   - the list's Start opens `RunnerRoute(workoutId)`;
   - the runner must validate the workout before building a timeline, because `Timeline.of` throws on an invalid one (P3 Q2). It also decides what to show for an invalid or missing workout;
   - `formatTotalDuration()` (`ui/common/TotalDuration.kt`) is there for the completed screen's planned total;
-  - `PlaceholderScreen` and `placeholder_note` are still used by the runner and completed placeholders. P7 deletes them with the last placeholder.
+  - `PlaceholderScreen` and `placeholder_note` are still used by the runner and completed placeholders. P7 deletes them with the last placeholder;
+  - `NavigationSmokeTest` seeds a workout (`smoke-test-workout`), presses its Start, and then clicks the runner placeholder's Finish (`runner_finish`). P7 updates those two runner tests for the real runner.
 - **P8:** the end-to-end test (create a workout in the editor, run it, complete it), and checking `WM-8` through the UI as part of acceptance.
 
 ## How to verify
