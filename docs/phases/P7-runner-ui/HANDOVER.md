@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | Not started |
-| **Spec** | [SPEC.md](SPEC.md), version v0.1 |
+| **Status** | In progress |
+| **Spec** | [SPEC.md](SPEC.md), version v0.2 |
 | **Branch** | `phase/p7-runner-ui` |
-| **Last session** | — |
+| **Last session** | 2026-11-05 |
 
 This document tracks the phase as it's built. Update it at the end of every session, so the next one can continue from here.
 
@@ -25,12 +25,11 @@ Start or continue phase P7 (Workout runner UI) of the workout timer.
 
 ## Current state
 
-Not started. The runner and completed screens are still P1's placeholders: Start on the list opens a runner placeholder with a Finish button.
+The SPEC is `Ready` (v0.2, all six questions answered as assumed), and the branch exists. No code yet: the runner and completed screens are still P1's placeholders, and Start on the list opens a runner placeholder with a Finish button.
 
 ## Next steps
 
-1. Get SPEC.md reviewed and marked `Ready` (its §9 has six open questions).
-2. Then start with `T1`: the lifecycle, content-area and process-death measurements on the tablet (SPEC §7).
+1. `T1`: the lifecycle, content-area and process-death measurements on the tablet (SPEC §7). The user turns the tablet over during the lifecycle probe.
 
 ## Tasks
 
@@ -74,3 +73,8 @@ P7 completes the pending wiring that P4, P5 and P6 left for it (SPEC §4.5).
 ## Session log
 
 Newest first.
+
+### 2026-11-05
+
+- Done: SPEC v0.1 written, reviewed, and v0.2 marked `Ready`, with specification v0.9 (Back on the runner, the completed screen's counts). Phase marked in progress; branch `phase/p7-runner-ui` created.
+- Notes: nothing implemented yet.
