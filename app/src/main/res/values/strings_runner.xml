@@ -1,5 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- The runner screen (P7). -->
 <resources>
+    <!-- Header: round number of count, then its name (UI-1, UI-6). -->
+    <string name="runner_round">Round %1$d/%2$d · %3$s</string>
+    <!-- Header, during an exercise: its number of the round's count (UI-6). -->
+    <string name="runner_exercise">Exercise %1$d/%2$d</string>
+
+    <string name="runner_get_ready">GET READY</string>
+    <string name="runner_rest">REST</string>
+    <string name="runner_paused">PAUSED</string>
+
+    <!-- The exercise after get ready or a rest, with its duration in seconds (EX-7, UI-5). -->
+    <string name="runner_next_exercise">Next: %1$s (%2$d s)</string>
+    <!-- After a round rest: the round that starts (UI-5). -->
+    <string name="runner_next_round">Next round: %1$s</string>
+
+    <string name="runner_pause">Pause</string>
+    <string name="runner_resume">Resume</string>
+    <string name="runner_previous">Previous</string>
+    <string name="runner_next">Next</string>
+    <string name="runner_stop">Stop</string>
+
+    <string name="runner_stop_title">Stop the workout?</string>
+    <string name="runner_stop_text">You\'ll go back to the workout list.</string>
+    <string name="runner_stop_confirm">Stop</string>
+    <string name="runner_stop_cancel">Cancel</string>
+
+    <string name="runner_starting">Getting ready…</string>
+    <string name="runner_unavailable">This workout can\'t be started.</string>
+    <string name="runner_back_to_list">Back to list</string>
+
+    <!-- The placeholder's, until P7 T5. -->
     <string name="runner_title">Workout</string>
     <string name="runner_workout_id">Workout: %1$s</string>
     <string name="runner_finish">Finish</string>
