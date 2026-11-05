@@ -9,11 +9,15 @@ description: End-of-session routine for a workout-timer phase. It runs the check
 
 1. **Run the checks.**
    - Run `./gradlew ktlintFormat`, then `./gradlew build` as a separate command (see CLAUDE.md). The build covers compilation, unit tests, lint, ktlint and the no-INTERNET check. Total the test results with the one-liner in CLAUDE.md.
-   - If UI or Android code changed and the tablet is connected, also run `./gradlew connectedDebugAndroidTest`. The `tablet` skill covers the device. That task uninstalls the app when it ends, so run `./gradlew installDebug` afterwards to leave it installed.
+   - **Instrumented tests:** if UI or Android code changed since the last full instrumented run, and the tablet is connected, run `./gradlew connectedDebugAndroidTest`. The `tablet` skill covers the device.
+     - It uninstalls the app when it ends, which deletes the debug app's data, such as workouts the user made during manual checks. If the user may have data there, ask first, or run only the changed test classes with `am instrument` (`tablet` skill), which keeps it.
+     - Afterwards, run `./gradlew installDebug` to leave the app installed.
+     - If only documents changed since a full run passed, don't run it again. Say which commit it ran on.
+   - **Merged manifests:** if dependencies or the manifest changed, check that the merged manifests gain no permission or component, with "Comparing the merged manifests with `main`" below.
    - When a unit test fails, print each failure's name and message with the one-liner in CLAUDE.md.
    - Note the results exactly. Don't call something passing unless it ran and passed.
 2. **Push decisions up.**
-   - **Does it need a new SPEC version?** A decision that only settles a point SPEC.md leaves open stays in HANDOVER.md. One that contradicts SPEC.md's text gets a new SPEC version, with a change-log entry. That includes a change to an internal API or behaviour the SPEC describes.
+   - **Does it need a new SPEC version?** A decision that only settles a point SPEC.md leaves open stays in HANDOVER.md. One that contradicts SPEC.md's text gets a new SPEC version, with a change-log entry. That includes a change to an internal API or behaviour the SPEC describes. New wording for a UI text the SPEC lists as a suggestion isn't a contradiction: the strings file holds the final wording (`phase-docs`, step 5).
    - **Specification or plan first.** If a decision changes the specification or the plan, update those first and tell the user.
    - **Where SPEC versions go:** to `main`, like every version of these documents (CLAUDE.md, "Git"). Commit them there, from a worktree if this working copy is busy, and push. Then run `git merge main` on the phase branch, so the pull request carries the same SPEC.md as `main`. Commit any pending work on the branch before switching. The full steps are in the `phase-docs` skill, "SPEC change during implementation".
    - **Note it in the handover.** Mention the new version in the decision's row.
@@ -75,3 +79,26 @@ PN of the [implementation plan](docs/IMPLEMENTATION_PLAN.md): <goal, from SPEC.m
 
 <from HANDOVER.md, or "None.">
 ```
+
+## Comparing the merged manifests with `main`
+
+Lists the permissions and components of the debug and release manifests, on the branch and on `main`, and compares them. `main` is built in a scratch worktree, so this working copy stays on the branch. Run it in Git Bash after `./gradlew build`, with `sp` set to the session's scratchpad.
+
+```bash
+sp=<scratchpad>
+# Permissions and components of a merged manifest, one "<tag> <name>" per line.
+components() { tr '\n' ' ' < "$1" | grep -o -E '<(uses-permission|permission|activity|activity-alias|service|receiver|provider)[^>]*>' | sed -E 's/^<([a-z-]+)[^>]*android:name="([^"]*)".*/\1 \2/' | sort; }
+manifest() { find "$1/app/build/intermediates/merged_manifest/$2" -name AndroidManifest.xml | head -1; }
+
+./gradlew :app:processDebugMainManifest :app:processReleaseMainManifest --console=plain -q 2>&1 | grep -v -i 'unsafe\|^WARNING'
+git worktree add -q --detach "$sp/main-wt" origin/main && cp local.properties "$sp/main-wt/" 2>/dev/null
+(cd "$sp/main-wt" && ./gradlew :app:processDebugMainManifest :app:processReleaseMainManifest --console=plain -q 2>&1 | grep -v -i 'unsafe\|^WARNING')
+for v in debug release; do
+  a=$(manifest "$sp/main-wt" $v); b=$(manifest . $v)
+  if [ -z "$a" ] || [ -z "$b" ]; then echo "$v: merged manifest not found"; continue; fi
+  diff <(components "$a") <(components "$b") && echo "$v: same as main ($(components "$b" | wc -l) entries)"
+done
+git worktree remove --force "$sp/main-wt"
+```
+
+Every difference is a line starting with `<` (only on `main`) or `>` (new on the branch). A new permission or component must be explained in the handover, or removed. A changed attribute, such as `windowSoftInputMode`, doesn't show here: check that one in the manifest itself.

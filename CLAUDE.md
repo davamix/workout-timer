@@ -60,6 +60,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - `:core` is pure Kotlin: model, timeline, engine, cue planner. Never add Android dependencies to it (plan D-2).
 - `:app` holds the Android code: `data/`, `audio/`, `ui/<feature>/`, `navigation/`, and `di/AppContainer.kt`.
 - The base package is `io.github.davamix.workouttimer`.
+- **Screens** (since P6): each has an entry composable that takes its ViewModel, defaulting to `viewModel(factory = …)`, and a stateless `…Content` composable that draws the state. The factory, in the ViewModel's companion, gets the container with `(this[APPLICATION_KEY] as WorkoutTimerApp).container`. Tests build the ViewModel directly, with fakes.
 
 ## Conventions
 
@@ -67,14 +68,23 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - **Permissions:** none. `INTERNET` is forbidden and fails the build (NF-4).
 - **Versions:** pinned in `gradle/libs.versions.toml`. AGP must stay at 9.3 or lower while Android Studio 2026.1.3 is the installed IDE.
 - **Kotlin style:** ktlint, official style (`.editorconfig`). Run `ktlintFormat` before committing.
+- **Formatting numbers:** don't call `String.format` without a `Locale`. Lint warns (`DefaultLocale`), and the result would follow the device's language. Pad with `padStart` instead, as `formatTotalDuration()` does.
 - **Tests:**
   - **Unit tests:** in both modules, JUnit Jupiter, with sentence names in backticks. With AGP 9, `./gradlew build` runs only `:app`'s debug unit tests (`testDebugUnitTest`).
   - **Characters in test names:** names in backticks can't contain `.` `;` `:` `/` `\` `[` `]` `<` `>` on the JVM; the compiler rejects them. Use commas, or "and", instead.
   - **Coroutine tests:** in `runTest`, `advanceUntilIdle()` ignores work that only `backgroundScope` has scheduled. Code launched there, such as a `WorkoutSession`'s timer, doesn't run. Wait in the foreground instead: `session.state.first { … }` or `session.events.toList()`. `advanceTimeBy()` does run background work. For the clock, use `Clock { testScheduler.currentTime }`.
   - **Instrumented tests** (`app/src/androidTest`): JUnit 4 with camelCase names. Names with spaces don't compile to DEX below API 30, and `minSdk` is 26.
-  - **Compose UI tests:** use the rules from `androidx.compose.ui.test.junit4.v2` (`createComposeRule`, `createAndroidComposeRule`). The v1 rules are deprecated in Compose BOM 2026.09.00. After an action that starts a coroutine, wait for its result (`waitUntil { … }` or `waitForIdle()`) before asserting.
+  - **ViewModel tests** (`:app`): register `MainDispatcherExtension`, so `viewModelScope` runs on a test dispatcher. Compose snapshot state (`mutableStateOf`) works in these JVM tests.
+  - **Compose UI tests:** use the rules from `androidx.compose.ui.test.junit4.v2` (`createComposeRule`, `createAndroidComposeRule`). The v1 rules are deprecated in Compose BOM 2026.09.00. After an action that starts a coroutine, wait for its result (`waitUntil { … }` or `waitForIdle()`) before asserting. Also:
+    - A `LazyColumn` item exists only once it's scrolled into composition. Tag the list, and call `performScrollToNode(matcher)` on it before using an item.
+    - With the soft keyboard up, Back only closes the keyboard. Call `closeSoftKeyboard()` before `pressBack()`.
+    - `and` and `or` on matchers are members and need no import. `assert(…)` on a node is an extension, imported from `androidx.compose.ui.test.assert`.
+    - Check touch targets (`NF-6`) with `assertTouchTargetsAtLeast()`. Material 3 icon buttons lay out at 40 dp but take touches over 48 dp, so it checks the touch bounds of the nodes fully on screen.
   - **JUnit 4 asserts:** `assertNotNull` returns nothing, so its result can't be used. To check a value and then use it, write `val voice = checkNotNull(x) { "No voice selected" }`.
   - **Fixtures:** `core/src/test/.../core/ExampleWorkouts.kt` for `:core` and `app/src/test/.../data/SampleWorkouts.kt` for `:app`. Both hold the specification §4.4 example. `:app` IDs only use characters that are valid in file names.
+  - **Test helpers** (since P6):
+    - `app/src/test/.../ui/`: `MainDispatcherExtension`, and `TestRepositories.kt`, whose in-memory repositories can hold back their data or fail writes with `IOException`.
+    - `app/src/androidTest/.../ui/`: `UiTestWorkouts.kt` (the §4.4 example, and `withoutIds()` to compare structures), and `TouchTargets.kt`.
 - **Ownership:** each phase owns its packages. Shared files (the catalog, build files, `AppContainer`, `AppNavHost`) only get that phase's own entries.
 
 ## Git

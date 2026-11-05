@@ -29,6 +29,7 @@ Phase folders:
 3. **Read the code it builds on.** Read only the merged code this phase uses: the interfaces from its dependencies, plus the shared files it will touch.
 4. **Read what earlier phases learned.** A session that implements this phase reads only this phase's documents, so lessons left in other handovers never reach it unless this SPEC carries them.
    - For each phase this one depends on in plan §5.1, and their own dependencies in turn, read three sections of its HANDOVER.md: "Decisions and deviations", "Known issues" and "Pending wiring".
+   - **Same layer:** read the same three sections for every `Done` phase that works in the same layer as this one, even when it isn't a dependency. A UI phase reads the other UI phases: P6 for P7, and P6 and P7 for P8. Their test helpers, code patterns and platform pitfalls apply here too. For example, P7 depends only on P4, but its screens and tests follow P6's.
    - Then read "Pending wiring" in the HANDOVER.md of every other phase marked `Done` in plan §5.1, and take the items that name this phase. The plan's dependencies don't list every phase whose code this one wires up. For example, P7 depends only on P4, but completes P5's audio wiring.
    - Carry what applies into SPEC.md:
      - pending wiring this phase must complete, or must leave for a later phase;
@@ -41,6 +42,7 @@ Phase folders:
    - List the packages and files the phase owns. Name every shared file it changes.
    - Tasks: in order, each one session or less, with IDs `T1`, `T2`, …
    - **Measure first what the documents can't tell.** If the design depends on device or platform behaviour that nobody has measured, make a task that measures it on the tablet before the design relies on it. That covers timing, latency, and what Android does in the background or on a cold start. Use a throwaway probe (`tablet` skill, "Measuring device behaviour"), and say in §9 what the design assumes until then. In P5, the TTS start-up delay only came to light in T3, and forced SPEC v0.3 in the middle of the phase.
+   - **UI text is a suggestion.** List a screen's main texts so the review can see them, and say they are suggestions. The phase's `strings_<feature>.xml` is the source of the final wording. Changing it during implementation doesn't need a new SPEC version. Only text quoted from the specification is fixed. In P6, shortening one label still went into a SPEC version (v0.4).
    - Every covered requirement needs a test or a manual check in §6.
    - Anything unclear goes into §9 as a question, with the assumption the draft uses.
 6. **Write HANDOVER.md.** Copy `docs/phases/_templates/HANDOVER_TEMPLATE.md` as `HANDOVER.md`:
