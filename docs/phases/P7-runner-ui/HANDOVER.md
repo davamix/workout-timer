@@ -25,12 +25,19 @@ Start or continue phase P7 (Workout runner UI) of the workout timer.
 
 ## Current state
 
-T1–T4 are done. The measurements confirm the design (SPEC v0.3). The runner's logic is unit-tested: `RunnerView` (what each state shows) and `RunnerViewModel` (starting, commands, Stop dialog, Back, foreground, rebuilt runner, completed summary), with the real session and cue player. `RunnerContent` draws every state, checked on the tablet; with Stop in the paused row of buttons (SPEC v0.4, Q7). Nothing opens it yet: `RunnerScreen` is still the placeholder entry, the completed screen is still P1's placeholder, and `WorkoutSummary` sits in the placeholder's `CompletedScreen.kt` until T5.
+T1–T5 are done. A workout runs from the list's Start on the tablet, with its cues, to the completed screen. The runner's logic is unit-tested (`RunnerView`, `RunnerViewModel`), and its content and the completed screen have Compose tests that pass on the tablet. A short live check on the tablet confirmed:
+
+- the window has `FLAG_KEEP_SCREEN_ON` while the runner is open, and not on the list afterwards;
+- Home pauses the workout;
+- Back while paused opens the Stop dialog;
+- Stop returns to the list.
+
+The placeholders are gone.
 
 ## Next steps
 
-1. `T5`: the real `RunnerScreen` entry (SPEC §4.3.3–§4.3.7: keeping the screen on, `LifecycleEventEffect` for `ON_STOP` and `ON_START` with the `isChangingConfigurations` check, `BackHandler`, the outcomes after `RESUMED`); the completed screen and `strings_completed.xml`; `CompletedRoute` and both entries in `AppNavHost`. Delete `PlaceholderScreen`, `placeholder_note` and the placeholder's `runner_title`, `runner_workout_id` and `runner_finish`. Update `NavigationSmokeTest`. Test: `CompletedScreenTest`.
-2. Then `T6`: `RunnerScreenTest` and `RunnerActivityTest`.
+1. `T6`: `RunnerScreenTest` (a real ViewModel with in-memory repositories and `SilentAudio.kt`) and `RunnerActivityTest` (in `MainActivity`: `recreate()`, `moveToState(CREATED)`, the keep-screen-on flag), as SPEC §6 describes. Then run every instrumented test with `connectedDebugAndroidTest`.
+2. Then `T7`: manifests, the text check, the manual checks with the user, KDoc, the pull request.
 
 ## Tasks
 
@@ -42,7 +49,7 @@ The task IDs come from SPEC.md §7.
 | T2 | Done | `RunnerView.kt`; `RunnerViewTest` (18 tests) |
 | T3 | Done | `RunnerViewModel.kt`; `RunnerViewModelTest` (28 tests), `GatedSpeaker`. No new dependency: `createSavedStateHandle()` comes with `navigation-compose`. |
 | T4 | Done | `RunnerContent`, `RunnerIcons`, `PhaseColors.OnPhase` and `OnPaused`, `strings_runner.xml`; `RunnerContentTest` (14 tests, on the tablet). Paused layout changed with the user (Q7, SPEC v0.4). |
-| T5 | To do | `RunnerScreen` entry, completed screen, navigation, placeholders removed |
+| T5 | Done | `RunnerScreen` entry, `CompletedScreen` and `CompletedContent`, `CompletedRoute`, `AppNavHost`; placeholders removed; `NavigationSmokeTest` updated; `CompletedScreenTest` (5 tests). On the tablet, with `RunnerContentTest`: 25 tests pass. |
 | T6 | To do | Instrumented flows |
 | T7 | To do | Manifests, text check, manual checks, KDoc, pull request |
 
