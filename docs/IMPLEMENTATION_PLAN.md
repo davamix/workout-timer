@@ -186,7 +186,7 @@ Rules:
 | P5 | Audio cues | P4 | Done |
 | P6 | Workout management UI | P2 | Done |
 | P7 | Workout runner UI | P4 | Done |
-| P8 | Integration and v1.0 | P3, P5, P6, P7 | Ready |
+| P8 | Integration and v1.0 | P3, P5, P6, P7 | In progress |
 
 ```mermaid
 flowchart LR
