@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.11, P8 spec review |
+| **Status** | v1.0, for Workout Timer 1.0.0 |
 | **Last updated** | 2026-11-06 |
 | **Platform** | Android tablet, single user, personal use |
 
-This document describes *what* the app does. Once it is agreed, it becomes the base for the implementation plan.
+This document describes *what* the app does. It is the base for the implementation plan.
 
 How to read it:
 
@@ -15,7 +15,7 @@ How to read it:
   - **Requested**: asked for in the original brief or in review answers.
   - **Agreed**: a proposal accepted in review.
   - **Proposed**: a suggestion still waiting for review.
-- Unresolved points are listed in [§8 Open questions](#8-open-questions), each with the assumption this draft makes for now.
+- Unresolved points are listed in [§8 Open questions](#8-open-questions), each with the assumption this version makes for now.
 
 ---
 
@@ -344,7 +344,7 @@ Paused:
 
 ## 8. Open questions
 
-None at the moment. New questions are numbered from Q19, and each one lists the assumption the draft uses until it is answered.
+None at the moment. New questions are numbered from Q19, and each one lists the assumption the document uses until it is answered.
 
 ## 9. Decisions
 
@@ -408,3 +408,4 @@ Not planned for v1; listed so they are not lost.
 | 0.9 | 2026-11-05 | From the P7 spec review (P7 Q1 and Q2): on the runner, the system Back button pauses a running workout and asks to stop a paused one. The completed screen's round and exercise counts are the workout's, like its total time (§6). |
 | 0.10 | 2026-11-05 | From P7 T4 (P7 Q7): in the paused sketch, Stop is at the end of the row of buttons rather than under it, so the time has room to stay large (§6). |
 | 0.11 | 2026-11-06 | From the P8 spec review (P8 Q2): `NF-1` counts from the start of the get-ready countdown, so preparing the audio and "Get ready in" aren't part of the ±1 s. |
+| 1.0 | 2026-11-06 | Version 1.0: what Workout Timer 1.0.0 does (P8 Q7). No requirement changed since v0.11. Every requirement was checked on the tablet, as [the acceptance record](phases/P8-integration/ACCEPTANCE.md) shows. New work starts a new version. |

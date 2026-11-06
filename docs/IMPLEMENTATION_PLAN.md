@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.3, P8 spec review |
+| **Status** | v1.0, for Workout Timer 1.0.0 |
 | **Last updated** | 2026-11-06 |
-| **Based on** | [SPECIFICATION.md](SPECIFICATION.md) v0.11 |
+| **Based on** | [SPECIFICATION.md](SPECIFICATION.md) v1.0 |
 
 [SPECIFICATION.md](SPECIFICATION.md) says *what* the app does. This plan says *how* it is built: the architecture, the technical decisions, and the phases of work. Each phase gets its own specification and handover documents (see [§6](#6-working-method)).
 
@@ -457,3 +457,4 @@ None at the moment. New questions are numbered from PQ-6.
 | 0.1 | 2026-11-02 | First draft, based on specification v0.4. |
 | 0.2 | 2026-11-02 | Review applied: PQ-1 to PQ-5 answered. Based on specification v0.5: new requirements `EX-11` (P7) and `WM-9` and `WM-10` (P6). The release is attached to a GitHub release. `D-12` notes that the installed Android Studio limits AGP to 9.3. Actions are pinned to commit SHAs. Status changes go straight to `main`. |
 | 0.3 | 2026-11-06 | From the P8 spec review (P8 Q5): §3 lists what AndroidX adds to the merged manifest. Based on specification v0.11. |
+| 1.0 | 2026-11-06 | Version 1.0, for Workout Timer 1.0.0 (P8 Q7). Based on specification v1.0. No decision changed since v0.3. New work starts a new version. |
