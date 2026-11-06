@@ -25,17 +25,18 @@ Start or continue phase P8 (Integration and v1.0) of the workout timer.
 
 ## Current state
 
-T1–T3 are done, on SPEC v0.3.
+T1–T4 are done, on SPEC v0.3. Acceptance hasn't started.
 
 - A run can be timed from outside the app to about ±0.15 s.
 - The release APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app. Its list is empty.
-- `EndToEndTest` passes: 10 of 10 runs, fresh-installed and warm.
-- No production Kotlin has changed. No wiring is left to do (read on `main` at `6d2cc6d`; T4 confirms it).
+- Every instrumented test passes, including `EndToEndTest`.
+- No production Kotlin has changed, and no wiring is left to do.
+- `ACCEPTANCE.md` lists every requirement, all still "To do".
 
 ## Next steps
 
-1. `T4`: run the whole instrumented suite, including the voice setting check under "Known issues"; repeat the wiring and security checks; write `ACCEPTANCE.md`.
-2. `T5`: acceptance without sound.
+1. `T5`: acceptance without sound. Rebuild the release APK at the branch's `HEAD`, install it with `adb install -r`, and put the commit and its SHA-256 in `ACCEPTANCE.md`'s header. A13 changes the screen timeout, so ask the user first.
+2. `T6`: acceptance with the user.
 
 ## Tasks
 
@@ -46,7 +47,7 @@ The task IDs come from SPEC.md §7.
 | T1 | Done | The method gives about ±0.15 s; numbers under "How to verify" |
 | T2 | Done | Signed APK installed. `./gradlew build` still has to pass without the properties in CI, which the pull request's run proves. |
 | T3 | Done | 10 of 10 runs pass |
-| T4 | To do | Baseline and `ACCEPTANCE.md` |
+| T4 | Done | 81 instrumented tests pass; wiring and security checks clean; `ACCEPTANCE.md` written |
 | T5 | To do | Acceptance without sound |
 | T6 | To do | Acceptance with the user |
 | T7 | To do | The 60-minute run |
@@ -61,14 +62,13 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 | Date | Decision | Reason |
 |---|---|---|
 | 2026-11-06 | The keystore is at `C:\Users\davam_p3h1i13\workout-timer.keystore`, and its certificate is `CN=Daniel Valcarce, C=ES`. In SPEC v0.3 (Q8). | The user created it that way, and chose to keep their name, which is already public in the commits. |
-| 2026-11-06 | `EndToEndTest` closes the soft keyboard before each click in the form. | `MainActivity` resizes for the keyboard, and focus moving from a name to a number swaps the letter keyboard for the shorter number pad a moment later. If that lands between `performScrollToNode` and `performClick`, the round is never added: 10 of 18 runs failed this way, at both a fresh install and warm. With the fix, 10 of 10 pass. Bounds logged before the click showed it: the button stayed at y=521 when the round was added, and stayed at y=941 or had empty bounds when it wasn't. The test still uses the real keyboard. |
+| 2026-11-06 | `EndToEndTest` closes the soft keyboard before each click in the form. | `MainActivity` resizes for the keyboard, and focus moving from a name to a number swaps the letter keyboard for the shorter number pad a moment later. If that lands between `performScrollToNode` and `performClick`, the round is never added: 13 of 23 runs failed this way, at both a fresh install and warm. With the fix, 10 of 10 pass. Bounds logged before the click showed it: the button stayed at y=521 when the round was added, and stayed at y=941 or had empty bounds when it wasn't. The test still uses the real keyboard. |
 | 2026-11-06 | `EndToEndTest` doesn't use `FLAG_ALT_FOCUSABLE_IM`. | It was tried first, to keep the keyboard away, but the keyboard still showed on this tablet, and 5 of 10 runs failed. |
 
 ## Known issues
 
 Lessons from earlier phases that apply here are in SPEC §4.5.
 
-- **Voice cues were off in the debug app when P8 started.** T1 read `false` before changing anything, and put it back to `false` afterwards. Nobody knows yet what turned them off: P7's manual check 11 says to turn them back on. In T4, turn them on, run the whole instrumented suite, and read the setting again. If the suite leaves them off, a test isn't restoring them.
 - **For CLAUDE.md, in T8:** a click on a node with empty bounds raises no error, and lands at the screen's corner. Under `MainActivity`, close the keyboard before a click that follows a scroll.
 
 ## Pending wiring
@@ -111,11 +111,18 @@ The difference, about 1.2 s, is "Get ready in".
 
 **Unit tests** on `caf02d3` plus T3: 212 in `:app` and 245 in `:core`, no failures.
 
+**T4, the baseline,** on commit `11873a9`, on 2026-11-06:
+
+- Every instrumented test passes on the tablet: `OK (81 tests)` in 172 s, with `gradle installDebug installDebugAndroidTest && instrument`. `PersistenceCheck`'s 3 steps are skipped, as always.
+- Voice cues in the debug app were off when P8 started. To see whether a test turns them off, T4 turned them on and ran the whole suite: they were still on afterwards, so no test does. They're on now.
+- The merged release manifest holds exactly what SPEC §5 expects. There's no secret in a tracked file, no user-facing text in the Kotlin sources, and no network or analytics library. `app/src/main` and `core/src/main` haven't changed since the phase started.
+- `ACCEPTANCE.md` holds all 50 requirement IDs, compared with the specification by script, plus the §5.3 volume rule.
+
 ## Session log
 
 Newest first.
 
 ### 2026-11-06
 
-- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3.
+- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3. T4.
 - Notes: measured on the tablet for the SPEC: a `dumpsys window` poll through adb takes about 130 ms, and one `input` command about 750 ms. The first `input` took 1034 ms.
