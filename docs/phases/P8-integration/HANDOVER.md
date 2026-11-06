@@ -25,18 +25,19 @@ Start or continue phase P8 (Integration and v1.0) of the workout timer.
 
 ## Current state
 
-T1–T4 are done, on SPEC v0.3. Acceptance hasn't started.
+T1–T4 are done, on SPEC v0.3, and T5 is done except A13. Acceptance runs on the release APK from `56b5747`, whose SHA-256 is in `ACCEPTANCE.md`. No defect has been found.
 
 - A run can be timed from outside the app to about ±0.15 s.
-- The release APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app. Its list is empty.
+- The release APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app. It holds the §4.4 "Example".
 - Every instrumented test passes, including `EndToEndTest`.
 - No production Kotlin has changed, and no wiring is left to do.
-- `ACCEPTANCE.md` lists every requirement, all still "To do".
+- `ACCEPTANCE.md`: A1, A3, A4, A5, A10 and A11 pass, so 13 of the 51 rows do. A2 and A18 are still open.
 
 ## Next steps
 
-1. `T5`: acceptance without sound. Rebuild the release APK at the branch's `HEAD`, install it with `adb install -r`, and put the commit and its SHA-256 in `ACCEPTANCE.md`'s header. A13 changes the screen timeout, so ask the user first.
-2. `T6`: acceptance with the user.
+1. Get the user's agreement to change the settings below, and to reboot, then run `A13` (`screen_timeout 30000`, then `never`).
+2. `T6` with the user at the tablet: A6–A9, A12, A14–A16. While paused in A8, read the get-ready and rest screens with `texts`, which finishes A2. Wi-Fi goes off for A6, and the font scale goes to 1.15 for A12; put both back.
+3. `T7`, the 60-minute run.
 
 ## Tasks
 
@@ -48,7 +49,7 @@ The task IDs come from SPEC.md §7.
 | T2 | Done | Signed APK installed. `./gradlew build` still has to pass without the properties in CI, which the pull request's run proves. |
 | T3 | Done | 10 of 10 runs pass |
 | T4 | Done | 81 instrumented tests pass; wiring and security checks clean; `ACCEPTANCE.md` written |
-| T5 | To do | Acceptance without sound |
+| T5 | Doing | All but A13, which needs the user's agreement to change the screen timeout |
 | T6 | To do | Acceptance with the user |
 | T7 | To do | The 60-minute run |
 | T8 | To do | Close the documents |
@@ -70,6 +71,7 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 Lessons from earlier phases that apply here are in SPEC §4.5.
 
 - **For CLAUDE.md, in T8:** a click on a node with empty bounds raises no error, and lands at the screen's corner. Under `MainActivity`, close the keyboard before a click that follows a scroll.
+- **For the `tablet` skill, in T8: driving the editor through adb.** Focusing a field scrolls the form, so "the Nth field on screen" changes between taps. Find a field by its place after one holding a known value. A round's controls are in its header, above its name field. Press Back only when `dumpsys input_method` shows `mInputShown=true`, because Back on a closed keyboard leaves the editor. T7 needs this to create "One hour".
 
 ## Pending wiring
 
@@ -124,5 +126,5 @@ Newest first.
 
 ### 2026-11-06
 
-- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3. T4.
+- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3. T4. T5, apart from A13.
 - Notes: measured on the tablet for the SPEC: a `dumpsys window` poll through adb takes about 130 ms, and one `input` command about 750 ms. The first `input` took 1034 ms.
