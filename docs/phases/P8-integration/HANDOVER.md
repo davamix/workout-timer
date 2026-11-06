@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | In progress |
-| **Spec** | [SPEC.md](SPEC.md), version v0.2 |
+| **Spec** | [SPEC.md](SPEC.md), version v0.3 |
 | **Branch** | `phase/p8-integration` |
 | **Last session** | 2026-11-06 |
 
@@ -25,18 +25,17 @@ Start or continue phase P8 (Integration and v1.0) of the workout timer.
 
 ## Current state
 
-SPEC v0.2 is `Ready`: the user agreed with every assumption in §9. The phase branch exists, and T1 is done: a run can be timed from outside the app to about ±0.15 s. No app code has changed.
+T1–T3 are done, on SPEC v0.3.
 
-Found while writing the SPEC, on `main` at `6d2cc6d`:
-
-- No wiring is left to do.
-- `assembleRelease` works and gives an unsigned APK of 9.7 MB.
-- `~/.gradle/gradle.properties` doesn't exist yet. The user has the instructions to create it and the keystore (SPEC §4.3.2).
+- A run can be timed from outside the app to about ±0.15 s.
+- The release APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app. Its list is empty.
+- `EndToEndTest` passes: 10 of 10 runs, fresh-installed and warm.
+- No production Kotlin has changed. No wiring is left to do (read on `main` at `6d2cc6d`; T4 confirms it).
 
 ## Next steps
 
-1. `T2`: the signing config. Checking it with the real key waits until the user says the keystore is done.
-2. `T3`: the end-to-end test.
+1. `T4`: run the whole instrumented suite, including the voice setting check under "Known issues"; repeat the wiring and security checks; write `ACCEPTANCE.md`.
+2. `T5`: acceptance without sound.
 
 ## Tasks
 
@@ -45,8 +44,8 @@ The task IDs come from SPEC.md §7.
 | Task | Status | Notes |
 |---|---|---|
 | T1 | Done | The method gives about ±0.15 s; numbers under "How to verify" |
-| T2 | To do | Release build; the user creates the keystore |
-| T3 | To do | End-to-end test |
+| T2 | Done | Signed APK installed. `./gradlew build` still has to pass without the properties in CI, which the pull request's run proves. |
+| T3 | Done | 10 of 10 runs pass |
 | T4 | To do | Baseline and `ACCEPTANCE.md` |
 | T5 | To do | Acceptance without sound |
 | T6 | To do | Acceptance with the user |
@@ -61,12 +60,16 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 
 | Date | Decision | Reason |
 |---|---|---|
+| 2026-11-06 | The keystore is at `C:\Users\davam_p3h1i13\workout-timer.keystore`, and its certificate is `CN=Daniel Valcarce, C=ES`. In SPEC v0.3 (Q8). | The user created it that way, and chose to keep their name, which is already public in the commits. |
+| 2026-11-06 | `EndToEndTest` closes the soft keyboard before each click in the form. | `MainActivity` resizes for the keyboard, and focus moving from a name to a number swaps the letter keyboard for the shorter number pad a moment later. If that lands between `performScrollToNode` and `performClick`, the round is never added: 10 of 18 runs failed this way, at both a fresh install and warm. With the fix, 10 of 10 pass. Bounds logged before the click showed it: the button stayed at y=521 when the round was added, and stayed at y=941 or had empty bounds when it wasn't. The test still uses the real keyboard. |
+| 2026-11-06 | `EndToEndTest` doesn't use `FLAG_ALT_FOCUSABLE_IM`. | It was tried first, to keep the keyboard away, but the keyboard still showed on this tablet, and 5 of 10 runs failed. |
 
 ## Known issues
 
 Lessons from earlier phases that apply here are in SPEC §4.5.
 
 - **Voice cues were off in the debug app when P8 started.** T1 read `false` before changing anything, and put it back to `false` afterwards. Nobody knows yet what turned them off: P7's manual check 11 says to turn them back on. In T4, turn them on, run the whole instrumented suite, and read the setting again. If the suite leaves them off, a test isn't restoring them.
+- **For CLAUDE.md, in T8:** a click on a node with empty bounds raises no error, and lands at the screen's corner. Under `MainActivity`, close the keyboard before a click that follows a scroll.
 
 ## Pending wiring
 
@@ -97,11 +100,22 @@ The difference, about 1.2 s, is "Get ready in".
 - Pause is at (960, 1012) and Resume at (818, 1013), in pixels.
 - No crash, and no `WorkoutAudio` or `WorkoutStorage` line, during the runs.
 
+**T2, the signed release APK,** on 2026-11-06:
+
+- `apksigner`: v2 signature, one signer, `CN=Daniel Valcarce, C=ES`, RSA 4096, SHA-256 `abd7e456e1edcd040377267afdcf0ebbd0ee7dd82c4f07a2466c366a074ad75f`.
+- 9.7 MB. Version 1.0.0, label "Workout Timer". The only permission listed is `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`.
+- First launch after installing: 1.09 s. Cold starts: 1.08, 1.06 and 1.23 s (`am start -W`).
+- `dumpsys package` flags: `HAS_CODE ALLOW_CLEAR_USER_DATA`, so neither debuggable nor backed up. `run-as` is refused.
+
+**T3, the end-to-end test:** `gradle installDebug installDebugAndroidTest && instrument EndToEndTest`. It takes about 55 s, and the tablet speaks. 5 of 5 runs passed right after installing with a cold speech engine, then 5 of 5 warm.
+
+**Unit tests** on `caf02d3` plus T3: 212 in `:app` and 245 in `:core`, no failures.
+
 ## Session log
 
 Newest first.
 
 ### 2026-11-06
 
-- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill. Its throwaway probe is deleted.
+- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3.
 - Notes: measured on the tablet for the SPEC: a `dumpsys window` poll through adb takes about 130 ms, and one `input` command about 750 ms. The first `input` took 1034 ms.
