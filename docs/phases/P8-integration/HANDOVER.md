@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Not started |
-| **Spec** | [SPEC.md](SPEC.md), version v0.1 |
+| **Status** | In progress |
+| **Spec** | [SPEC.md](SPEC.md), version v0.2 |
 | **Branch** | `phase/p8-integration` |
 | **Last session** | 2026-11-06 |
 
@@ -25,20 +25,18 @@ Start or continue phase P8 (Integration and v1.0) of the workout timer.
 
 ## Current state
 
-SPEC v0.1 is written and waiting for review, with seven open questions in §9. No code has been written, and the phase branch doesn't exist yet.
+SPEC v0.2 is `Ready`: the user agreed with every assumption in §9. The phase branch exists, and T1 is under way. No app code has changed.
 
 Found while writing the SPEC, on `main` at `6d2cc6d`:
 
 - No wiring is left to do.
 - `assembleRelease` works and gives an unsigned APK of 9.7 MB.
-- `~/.gradle/gradle.properties` doesn't exist yet.
+- `~/.gradle/gradle.properties` doesn't exist yet. The user has the instructions to create it and the keystore (SPEC §4.3.2).
 
 ## Next steps
 
-1. The user reviews SPEC.md and answers §9.
-2. Apply the review (skill `phase-docs`, "After the review"). Q2 and Q5 change the specification and the plan, which come first.
-3. Once the user agrees, set SPEC.md and plan §5.1 to `Ready`, then start the phase with the `phase-start` skill.
-4. Start with `T1`.
+1. Finish `T1`: measure the timing method on the debug build.
+2. `T2`, once the user says the keystore is done.
 
 ## Tasks
 
@@ -82,5 +80,5 @@ Newest first.
 
 ### 2026-11-06
 
-- Done: SPEC v0.1 and this handover.
+- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created.
 - Notes: measured on the tablet for the SPEC: a `dumpsys window` poll through adb takes about 130 ms, and one `input` command about 750 ms. The first `input` took 1034 ms.
