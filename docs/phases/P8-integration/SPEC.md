@@ -390,18 +390,18 @@ In order. Each task should take one working session or less.
 
 The checks that must all pass before the phase is merged:
 
-- [ ] T1–T8 done
-- [ ] `./gradlew build` passes locally and in CI, without the signing properties in CI
-- [ ] Every instrumented test passes on the tablet, including `EndToEndTest`
-- [ ] The release APK is signed with the user's key, version 1.0.0, not debuggable, with no `INTERNET` permission
-- [ ] `ACCEPTANCE.md` has every requirement, each one passing, including `NF-1` with its measured drift
-- [ ] No secret in the repo
-- [ ] HANDOVER.md is up to date
+- [x] T1–T8 done
+- [x] `./gradlew build` passes locally and in CI, without the signing properties in CI
+- [x] Every instrumented test passes on the tablet, including `EndToEndTest`
+- [x] The release APK is signed with the user's key, version 1.0.0, not debuggable, with no `INTERNET` permission
+- [x] `ACCEPTANCE.md` has every requirement, each one passing, including `NF-1` with its measured drift
+- [x] No secret in the repo
+- [x] HANDOVER.md is up to date
 
 After the merge:
 
-- [ ] `v1.0.0` is tagged on the merged commit, and the GitHub release carries the signed APK
-- [ ] The plan's status table is updated
+- [x] `v1.0.0` is tagged on the merged commit, and the GitHub release carries the signed APK
+- [x] The plan's status table is updated
 
 ## 9. Open questions
 

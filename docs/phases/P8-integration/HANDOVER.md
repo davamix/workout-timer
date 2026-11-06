@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress: T1–T8 done; pull request [#8](https://github.com/davamix/workout-timer/pull/8) is waiting for the user to merge it, and T10 follows |
+| **Status** | Done. Merged in pull request [#8](https://github.com/davamix/workout-timer/pull/8) on 2026-11-06. Released as [v1.0.0](https://github.com/davamix/workout-timer/releases/tag/v1.0.0). |
 | **Spec** | [SPEC.md](SPEC.md), version v0.4 |
 | **Branch** | `phase/p8-integration` |
 | **Last session** | 2026-11-06 |
@@ -11,32 +11,20 @@ This document tracks the phase as it's built. Update it at the end of every sess
 
 ## Prompt to start or continue
 
-Paste this prompt into a new Claude Code session to start or continue the phase. When the phase is done, replace it with "Phase done: no prompt needed."
-
-```text
-Start or continue phase P8 (Integration and v1.0) of the workout timer.
-
-1. Use the phase-start skill for P8. Read only docs/phases/P8-integration/HANDOVER.md and SPEC.md; they contain everything needed.
-2. Carry on from "Next steps" in the handover. Work through the tasks in SPEC.md §7 in order, on branch phase/p8-integration. Commit after each task, once ./gradlew build passes.
-3. Follow SPEC.md. If something in it is wrong or unclear, stop and ask me before changing course. Record every decision or deviation in the handover.
-4. The tablet must be connected. I'm needed for: T2 (I create the keystore and the properties file; never read or print them), T6 (listening, turning the tablet, unlocking after a reboot), and the last minute of T7. Ask before changing any tablet setting, and put it back afterwards. The debug app holds my workouts, so run instrumented tests with the tablet skill's instrument helper, not connectedDebugAndroidTest. Don't push the tag or create the release until I say so. Pull request #8 is open, and may have been merged or have review comments: check it first.
-5. Before the session ends, or once all tasks are done, use the handover skill. When the done criteria pass, open the pull request and wait for me to merge it. After the merge, T10 releases v1.0.0, then the phase-close skill closes the phase.
-```
+Phase done: no prompt needed.
 
 ## Current state
 
-T1–T8 are done, on SPEC v0.4. Pull request [#8](https://github.com/davamix/workout-timer/pull/8) is open, and CI passes on it without the signing properties. The specification and the plan are at v1.0. Acceptance ran on the release APK from `56b5747`, whose SHA-256 is in `ACCEPTANCE.md`. No defect was found.
+P8 is merged into `main`, and version 1.0.0 is published as [v1.0.0](https://github.com/davamix/workout-timer/releases/tag/v1.0.0), tagged on the merge commit `1816ac6`. The specification and the plan are at v1.0. Acceptance ran on the release APK from `56b5747`, which has the same code. No defect was found.
 
-- The release APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app. It holds "Edges", "Example", "One hour" and "Sixty", so T10 can check that workouts survive `adb install -r`.
+- The published APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app.
 - Every instrumented test passes, including `EndToEndTest`.
-- No production Kotlin has changed, and no wiring is left to do.
+- No production Kotlin changed in this phase, and no wiring is left to do.
 - `ACCEPTANCE.md`: all 51 rows pass. `NF-1`'s drift is +0.022 s.
 
 ## Next steps
 
-1. Deal with any review comments on pull request #8. The user merges it.
-2. `T10`, after the merge: follow SPEC §4.3.6 step by step. Build on `main`, install over the accepted build, and check that the workouts survive and one runs to the end. Then **ask the user for the go-ahead** before the tag and the release.
-3. Use the `phase-close` skill.
+None for P8. Every phase in plan §5.1 is now `Done`, so no phase is waiting to start. New work starts a new version of the specification and the plan.
 
 ## Tasks
 
@@ -52,8 +40,8 @@ The task IDs come from SPEC.md §7.
 | T6 | Done | A2, A6–A9, A12 and A14–A16 pass, with no defect found. The user confirmed what only ears and hands can check. |
 | T7 | Done | A17 and A18 pass, with a drift of +0.022 s. The user confirmed the cues in the last minute. Numbers in `ACCEPTANCE.md`. |
 | T8 | Done | README, CLAUDE.md, the `tablet` skill, `ACCEPTANCE.md`, and the specification and plan at v1.0 |
-| T9 | In review | Pull request [#8](https://github.com/davamix/workout-timer/pull/8), with CI passing |
-| T10 | To do | Release after the merge, then `phase-close` |
+| T9 | Done | Pull request [#8](https://github.com/davamix/workout-timer/pull/8), with CI passing. The user merged it. |
+| T10 | Done | [v1.0.0](https://github.com/davamix/workout-timer/releases/tag/v1.0.0) published with the user's go-ahead; details under "How to verify" |
 
 ## Decisions and deviations
 
@@ -64,6 +52,7 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 | 2026-11-06 | The keystore is at `C:\Users\davam_p3h1i13\workout-timer.keystore`, and its certificate is `CN=Daniel Valcarce, C=ES`. In SPEC v0.3 (Q8). | The user created it that way, and chose to keep their name, which is already public in the commits. |
 | 2026-11-06 | `EndToEndTest` closes the soft keyboard before each click in the form. | `MainActivity` resizes for the keyboard, and focus moving from a name to a number swaps the letter keyboard for the shorter number pad a moment later. If that lands between `performScrollToNode` and `performClick`, the round is never added: 13 of 23 runs failed this way, at both a fresh install and warm. With the fix, 10 of 10 pass. Bounds logged before the click showed it: the button stayed at y=521 when the round was added, and stayed at y=941 or had empty bounds when it wasn't. The test still uses the real keyboard. |
 | 2026-11-06 | `EndToEndTest` doesn't use `FLAG_ALT_FOCUSABLE_IM`. | It was tried first, to keep the keyboard away, but the keyboard still showed on this tablet, and 5 of 10 runs failed. |
+| 2026-11-06 | The README has six screenshots, in `docs/screenshots/`, added after the merge in `8fdb749`. They're cropped to the app's own area. The tag stays on the merge commit, so the README inside `v1.0.0` has none, and the one on `main` has them. | The user asked for them at T10. They come from the published APK. The crop keeps the status bar's notifications out of a public repo. SPEC §4.3.6 puts the tag on the merged code, and the APK was built from that commit. The user agreed to this before publishing. |
 
 ## Known issues
 
@@ -123,9 +112,21 @@ The difference, about 1.2 s, is "Get ready in".
 - The command meant to keep the PC awake failed on its quoting in Git Bash, so nothing held the PC awake. Windows' System log has no sleep event (`Kernel-Power` 42) during the run.
 - The main logcat only reached back to 08:27 at the end, so the check for `WorkoutAudio` and `WorkoutStorage` lines covers the hour's last 12 minutes. The crash buffer covers all of it.
 
+**T10, the release,** on 2026-11-06:
+
+- CI passed on the merge commit `1816ac6`. `git diff --stat 56b5747 1816ac6 -- . ':!docs' ':!*.md' ':!.claude'` is empty, so the accepted code is the released code.
+- `./gradlew clean assembleRelease`: 9,712,920 bytes, SHA-256 `51b85544a924103e46c52dde29de671714b294798f2116eef0cad0409296a0d2`. It holds a v2 signature with the expected certificate, and the commit `1816ac6`.
+- `adb install -r` over the accepted build kept all four workouts. "Example" ran to the end on it, with one pause and no crash.
+- The asset downloaded from the release has the same SHA-256 as the local APK.
+
 ## Session log
 
 Newest first.
+
+### 2026-11-06 (close)
+
+- The user merged pull request #8, gave the go-ahead, and the phase is closed. T10 published `v1.0.0`.
+- Notes: T10 found a bug in the `tablet` skill's `wait_for`, now fixed. It returned failure when the text only appeared on a later try, because the function returned the loop's status. It could only cause false failures, so no acceptance result relied on it.
 
 ### 2026-11-06
 
