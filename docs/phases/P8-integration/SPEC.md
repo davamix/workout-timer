@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready, v0.3 |
+| **Status** | Ready, v0.4 |
 | **Phase** | P8, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P3, P5, P6 and P7, all done. It also uses P1, P2 and P4, all done. |
 | **Branch** | `phase/p8-integration` |
@@ -72,7 +72,7 @@ Quoted from specification §5.3: "The voice and the round-end sound play at the 
 | TTS-1 | When an exercise starts and its duration is **longer than 10 s**, the exercise name is spoken. The rule is strict: a 10 s exercise is not announced. | A6, A7 |
 | TTS-2 | When **3 s** remain in an exercise, a countdown is spoken: "three", "two", "one". There is one word per second, spoken as the display changes to 3, 2 and 1. An exercise of 3 s or less starts the countdown at its own duration. | A6, A7 |
 | TTS-3 | Pausing stops any speech in progress. Nothing is replayed on resume; the countdown carries on from the current second. | A8 |
-| TTS-4 | The cues work without a network connection. The app doesn't need the network at all. | A6 |
+| TTS-4 | The cues work without a network connection. The app doesn't need the network at all. | A7 |
 | TTS-7 | When the workout ends, "Workout complete. Well done!" is spoken. | A6, A9 |
 | TTS-9 | A setting turns voice cues on or off. The choice is remembered. With voice cues off, the timer, the screen and the round-end sound work the same. | A14, A16 |
 | TTS-10 | **Get ready:** "Get ready in" is spoken first. When it finishes, the 3 s countdown starts, with "three", "two", "one" spoken in sync with the display. With voice cues off, the countdown starts immediately. | A6, A14 |
@@ -103,7 +103,7 @@ Quoted from specification §5.3: "The voice and the round-end sound play at the 
 | NF-1 | **Timer accuracy:** remaining time is computed from a monotonic clock, not by adding up timer ticks, so errors don't build up. A 60-minute workout ends within ±1 s of real elapsed time, and pausing doesn't change this. The time counts from the start of the get-ready countdown: preparing the audio and the "Get ready in" announcement (`TTS-10`) come before it, and aren't part of the workout's total (`WM-6`). | A17 |
 | NF-2 | **Screen stays on** while the runner screen is open. | A13 |
 | NF-3 | **Robust to configuration changes:** events such as flipping the tablet between the two landscape orientations don't reset, pause or skip the running workout. | A12 |
-| NF-4 | **Offline and private:** no network permission, no accounts, no analytics. | A1, A6 |
+| NF-4 | **Offline and private:** no network permission, no accounts, no analytics. | A1, A7 |
 | NF-5 | **Compatibility:** runs on Android 8.0 (API 26) on the target device. | A1 |
 | NF-6 | **Readability:** the time and exercise name are readable from about 3 m away. Touch targets are large. | A6 |
 | NF-7 | **Distribution:** installed as an APK from the development machine (`adb` / Android Studio). | A1 |
@@ -331,8 +331,8 @@ Use the release APK, unless a scenario says otherwise. The tablet stays in Spani
 | A3 | Claude | Create the §4.4 example below by hand, leaving linked values empty, then Save | The editor shows "Total 4:23" before saving. The list shows "Example" and "Total 4:23". |
 | A4 | Claude | Edit it. Set the default duration to 45. Check the unused rests, and move High knees up one place. Add, rename, duplicate, reorder and remove an exercise and a round. Clear a name, set a duration to 0 and a rest to 6000, then Save. Remove the only exercise of a round, then the only round, and Save each time. Leave with Back: Keep editing, then Discard. | High knees and Crunches show 45, Jumping jacks keeps 30, and the total is 4:33. "Not used" moves with the exercise, and its value comes back. Each Save shows messages at the fields, or asks for at least one exercise or round, and saves nothing. "Discard changes?", then 4:23 again (`WM-1`, `WM-5`, `WM-6`, `WM-7`, `WM-10`). |
 | A5 | Claude | Duplicate "Example". Delete the copy: Cancel, then Delete. | "Example (copy)" with 4:23. Cancel keeps it, Delete removes it (`WM-3`, `WM-4`, `WM-9`). |
-| A6 | User listens and watches | Turn Wi-Fi off. Run `stop_app cold`, open the app and start the example at once. Follow it to the end without touching it, from about 3 m. Then use every screen at arm's length. Turn Wi-Fi back on. | "Getting ready…", then each phase and cue as in the example table below, in English, in sync with the display. Rests silent. Colours easy to tell apart, and the time and name easy to read. "Total time 4:23 · 2 rounds · 5 exercises" at the end. Buttons easy to hit. |
-| A7 | User listens | Create "Edges": round 1 with rest 0 s holding Ten (10 s) and Eleven (11 s); round 2 holding Twelve (12 s), Three (3 s), Two (2 s) and One (1 s). Default rests 0 s. Run it. | Ten isn't named; Eleven is. The chime, then "Twelve", not over it. The 3, 2 and 1 s exercises count from "three", "two" and "one" (`EX-3`, `TTS-1`, `TTS-2`, `SND-1`). |
+| A6 | User listens and watches | Run `stop_app cold`, open the app and start the example at once. Follow it to the end without touching it, from about 3 m. Then use every screen at arm's length. | "Getting ready…", then each phase and cue as in the example table below, in English, in sync with the display. Rests silent. Colours easy to tell apart, and the time and name easy to read. "Total time 4:23 · 2 rounds · 5 exercises" at the end. Buttons easy to hit. |
+| A7 | User listens | Create "Edges": round 1 with rest 0 s holding Ten (10 s) and Eleven (11 s); round 2 holding Twelve (12 s), Three (3 s), Two (2 s) and One (1 s). Default rests 0 s. The user turns Wi-Fi off in the tablet's quick settings, and Claude checks that `dumpsys connectivity` shows no active network. Run `stop_app cold`, then run Edges. The user turns Wi-Fi back on. | Ten isn't named; Eleven is. The chime, then "Twelve", not over it. The 3, 2 and 1 s exercises count from "three", "two" and "one". Every cue is heard with no network (`EX-3`, `TTS-1`, `TTS-2`, `TTS-4`, `SND-1`, `NF-4`). |
 | A8 | User listens | Pause in get ready, in an exercise and in a rest, then resume each. Pause during a spoken name, and just after "two". | The time stays, then counts on. The paused colour and "PAUSED", with Resume, Previous, Next and Stop. Speech stops at the pause and nothing is replayed; "one" comes on time (`EX-4`, `EX-5`, `TTS-3`, `UI-4`, `UI-7`, `UI-11`). |
 | A9 | User listens | While paused, go through the Next and Previous table. Cross into round 2 and resume. Next on the last exercise. Pause, Stop, Cancel, Stop, Stop. Back while running, while paused, and with the dialog open. | As the table says; Previous is disabled in get ready. No chime when crossing, and the name is spoken on resume. The completed screen and "Workout complete. Well done!" Stop returns to the list. Back pauses, then asks to stop, then closes the dialog (`EX-8`, `EX-9`, `TTS-7`). |
 | A10 | Claude | While running, press Home and return. Repeat with Recents and the power button. | Paused each time, at the time it had (`EX-10`) |
@@ -405,7 +405,7 @@ After the merge:
 
 ## 9. Open questions
 
-None at the moment. New questions are numbered from Q9.
+None at the moment. New questions are numbered from Q10.
 
 ### Answered
 
@@ -419,6 +419,7 @@ None at the moment. New questions are numbered from Q9.
 | Q6 | How much of the 60-minute run needs the user? | Claude drives it through adb. The tablet speaks for an hour on USB, and nobody touches it. The user only listens to the last minute. If the user would rather work out with it, that's fine as long as they don't touch the screen outside the two pauses. |
 | Q7 | Do the specification and the plan become v1.0? They still say "Draft". | Yes, at T8: specification v1.0 and plan v1.0, both based on what was released, with a change-log entry. New work after that starts a new version. |
 | Q8 | From T2: the user's keystore is at `C:\Users\davam_p3h1i13\workout-timer.keystore`, not in `.android-keys`, and its certificate is `CN=Daniel Valcarce, C=ES`, not the generic "Workout Timer" this SPEC assumed. Anyone who downloads the APK can read the certificate. | Keep both. The user's name is already public in the repo's commits. The key can't change after this without uninstalling the app, which deletes its workouts. |
+| Q9 | From T6: A6 was to run with Wi-Fi off, but `adb shell svc wifi disable` has no effect on this tablet: `dumpsys connectivity` showed it still connected, so A6 didn't check offline. | The user turns Wi-Fi off by hand, and Claude confirms it. Offline moves to A7, which has every kind of cue in 42 s, so A6's 4:23 run needn't be repeated. `TTS-4` and `NF-4` are accepted by A7. |
 
 ## 10. Change log
 
@@ -427,3 +428,4 @@ None at the moment. New questions are numbered from Q9.
 | 0.1 | 2026-11-06 | First draft |
 | 0.2 | 2026-11-06 | Review applied: the user agreed with every draft assumption (Q1–Q7). Quotes specification v0.11 (`NF-1`, Q2). §4.3.2 adds how to write the properties file. §5 gives the expected manifest (Q5). Ready. |
 | 0.3 | 2026-11-06 | From T2 (Q8): the keystore's real path and certificate, in §4.2, §4.3.2 and §5. |
+| 0.4 | 2026-11-06 | From T6 (Q9): the offline check moves from A6 to A7, because `svc wifi disable` has no effect on this tablet. |
