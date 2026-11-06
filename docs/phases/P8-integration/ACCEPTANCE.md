@@ -16,7 +16,7 @@ This records how each requirement of version 1.0.0 was checked on the tablet. A 
 | # | What it checks | Checked by | Result | Notes |
 |---|---|---|---|---|
 | A1 | Installing, what's in the APK, launch | Claude | Pass | v2 signature, version 1.0.0, 9.7 MB. Not debuggable, no backup flag, `run-as` refused. The only permission is the one the app grants itself. One launcher entry. First launch 1.15 s, cold starts 1.02–1.09 s. Opens on the empty list. |
-| A2 | English text, all in resources | Claude | In progress | Read in English: the list, the editor, Settings, the paused runner, every dialog and the completed screen. No user-facing text in the Kotlin sources. Get ready, the rest screen and "Getting ready…" are read in T6. |
+| A2 | English text, all in resources | Claude | In progress | Read in English: the list, the editor, Settings, the paused runner, every dialog and the completed screen. No user-facing text in the Kotlin sources. The paused rest screen also reads in English. Get ready and "Getting ready…" are read in T6. |
 | A3 | Creating the §4.4 example | Claude | Pass | Typed with the real keyboard through adb, leaving linked values empty. "Total 4:23" before saving and on the list. |
 | A4 | Editing, linked defaults, validation, discarding | Claude | Pass | Default duration 45: High knees and Crunches show 45, Jumping jacks keeps 30, total 4:33. "Not used" moved with the exercise, and Arm circles kept its 5. Messages: "Enter a name", "From 1 to 5999 s", "From 0 to 5999 s", "Add at least one exercise", "Add at least one round", and nothing saved. "Discard changes?", then 4:23. |
 | A5 | Duplicating and deleting | Claude | Pass | "Example (copy)" with 4:23. The dialog names the copy. Cancel keeps it, Delete removes it. |
@@ -27,7 +27,7 @@ This records how each requirement of version 1.0.0 was checked on the tablet. A 
 | A10 | Leaving the app | Claude | Pass | Paused at 00:23 after Home, 00:19 after Recents and 00:15 after the power button, and unchanged 4 s later each time. |
 | A11 | Android closing the app (debug APK) | Claude | Pass | Debug APK from the same commit. The process ended as `cch CAC`. The list came back from the launcher and from Recents. |
 | A12 | Turning the tablet, a forced configuration change | User and Claude | To do | |
-| A13 | The screen stays on | Claude | To do | |
+| A13 | The screen stays on | Claude | Pass | With a 30 s timeout: still on after 40 s running and 70 s paused (`FLAG_KEEP_SCREEN_ON` set), and off after 45 s on the list. The timeout is back to "never". |
 | A14 | Voice cues off | User | To do | |
 | A15 | Volume keys | User | To do | |
 | A16 | A reboot | User and Claude | To do | |
@@ -103,7 +103,7 @@ This records how each requirement of version 1.0.0 was checked on the tablet. A 
 | ID | Requirement | Scenarios | Result |
 |---|---|---|---|
 | NF-1 | A 60-minute workout ends within ±1 s | A17 | To do |
-| NF-2 | The screen stays on in the runner | A13 | To do |
+| NF-2 | The screen stays on in the runner | A13 | Pass |
 | NF-3 | Configuration changes don't affect the workout | A12 | To do |
 | NF-4 | No network permission, no accounts, no analytics | A1, A6 | To do |
 | NF-5 | Runs on Android 8.0 on the target device | A1 | Pass |
