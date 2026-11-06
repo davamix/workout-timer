@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.1 |
+| **Status** | Ready, v0.2 |
 | **Phase** | P8, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P3, P5, P6 and P7, all done. It also uses P1, P2 and P4, all done. |
 | **Branch** | `phase/p8-integration` |
@@ -18,7 +18,7 @@ This phase adds no features and no screens. Production Kotlin only changes if ac
 
 ## 2. Requirements covered
 
-P8 covers every requirement. The text is quoted from [SPECIFICATION.md](../../SPECIFICATION.md) (version v0.10). The last column names the acceptance scenarios in §6 that check it. Discarded IDs (`UI-8`, `UI-9`, `TTS-5`, `TTS-6`, `TTS-8`) aren't requirements.
+P8 covers every requirement. The text is quoted from [SPECIFICATION.md](../../SPECIFICATION.md) (version v0.11). The last column names the acceptance scenarios in §6 that check it. Discarded IDs (`UI-8`, `UI-9`, `TTS-5`, `TTS-6`, `TTS-8`) aren't requirements.
 
 ### Workout execution
 
@@ -100,7 +100,7 @@ Quoted from specification §5.3: "The voice and the round-end sound play at the 
 
 | ID | Requirement (quoted) | Accepted by |
 |---|---|---|
-| NF-1 | **Timer accuracy:** remaining time is computed from a monotonic clock, not by adding up timer ticks, so errors don't build up. A 60-minute workout ends within ±1 s of real elapsed time, and pausing doesn't change this. | A17 |
+| NF-1 | **Timer accuracy:** remaining time is computed from a monotonic clock, not by adding up timer ticks, so errors don't build up. A 60-minute workout ends within ±1 s of real elapsed time, and pausing doesn't change this. The time counts from the start of the get-ready countdown: preparing the audio and the "Get ready in" announcement (`TTS-10`) come before it, and aren't part of the workout's total (`WM-6`). | A17 |
 | NF-2 | **Screen stays on** while the runner screen is open. | A13 |
 | NF-3 | **Robust to configuration changes:** events such as flipping the tablet between the two landscape orientations don't reset, pause or skip the running workout. | A12 |
 | NF-4 | **Offline and private:** no network permission, no accounts, no analytics. | A1, A6 |
@@ -140,7 +140,7 @@ Quoted from specification §5.3: "The voice and the round-end sound play at the 
 | `app/build.gradle.kts` (shared) | Signing config; `versionName = "1.0.0"`. `versionCode` stays 1. |
 | `.claude/skills/tablet/helpers.sh` and `SKILL.md` (shared) | The release package name, and the helper that times a run (§4.2) |
 | `README.md`, `CLAUDE.md` (shared) | Status, how to build and install a release, and lessons from this phase |
-| `docs/SPECIFICATION.md`, `docs/IMPLEMENTATION_PLAN.md` (shared) | Status and the changes agreed in §9, on `main` |
+| `docs/SPECIFICATION.md`, `docs/IMPLEMENTATION_PLAN.md` (shared) | Their status becomes v1.0 (Q7), on `main` |
 
 No new screen, so there's no layout to check. No library is added.
 
@@ -185,6 +185,7 @@ The handovers leave P8 these items only: the end-to-end test, checking `WM-8` th
   ```
 
   The certificate is public inside the APK, so its name is "Workout Timer" and holds no personal data. This keystore format has one password, so both password properties get the same value.
+- **The properties file** is written in Notepad, not VS Code, because the Claude extension can see what's selected in the editor. A `\` is an escape character in a properties file, so the path uses forward slashes and the password has no backslash.
 - **Keep a copy of the keystore and its password outside this PC.** Android only installs an update signed with the same key. Without the key, an update means uninstalling first, which deletes every workout (`WM-8`).
 - **In `app/build.gradle.kts`:** the release signing config exists only when all four properties are set, read with `providers.gradleProperty`, which works with the configuration cache. Otherwise the release build stays unsigned. CI has no properties and must keep passing, because `./gradlew build` also assembles the release variant.
 - **Checking it:** `apksigner verify --print-certs` (`D:\Android\Sdk\build-tools\37.0.0\apksigner.bat`) must show a v2 signature with the "Workout Timer" certificate. Android 8 uses v2. Never print the properties file.
@@ -246,7 +247,7 @@ The run happens on the release APK, which has no logs and no `run-as`, so it's t
   drift    = span − paused time − 3600 s − overhead
   ```
 
-  `NF-1` passes when |drift| ≤ 1 s. The assumption behind this is Q2.
+  `NF-1` passes when |drift| ≤ 1 s. Its time counts from the start of the get-ready countdown (Q2), so what comes before it mustn't count.
 - **The workout, "One hour":** defaults of 50 s exercise, 10 s exercise rest and 10 s round rest. One round of 5 exercises, duplicated to make 12 rounds (`WM-5`), with an own duration of 57 s on the very last exercise. 3 + 12 × 290 + 11 × 10 + 7 = 3600 s. The list shows "Total 1:00:00".
 - **Pauses:** two of about a minute each, near minutes 20 and 40, with `adb shell input tap` on the Pause and Resume buttons. Paused time is the PC time between the two `input` commands returning. One `input` command takes about 750 ms, measured on 2026-11-06. Only the spread matters, because the pause and the resume each carry the same delay. T1 measures it.
 - **Polling:** every few seconds for most of the hour, so as not to load the tablet, then as fast as possible from a minute before the expected end.
@@ -308,10 +309,10 @@ Final check of plan §3 on the release APK, in A1 and T4:
 
 | Rule | Check |
 |---|---|
-| No network | `aapt2 dump badging` lists no `INTERNET` permission. Today it lists only `<package>.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (Q5). |
+| No network | `aapt2 dump badging` lists no `INTERNET` permission. The only one it lists is `<package>.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` (Q5). |
 | No cloud backup | `dumpsys package` shows no `ALLOW_BACKUP` flag (`D-11`) |
 | Not debuggable | `dumpsys package` shows no `DEBUGGABLE` flag, and `run-as` is refused |
-| Minimal surface | The merged release manifest is compared with the list in Q5 |
+| Minimal surface | The merged release manifest holds exactly `MainActivity` (exported), `ProfileInstallReceiver` (exported, needs `android.permission.DUMP`) and `InitializationProvider` (not exported). Anything new fails the check (Q5). |
 | Signing keys stay out of the repo | The keystore and the properties are outside it. `git grep` for the property names finds only their use in `build.gradle.kts` and the documents, with no values. Passwords never appear on a command line or in any output. |
 | Release builds don't log | Logcat holds no `WorkoutStorage` or `WorkoutAudio` line during acceptance (A18) |
 | Trusted dependencies | No library is added. CI still validates the wrapper, and its actions stay pinned. |
@@ -388,7 +389,7 @@ In order. Each task should take one working session or less.
 | T5 | **Acceptance without sound:** A1–A5, A10, A11, A13, A18. Claude alone. |
 | T6 | **Acceptance with the user:** A6–A9, A12, A14–A16, A18. |
 | T7 | **The 60-minute run:** A17, A18. It comes last among the checks, so a fix found earlier doesn't force a second hour (§4.3.7). |
-| T8 | **Close the documents.** README: status, what the app is, how to build a signed release and install it. CLAUDE.md and the `tablet` skill: release commands and what this phase learned. Specification and plan: the versions agreed in Q7, plus the changes from Q2 and Q5 if not already made. |
+| T8 | **Close the documents.** README: status, what the app is, how to build a signed release and install it. CLAUDE.md and the `tablet` skill: release commands and what this phase learned. Specification and plan: v1.0 (Q7), on `main`. |
 | T9 | **Pull request** (skill `handover`), with `ACCEPTANCE.md` linked. Wait for CI and for the user to merge it. |
 | T10 | **After the merge:** release as in §4.3.6, with the user's go-ahead, then the `phase-close` skill. |
 
@@ -411,18 +412,23 @@ After the merge:
 
 ## 9. Open questions
 
-| # | Question | Draft assumption |
+None at the moment. New questions are numbered from Q8.
+
+### Answered
+
+| # | Question | Decision |
 |---|---|---|
-| Q1 | **Who creates the keystore, and where?** | The user creates it, in their own terminal, with the command in §4.3.2, at `C:\Users\davam_p3h1i13\.android-keys\`. They write the properties file too, so the password never passes through Claude, and they keep a copy of both outside this PC. Claude then builds with it, without ever reading the file. |
-| Q2 | **What does `NF-1`'s ±1 s measure?** With voice on, "Get ready in" comes before the countdown (`TTS-10`), and it isn't in the planned total (`WM-6`, §4.4). So the real time from pressing Start is the total plus 1–2 s. | `NF-1` is about the timer drifting, so it counts from the moment the get-ready countdown starts. The announcement and the time to prepare the audio don't count. This clarifies a requirement, so the specification gets a sentence and a new version before SPEC v0.2. |
-| Q3 | **Does every check have to run on the release APK?** `EX-11` needs `run-as` to end the process the way Android does, and the release APK refuses it. | Everything runs on the release APK except A11, which runs on the debug APK from the same commit. Saved state has no code that differs between the two builds. The end-to-end test also stays on debug. |
-| Q4 | **Should v1.0 turn on R8?** The release build has `isMinifyEnabled = false` since P1. Unshrunk, the APK is 9.7 MB. | It stays off. The APK size doesn't matter for an app installed by hand, and R8 would add keep rules to get right for a build the instrumented tests can't run on. If A6 shows the UI stuttering on the release build, raise it again. |
-| Q5 | **Plan §3 and CLAUDE.md don't match the merged manifest.** Plan §3 says only the launcher activity is exported, and that there are no receivers or providers. CLAUDE.md says "Permissions: none". AndroidX adds `ProfileInstallReceiver` (exported, but only holders of `android.permission.DUMP` can reach it), `InitializationProvider` (not exported), and `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`, a permission the app declares and grants itself. | Keep all three, since `InitializationProvider` starts libraries the app uses, and none of them gives access to anything. `NF-4` still holds: there's no network permission. Plan §3 and CLAUDE.md get corrected to say so. These three become the expected list in §5, so that a new one fails the check. |
-| Q6 | **How much of the 60-minute run needs the user?** | Claude drives it through adb. The tablet speaks for an hour on USB, and nobody touches it. The user only listens to the last minute. If the user would rather work out with it, that's fine as long as they don't touch the screen outside the two pauses. |
-| Q7 | **Do the specification and the plan become v1.0?** They still say "Draft" (v0.10 and v0.2), and the plan says it's based on specification v0.5. | Yes, at T8: specification v1.0 and plan v1.0, both based on what was released, with a change-log entry. New work after that starts a new version. |
+| Q1 | Who creates the keystore, and where? | The user creates it, in their own terminal, with the command in §4.3.2, at `C:\Users\davam_p3h1i13\.android-keys\`. They write the properties file too, so the password never passes through Claude, and they keep a copy of both outside this PC. Claude then builds with it, without ever reading the file. |
+| Q2 | What does `NF-1`'s ±1 s measure? With voice on, "Get ready in" comes before the countdown (`TTS-10`), and it isn't in the planned total (`WM-6`, §4.4), so the real time from pressing Start is the total plus 1–2 s. | `NF-1` is about the timer drifting, so it counts from the moment the get-ready countdown starts. The announcement and the time to prepare the audio don't count. Specification v0.11 says so. |
+| Q3 | Does every check have to run on the release APK? `EX-11` needs `run-as` to end the process the way Android does, and the release APK refuses it. | Everything runs on the release APK except A11, which runs on the debug APK from the same commit. Saved state has no code that differs between the two builds. The end-to-end test also stays on debug. |
+| Q4 | Should v1.0 turn on R8? The release build has `isMinifyEnabled = false` since P1. Unshrunk, the APK is 9.7 MB. | It stays off. The APK size doesn't matter for an app installed by hand, and R8 would add keep rules to get right for a build the instrumented tests can't run on. If A6 shows the UI stuttering on the release build, raise it again. |
+| Q5 | Plan §3 and CLAUDE.md didn't match the merged manifest. AndroidX adds `ProfileInstallReceiver` (exported, but only holders of `android.permission.DUMP` can reach it), `InitializationProvider` (not exported), and `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`, a permission the app declares and grants itself. | Keep all three, since `InitializationProvider` starts libraries the app uses, and none of them gives access to anything. `NF-4` still holds: there's no network permission. Plan v0.3 §3 and CLAUDE.md now say so. These three are the expected list in §5, so that a new one fails the check. |
+| Q6 | How much of the 60-minute run needs the user? | Claude drives it through adb. The tablet speaks for an hour on USB, and nobody touches it. The user only listens to the last minute. If the user would rather work out with it, that's fine as long as they don't touch the screen outside the two pauses. |
+| Q7 | Do the specification and the plan become v1.0? They still say "Draft". | Yes, at T8: specification v1.0 and plan v1.0, both based on what was released, with a change-log entry. New work after that starts a new version. |
 
 ## 10. Change log
 
 | Version | Date | Changes |
 |---|---|---|
 | 0.1 | 2026-11-06 | First draft |
+| 0.2 | 2026-11-06 | Review applied: the user agreed with every draft assumption (Q1–Q7). Quotes specification v0.11 (`NF-1`, Q2). §4.3.2 adds how to write the properties file. §5 gives the expected manifest (Q5). Ready. |

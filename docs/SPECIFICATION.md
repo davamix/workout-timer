@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.10, P7 paused layout |
-| **Last updated** | 2026-11-05 |
+| **Status** | Draft v0.11, P8 spec review |
+| **Last updated** | 2026-11-06 |
 | **Platform** | Android tablet, single user, personal use |
 
 This document describes *what* the app does. Once it is agreed, it becomes the base for the implementation plan.
@@ -332,7 +332,7 @@ Paused:
 
 | ID | Requirement |
 |---|---|
-| NF-1 | **Timer accuracy:** remaining time is computed from a monotonic clock, not by adding up timer ticks, so errors don't build up. A 60-minute workout ends within ±1 s of real elapsed time, and pausing doesn't change this. |
+| NF-1 | **Timer accuracy:** remaining time is computed from a monotonic clock, not by adding up timer ticks, so errors don't build up. A 60-minute workout ends within ±1 s of real elapsed time, and pausing doesn't change this. The time counts from the start of the get-ready countdown: preparing the audio and the "Get ready in" announcement (`TTS-10`) come before it, and aren't part of the workout's total (`WM-6`). |
 | NF-2 | **Screen stays on** while the runner screen is open. |
 | NF-3 | **Robust to configuration changes:** events such as flipping the tablet between the two landscape orientations don't reset, pause or skip the running workout. |
 | NF-4 | **Offline and private:** no network permission, no accounts, no analytics. |
@@ -407,3 +407,4 @@ Not planned for v1; listed so they are not lost.
 | 0.8 | 2026-11-04 | From the P5 spec review (P5 Q3 to Q5): the voice and the round-end sound use the media volume, which the volume keys always control (§5.3). Next on the last exercise also says "Workout complete. Well done!" (§5.1). A message when the English voice is missing is a future idea (§10). |
 | 0.9 | 2026-11-05 | From the P7 spec review (P7 Q1 and Q2): on the runner, the system Back button pauses a running workout and asks to stop a paused one. The completed screen's round and exercise counts are the workout's, like its total time (§6). |
 | 0.10 | 2026-11-05 | From P7 T4 (P7 Q7): in the paused sketch, Stop is at the end of the row of buttons rather than under it, so the time has room to stay large (§6). |
+| 0.11 | 2026-11-06 | From the P8 spec review (P8 Q2): `NF-1` counts from the start of the get-ready countdown, so preparing the audio and "Get ready in" aren't part of the ±1 s. |

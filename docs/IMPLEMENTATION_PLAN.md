@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.2, review applied |
-| **Last updated** | 2026-11-02 |
-| **Based on** | [SPECIFICATION.md](SPECIFICATION.md) v0.5 |
+| **Status** | Draft v0.3, P8 spec review |
+| **Last updated** | 2026-11-06 |
+| **Based on** | [SPECIFICATION.md](SPECIFICATION.md) v0.11 |
 
 [SPECIFICATION.md](SPECIFICATION.md) says *what* the app does. This plan says *how* it is built: the architecture, the technical decisions, and the phases of work. Each phase gets its own specification and handover documents (see [§6](#6-working-method)).
 
@@ -147,7 +147,10 @@ The app handles no personal or sensitive data, but it should stay small and clos
 - **No network.** The manifest has no `INTERNET` permission. CI fails if the merged manifest gains it, for example through a library (`NF-4`).
 - **No backup to the cloud.** Auto Backup is disabled (`D-11`).
 - **Private storage only.** Workouts live in app-private storage, so other apps can't read them.
-- **Minimal surface.** Only the launcher activity is exported. There are no services, receivers or content providers.
+- **Minimal surface.** The app itself exports only the launcher activity, and declares no services, receivers or content providers. AndroidX adds three things to the merged manifest, none of which gives access to anything:
+  - `ProfileInstallReceiver`, exported, but only holders of `android.permission.DUMP` can reach it;
+  - `InitializationProvider`, not exported, which starts libraries the app uses;
+  - `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`, a permission the app declares and grants itself.
 - **Signing keys stay out of the repo.** The release keystore and its passwords live outside the repository, in user-level Gradle properties. `.gitignore` already excludes keystore files.
 - **Trusted dependencies.**
   - Only well-known AndroidX, JetBrains and Google libraries, from Google Maven and Maven Central.
@@ -183,7 +186,7 @@ Rules:
 | P5 | Audio cues | P4 | Done |
 | P6 | Workout management UI | P2 | Done |
 | P7 | Workout runner UI | P4 | Done |
-| P8 | Integration and v1.0 | P3, P5, P6, P7 | Spec draft |
+| P8 | Integration and v1.0 | P3, P5, P6, P7 | Ready |
 
 ```mermaid
 flowchart LR
@@ -453,3 +456,4 @@ None at the moment. New questions are numbered from PQ-6.
 |---|---|---|
 | 0.1 | 2026-11-02 | First draft, based on specification v0.4. |
 | 0.2 | 2026-11-02 | Review applied: PQ-1 to PQ-5 answered. Based on specification v0.5: new requirements `EX-11` (P7) and `WM-9` and `WM-10` (P6). The release is attached to a GitHub release. `D-12` notes that the installed Android Studio limits AGP to 9.3. Actions are pinned to commit SHAs. Status changes go straight to `main`. |
+| 0.3 | 2026-11-06 | From the P8 spec review (P8 Q5): §3 lists what AndroidX adds to the merged manifest. Based on specification v0.11. |

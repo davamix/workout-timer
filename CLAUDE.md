@@ -70,7 +70,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 ## Conventions
 
 - **Text:** all user-facing text lives in resources, one `res/values/strings_<feature>.xml` per feature (D-13). English only for now.
-- **Permissions:** none. `INTERNET` is forbidden and fails the build (NF-4).
+- **Permissions:** the app requests none. The merged manifest's only one is AndroidX's `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`, which the app declares and grants itself (plan §3). `INTERNET` is forbidden and fails the build (NF-4).
 - **Versions:** pinned in `gradle/libs.versions.toml`. AGP must stay at 9.3 or lower while Android Studio 2026.1.3 is the installed IDE.
 - **Kotlin style:** ktlint, official style (`.editorconfig`). Run `ktlintFormat` before committing.
 - **Formatting numbers:** don't call `String.format` without a `Locale`. Lint warns (`DefaultLocale`), and the result would follow the device's language. Pad with `padStart` instead, as `formatTotalDuration()` does.
