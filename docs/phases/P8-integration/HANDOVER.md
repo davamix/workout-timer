@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress |
+| **Status** | In progress: T1–T8 done; pull request [#8](https://github.com/davamix/workout-timer/pull/8) is waiting for the user to merge it, and T10 follows |
 | **Spec** | [SPEC.md](SPEC.md), version v0.4 |
 | **Branch** | `phase/p8-integration` |
 | **Last session** | 2026-11-06 |
@@ -19,13 +19,13 @@ Start or continue phase P8 (Integration and v1.0) of the workout timer.
 1. Use the phase-start skill for P8. Read only docs/phases/P8-integration/HANDOVER.md and SPEC.md; they contain everything needed.
 2. Carry on from "Next steps" in the handover. Work through the tasks in SPEC.md §7 in order, on branch phase/p8-integration. Commit after each task, once ./gradlew build passes.
 3. Follow SPEC.md. If something in it is wrong or unclear, stop and ask me before changing course. Record every decision or deviation in the handover.
-4. The tablet must be connected. I'm needed for: T2 (I create the keystore and the properties file; never read or print them), T6 (listening, turning the tablet, unlocking after a reboot), and the last minute of T7. Ask before changing any tablet setting, and put it back afterwards. The debug app holds my workouts, so run instrumented tests with the tablet skill's instrument helper, not connectedDebugAndroidTest. Don't push the tag or create the release until I say so.
+4. The tablet must be connected. I'm needed for: T2 (I create the keystore and the properties file; never read or print them), T6 (listening, turning the tablet, unlocking after a reboot), and the last minute of T7. Ask before changing any tablet setting, and put it back afterwards. The debug app holds my workouts, so run instrumented tests with the tablet skill's instrument helper, not connectedDebugAndroidTest. Don't push the tag or create the release until I say so. Pull request #8 is open, and may have been merged or have review comments: check it first.
 5. Before the session ends, or once all tasks are done, use the handover skill. When the done criteria pass, open the pull request and wait for me to merge it. After the merge, T10 releases v1.0.0, then the phase-close skill closes the phase.
 ```
 
 ## Current state
 
-T1–T8 are done, on SPEC v0.4. The specification and the plan are at v1.0. Acceptance ran on the release APK from `56b5747`, whose SHA-256 is in `ACCEPTANCE.md`. No defect was found.
+T1–T8 are done, on SPEC v0.4. Pull request [#8](https://github.com/davamix/workout-timer/pull/8) is open, and CI passes on it without the signing properties. The specification and the plan are at v1.0. Acceptance ran on the release APK from `56b5747`, whose SHA-256 is in `ACCEPTANCE.md`. No defect was found.
 
 - The release APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app. It holds "Edges", "Example", "One hour" and "Sixty", so T10 can check that workouts survive `adb install -r`.
 - Every instrumented test passes, including `EndToEndTest`.
@@ -34,8 +34,9 @@ T1–T8 are done, on SPEC v0.4. The specification and the plan are at v1.0. Acce
 
 ## Next steps
 
-1. `T9`: the pull request, with `ACCEPTANCE.md` linked. The user merges it.
-2. `T10`: the release, with the user's go-ahead (SPEC §4.3.6), then `phase-close`.
+1. Deal with any review comments on pull request #8. The user merges it.
+2. `T10`, after the merge: follow SPEC §4.3.6 step by step. Build on `main`, install over the accepted build, and check that the workouts survive and one runs to the end. Then **ask the user for the go-ahead** before the tag and the release.
+3. Use the `phase-close` skill.
 
 ## Tasks
 
@@ -44,14 +45,14 @@ The task IDs come from SPEC.md §7.
 | Task | Status | Notes |
 |---|---|---|
 | T1 | Done | The method gives about ±0.15 s; numbers under "How to verify" |
-| T2 | Done | Signed APK installed. `./gradlew build` still has to pass without the properties in CI, which the pull request's run proves. |
+| T2 | Done | Signed APK installed. `./gradlew build` passes in CI without the properties, on pull request #8. |
 | T3 | Done | 10 of 10 runs pass |
 | T4 | Done | 81 instrumented tests pass; wiring and security checks clean; `ACCEPTANCE.md` written |
 | T5 | Done | A1, A3, A4, A5, A10, A11 and A13 pass, with no defect found. A2 and A18 finish in T6. |
 | T6 | Done | A2, A6–A9, A12 and A14–A16 pass, with no defect found. The user confirmed what only ears and hands can check. |
 | T7 | Done | A17 and A18 pass, with a drift of +0.022 s. The user confirmed the cues in the last minute. Numbers in `ACCEPTANCE.md`. |
 | T8 | Done | README, CLAUDE.md, the `tablet` skill, `ACCEPTANCE.md`, and the specification and plan at v1.0 |
-| T9 | Doing | Pull request |
+| T9 | In review | Pull request [#8](https://github.com/davamix/workout-timer/pull/8), with CI passing |
 | T10 | To do | Release after the merge, then `phase-close` |
 
 ## Decisions and deviations
@@ -128,5 +129,5 @@ Newest first.
 
 ### 2026-11-06
 
-- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3. T4. T5. T6 with the user (SPEC v0.4). T7. T8, with specification and plan v1.0.
+- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3. T4. T5. T6 with the user (SPEC v0.4). T7. T8, with specification and plan v1.0. T9, pull request #8.
 - Notes: measured on the tablet for the SPEC: a `dumpsys window` poll through adb takes about 130 ms, and one `input` command about 750 ms. The first `input` took 1034 ms.
