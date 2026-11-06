@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Status** | In progress |
-| **Spec** | [SPEC.md](SPEC.md), version v0.3 |
+| **Spec** | [SPEC.md](SPEC.md), version v0.4 |
 | **Branch** | `phase/p8-integration` |
 | **Last session** | 2026-11-06 |
 
@@ -25,18 +25,18 @@ Start or continue phase P8 (Integration and v1.0) of the workout timer.
 
 ## Current state
 
-T1–T5 are done, on SPEC v0.3. Acceptance runs on the release APK from `56b5747`, whose SHA-256 is in `ACCEPTANCE.md`. No defect has been found.
+T1–T6 are done, on SPEC v0.4. Acceptance runs on the release APK from `56b5747`, whose SHA-256 is in `ACCEPTANCE.md`. No defect has been found.
 
 - A run can be timed from outside the app to about ±0.15 s.
 - The release APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app. It holds the §4.4 "Example".
 - Every instrumented test passes, including `EndToEndTest`.
 - No production Kotlin has changed, and no wiring is left to do.
-- `ACCEPTANCE.md`: A1, A3, A4, A5, A10, A11 and A13 pass, so 14 of the 51 rows do. A2 and A18 are still open.
+- `ACCEPTANCE.md`: 50 of the 51 rows pass. Only `NF-1` is left, with A17 and the last of A18.
 
 ## Next steps
 
-1. `T6` with the user at the tablet: A6–A9, A12, A14–A16. The user has agreed to the Wi-Fi and font scale changes, and to the reboot. While paused in A8, read the get-ready and rest screens with `texts`, which finishes A2. Wi-Fi goes off for A6, and the font scale goes to 1.15 for A12; put both back.
-2. `T7`, the 60-minute run.
+1. `T7`, the 60-minute run (SPEC §4.3.5).
+2. `T8`: close the documents.
 
 ## Tasks
 
@@ -49,8 +49,8 @@ The task IDs come from SPEC.md §7.
 | T3 | Done | 10 of 10 runs pass |
 | T4 | Done | 81 instrumented tests pass; wiring and security checks clean; `ACCEPTANCE.md` written |
 | T5 | Done | A1, A3, A4, A5, A10, A11 and A13 pass, with no defect found. A2 and A18 finish in T6. |
-| T6 | To do | Acceptance with the user |
-| T7 | To do | The 60-minute run |
+| T6 | Done | A2, A6–A9, A12 and A14–A16 pass, with no defect found. The user confirmed what only ears and hands can check. |
+| T7 | Doing | The 60-minute run |
 | T8 | To do | Close the documents |
 | T9 | To do | Pull request |
 | T10 | To do | Release after the merge, then `phase-close` |

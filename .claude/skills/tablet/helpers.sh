@@ -132,13 +132,16 @@ keeps_screen_on() {
 # Times a workout from outside the app, on the PC's clock, for NF-1. It waits for the runner's FLAG_KEEP_SCREEN_ON to
 # turn on, then off, and prints "on <seconds>", "off <seconds>" and "span <seconds>". Start it in the background before
 # pressing Start. A poll takes about 130 ms. With SLOW_SECONDS, it polls only every 5 s for that long after the flag
-# turns on, so a long run doesn't load the tablet. Gives up after TIMEOUT_SECONDS (default 300).
+# turns on, so a long run doesn't load the tablet. Gives up after TIMEOUT_SECONDS (default 300). An empty answer from
+# adb counts as unknown, not as off, so one USB hiccup can't end a long run; "missed" says how many there were.
 time_run() {
-    local slow=${1:-0} timeout=${2:-300} begin=$SECONDS on_at="" on_seconds=0 flags now
+    local slow=${1:-0} timeout=${2:-300} begin=$SECONDS on_at="" on_seconds=0 missed=0 flags now
     while [ $((SECONDS - begin)) -lt "$timeout" ]; do
-        flags=$($adb shell "dumpsys window windows | grep -A6 'Window{.*$pkg/$activity' | grep -o 'fl=#[0-9a-f]*'" | head -1 | tr -d '\r' | cut -d'#' -f2)
+        flags=$($adb shell "dumpsys window windows | grep -A6 'Window{.*$pkg/$activity' | grep -o 'fl=#[0-9a-f]*'" 2> /dev/null | head -1 | tr -d '\r' | cut -d'#' -f2)
         now=$EPOCHREALTIME
-        if [ -n "$flags" ] && [ $((0x$flags & 0x80)) -ne 0 ]; then
+        if [ -z "$flags" ]; then
+            missed=$((missed + 1))
+        elif [ $((0x$flags & 0x80)) -ne 0 ]; then
             if [ -z "$on_at" ]; then
                 on_at=$now
                 on_seconds=$SECONDS
@@ -147,6 +150,7 @@ time_run() {
         elif [ -n "$on_at" ]; then
             echo "off $now"
             awk -v a="$on_at" -v b="$now" 'BEGIN { printf "span %.3f\n", b - a }'
+            echo "missed $missed"
             return 0
         fi
         if [ -n "$on_at" ] && [ $((SECONDS - on_seconds)) -lt "$slow" ]; then sleep 5; fi

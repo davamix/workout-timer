@@ -20,7 +20,7 @@ This records how each requirement of version 1.0.0 was checked on the tablet. A 
 | A3 | Creating the §4.4 example | Claude | Pass | Typed with the real keyboard through adb, leaving linked values empty. "Total 4:23" before saving and on the list. |
 | A4 | Editing, linked defaults, validation, discarding | Claude | Pass | Default duration 45: High knees and Crunches show 45, Jumping jacks keeps 30, total 4:33. "Not used" moved with the exercise, and Arm circles kept its 5. Messages: "Enter a name", "From 1 to 5999 s", "From 0 to 5999 s", "Add at least one exercise", "Add at least one round", and nothing saved. "Discard changes?", then 4:23. |
 | A5 | Duplicating and deleting | Claude | Pass | "Example (copy)" with 4:23. The dialog names the copy. Cancel keeps it, Delete removes it. |
-| A6 | A full run with voice, offline, from 3 m | User | In progress | From a cold speech engine: "Getting ready…", then the user confirmed every cue in the example table, the silent rests, the one chime, "Workout complete. Well done!", and that the text reads well from afar. Span 268.96 s. Whether every button is easy to hit is still to confirm. Offline is checked in A7, because Wi-Fi stayed on here (P8 Q9). |
+| A6 | A full run with voice, offline, from 3 m | User | Pass | From a cold speech engine: "Getting ready…", then the user confirmed every cue in the example table, the silent rests, the one chime, "Workout complete. Well done!", and that the text reads well from afar. Span 268.96 s. The user tried every screen at arm's length: the buttons are easy to hit. Offline is checked in A7, because Wi-Fi stayed on here (P8 Q9). |
 | A7 | Cue edge cases | User | Pass | With Wi-Fi off (`Active default network: none`) and a cold speech engine. The user confirmed: Ten not named, Eleven named, the chime then "Twelve" not over it, the 3, 2 and 1 s exercises counting from their own duration, and the end message. "Total time 0:42 · 2 rounds · 6 exercises". |
 | A8 | Pause and resume | User and Claude | Pass | Paused in get ready (00:03), an exercise (00:30, 00:25, 00:02) and a rest (00:04); each held still, then counted on. The orange paused colour, "PAUSED", and the four buttons. The user confirmed: speech stops at the pause, nothing is replayed, and "one" comes on time. |
 | A9 | Next, Previous, Stop, Back | User and Claude | Pass | The whole Next and Previous table, on screen. Previous does nothing in get ready. The user confirmed no chime crossing into Core, "Plank" on resume, and "Workout complete. Well done!" on Next from the last exercise. Back pauses, then asks to stop, then closes the dialog. Stop, Cancel keeps it paused; Stop, Stop returns to the list. |
@@ -40,13 +40,13 @@ This records how each requirement of version 1.0.0 was checked on the tablet. A 
 
 | ID | Requirement | Scenarios | Result |
 |---|---|---|---|
-| EX-1 | Phases follow the sequencing rules | A6 | To do |
-| EX-2 | An exercise lasts its duration, then the next phase starts | A6 | To do |
-| EX-3 | A rest lasts its duration; 0 s means no rest | A6, A7 | To do |
+| EX-1 | Phases follow the sequencing rules | A6 | Pass |
+| EX-2 | An exercise lasts its duration, then the next phase starts | A6 | Pass |
+| EX-3 | A rest lasts its duration; 0 s means no rest | A6, A7 | Pass |
 | EX-4 | Pause and resume an exercise | A8 | Pass |
 | EX-5 | Pause and resume in rests and get ready | A8 | Pass |
-| EX-6 | A completion screen at the end | A6 | To do |
-| EX-7 | A 3 s get ready before the first exercise | A6 | To do |
+| EX-6 | A completion screen at the end | A6 | Pass |
+| EX-7 | A 3 s get ready before the first exercise | A6 | Pass |
 | EX-8 | Stop asks for confirmation | A9 | Pass |
 | EX-9 | Next and Previous | A9 | Pass |
 | EX-10 | Pauses when the app leaves the foreground | A10 | Pass |
@@ -56,31 +56,31 @@ This records how each requirement of version 1.0.0 was checked on the tablet. A 
 
 | ID | Requirement | Scenarios | Result |
 |---|---|---|---|
-| UI-1 | Shows the round name | A6 | To do |
-| UI-2 | Shows the exercise name | A6 | To do |
-| UI-3 | Shows the current phase's time as `mm:ss` | A6 | To do |
+| UI-1 | Shows the round name | A6 | Pass |
+| UI-2 | Shows the exercise name | A6 | Pass |
+| UI-3 | Shows the current phase's time as `mm:ss` | A6 | Pass |
 | UI-4 | A pause and resume control | A8 | Pass |
-| UI-5 | A rest shows the next exercise, and the next round if it changes | A6 | To do |
-| UI-6 | Shows progress in the round and the workout | A6 | To do |
-| UI-7 | A background colour for each state | A6, A8 | To do |
-| UI-10 | Only Pause while running | A6 | To do |
+| UI-5 | A rest shows the next exercise, and the next round if it changes | A6 | Pass |
+| UI-6 | Shows progress in the round and the workout | A6 | Pass |
+| UI-7 | A background colour for each state | A6, A8 | Pass |
+| UI-10 | Only Pause while running | A6 | Pass |
 | UI-11 | Resume, Previous, Next and Stop while paused, and says it's paused | A8 | Pass |
 
 ### Audio cues
 
 | ID | Requirement | Scenarios | Result |
 |---|---|---|---|
-| TTS-1 | The name is spoken when an exercise is longer than 10 s | A6, A7 | To do |
-| TTS-2 | "three", "two", "one" for the last 3 s | A6, A7 | To do |
+| TTS-1 | The name is spoken when an exercise is longer than 10 s | A6, A7 | Pass |
+| TTS-2 | "three", "two", "one" for the last 3 s | A6, A7 | Pass |
 | TTS-3 | Pausing stops speech, and nothing is replayed | A8 | Pass |
 | TTS-4 | Cues work without a network | A7 | Pass |
-| TTS-7 | "Workout complete. Well done!" at the end | A6, A9 | To do |
+| TTS-7 | "Workout complete. Well done!" at the end | A6, A9 | Pass |
 | TTS-9 | Voice cues can be turned off, and the choice is remembered | A14, A16 | Pass |
-| TTS-10 | "Get ready in", then the countdown | A6, A14 | To do |
-| TTS-11 | Always in English (United States) | A6 | To do |
-| TTS-12 | Rests are silent | A6 | To do |
-| SND-1 | A sound when a round ends, not after the last | A6, A7 | To do |
-| SND-2 | No other sound effects | A6 | To do |
+| TTS-10 | "Get ready in", then the countdown | A6, A14 | Pass |
+| TTS-11 | Always in English (United States) | A6 | Pass |
+| TTS-12 | Rests are silent | A6 | Pass |
+| SND-1 | A sound when a round ends, not after the last | A6, A7 | Pass |
+| SND-2 | No other sound effects | A6 | Pass |
 | §5.3 | The volume keys always change the media volume | A15 | Pass |
 
 ### Workout management
@@ -107,7 +107,7 @@ This records how each requirement of version 1.0.0 was checked on the tablet. A 
 | NF-3 | Configuration changes don't affect the workout | A12 | Pass |
 | NF-4 | No network permission, no accounts, no analytics | A1, A7 | Pass |
 | NF-5 | Runs on Android 8.0 on the target device | A1 | Pass |
-| NF-6 | Readable from 3 m, with large touch targets | A6 | To do |
+| NF-6 | Readable from 3 m, with large touch targets | A6 | Pass |
 | NF-7 | Installed as an APK from the development machine | A1 | Pass |
 | NF-8 | Landscape only, following the sensor | A12 | Pass |
 | NF-9 | English UI, with all text in resources | A2 | Pass |
