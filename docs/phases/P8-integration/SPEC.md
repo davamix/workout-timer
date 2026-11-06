@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Ready, v0.2 |
+| **Status** | Ready, v0.3 |
 | **Phase** | P8, see [Implementation plan §5](../../IMPLEMENTATION_PLAN.md#5-phases) |
 | **Depends on** | P3, P5, P6 and P7, all done. It also uses P1, P2 and P4, all done. |
 | **Branch** | `phase/p8-integration` |
@@ -146,12 +146,12 @@ No new screen, so there's no layout to check. No library is added.
 
 ### 4.2 Interfaces and data
 
-**Signing properties,** in the user-level file `C:\Users\davam_p3h1i13\.gradle\gradle.properties`, outside the repo. The file doesn't exist yet.
+**Signing properties,** in the user-level file `C:\Users\davam_p3h1i13\.gradle\gradle.properties`, outside the repo. The user wrote it, and Claude doesn't read it.
 
 ```properties
-workoutTimerKeystoreFile=C:/Users/davam_p3h1i13/.android-keys/workout-timer-release.jks
+workoutTimerKeystoreFile=C:/Users/davam_p3h1i13/workout-timer.keystore
 workoutTimerKeystorePassword=<password>
-workoutTimerKeyAlias=workout-timer
+workoutTimerKeyAlias=<alias>
 workoutTimerKeyPassword=<password>
 ```
 
@@ -177,18 +177,11 @@ The handovers leave P8 these items only: the end-to-end test, checking `WM-8` th
 
 #### 4.3.2 Signing
 
-- **The keystore** (Q1) is created by the user in their own terminal, so its password never passes through Claude. `keytool` prompts for the password when none is given on the command line, which also keeps it out of the shell history:
-
-  ```powershell
-  New-Item -ItemType Directory -Force "$HOME\.android-keys"
-  & "D:\Android\Android Studio\jbr\bin\keytool.exe" -genkeypair -v -keystore "$HOME\.android-keys\workout-timer-release.jks" -alias workout-timer -keyalg RSA -keysize 4096 -validity 10950 -dname "CN=Workout Timer"
-  ```
-
-  The certificate is public inside the APK, so its name is "Workout Timer" and holds no personal data. This keystore format has one password, so both password properties get the same value.
+- **The keystore** (Q1, Q8) was created by the user in their own terminal, at `C:\Users\davam_p3h1i13\workout-timer.keystore`, so its password never passed through Claude. The key is RSA 4096. The certificate is public inside the APK, and the user chose to keep their name and country in it.
 - **The properties file** is written in Notepad, not VS Code, because the Claude extension can see what's selected in the editor. A `\` is an escape character in a properties file, so the path uses forward slashes and the password has no backslash.
 - **Keep a copy of the keystore and its password outside this PC.** Android only installs an update signed with the same key. Without the key, an update means uninstalling first, which deletes every workout (`WM-8`).
 - **In `app/build.gradle.kts`:** the release signing config exists only when all four properties are set, read with `providers.gradleProperty`, which works with the configuration cache. Otherwise the release build stays unsigned. CI has no properties and must keep passing, because `./gradlew build` also assembles the release variant.
-- **Checking it:** `apksigner verify --print-certs` (`D:\Android\Sdk\build-tools\37.0.0\apksigner.bat`) must show a v2 signature with the "Workout Timer" certificate. Android 8 uses v2. Never print the properties file.
+- **Checking it:** `apksigner verify --print-certs` (`D:\Android\Sdk\build-tools\37.0.0\apksigner.bat`) must show a v2 signature with the certificate `CN=Daniel Valcarce, C=ES`, SHA-256 `abd7e456e1edcd040377267afdcf0ebbd0ee7dd82c4f07a2466c366a074ad75f`. Android 8 uses v2. Never print the properties file.
 
 #### 4.3.3 Release and debug side by side
 
@@ -317,7 +310,7 @@ Final check of plan §3 on the release APK, in A1 and T4:
 | Release builds don't log | Logcat holds no `WorkoutStorage` or `WorkoutAudio` line during acceptance (A18) |
 | Trusted dependencies | No library is added. CI still validates the wrapper, and its actions stay pinned. |
 
-The APK goes on a public GitHub release (plan PQ-2). It holds no workouts and no secrets. The certificate name is generic, and the commit it records is already public.
+The APK goes on a public GitHub release (plan PQ-2). It holds no workouts and no secrets. The certificate holds the user's name and country, by their choice (Q8), and the commit it records is already public.
 
 ## 6. Testing
 
@@ -412,7 +405,7 @@ After the merge:
 
 ## 9. Open questions
 
-None at the moment. New questions are numbered from Q8.
+None at the moment. New questions are numbered from Q9.
 
 ### Answered
 
@@ -425,6 +418,7 @@ None at the moment. New questions are numbered from Q8.
 | Q5 | Plan §3 and CLAUDE.md didn't match the merged manifest. AndroidX adds `ProfileInstallReceiver` (exported, but only holders of `android.permission.DUMP` can reach it), `InitializationProvider` (not exported), and `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`, a permission the app declares and grants itself. | Keep all three, since `InitializationProvider` starts libraries the app uses, and none of them gives access to anything. `NF-4` still holds: there's no network permission. Plan v0.3 §3 and CLAUDE.md now say so. These three are the expected list in §5, so that a new one fails the check. |
 | Q6 | How much of the 60-minute run needs the user? | Claude drives it through adb. The tablet speaks for an hour on USB, and nobody touches it. The user only listens to the last minute. If the user would rather work out with it, that's fine as long as they don't touch the screen outside the two pauses. |
 | Q7 | Do the specification and the plan become v1.0? They still say "Draft". | Yes, at T8: specification v1.0 and plan v1.0, both based on what was released, with a change-log entry. New work after that starts a new version. |
+| Q8 | From T2: the user's keystore is at `C:\Users\davam_p3h1i13\workout-timer.keystore`, not in `.android-keys`, and its certificate is `CN=Daniel Valcarce, C=ES`, not the generic "Workout Timer" this SPEC assumed. Anyone who downloads the APK can read the certificate. | Keep both. The user's name is already public in the repo's commits. The key can't change after this without uninstalling the app, which deletes its workouts. |
 
 ## 10. Change log
 
@@ -432,3 +426,4 @@ None at the moment. New questions are numbered from Q8.
 |---|---|---|
 | 0.1 | 2026-11-06 | First draft |
 | 0.2 | 2026-11-06 | Review applied: the user agreed with every draft assumption (Q1–Q7). Quotes specification v0.11 (`NF-1`, Q2). §4.3.2 adds how to write the properties file. §5 gives the expected manifest (Q5). Ready. |
+| 0.3 | 2026-11-06 | From T2 (Q8): the keystore's real path and certificate, in §4.2, §4.3.2 and §5. |
