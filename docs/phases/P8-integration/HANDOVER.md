@@ -25,7 +25,7 @@ Start or continue phase P8 (Integration and v1.0) of the workout timer.
 
 ## Current state
 
-T1–T7 are done, on SPEC v0.4. Acceptance ran on the release APK from `56b5747`, whose SHA-256 is in `ACCEPTANCE.md`. No defect was found.
+T1–T8 are done, on SPEC v0.4. The specification and the plan are at v1.0. Acceptance ran on the release APK from `56b5747`, whose SHA-256 is in `ACCEPTANCE.md`. No defect was found.
 
 - The release APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app. It holds "Edges", "Example", "One hour" and "Sixty", so T10 can check that workouts survive `adb install -r`.
 - Every instrumented test passes, including `EndToEndTest`.
@@ -34,9 +34,8 @@ T1–T7 are done, on SPEC v0.4. Acceptance ran on the release APK from `56b5747`
 
 ## Next steps
 
-1. `T8`: close the documents.
-2. `T9`: the pull request. The user merges it.
-3. `T10`: the release, with the user's go-ahead, then `phase-close`.
+1. `T9`: the pull request, with `ACCEPTANCE.md` linked. The user merges it.
+2. `T10`: the release, with the user's go-ahead (SPEC §4.3.6), then `phase-close`.
 
 ## Tasks
 
@@ -51,8 +50,8 @@ The task IDs come from SPEC.md §7.
 | T5 | Done | A1, A3, A4, A5, A10, A11 and A13 pass, with no defect found. A2 and A18 finish in T6. |
 | T6 | Done | A2, A6–A9, A12 and A14–A16 pass, with no defect found. The user confirmed what only ears and hands can check. |
 | T7 | Done | A17 and A18 pass, with a drift of +0.022 s. The user confirmed the cues in the last minute. Numbers in `ACCEPTANCE.md`. |
-| T8 | Doing | Close the documents |
-| T9 | To do | Pull request |
+| T8 | Done | README, CLAUDE.md, the `tablet` skill, `ACCEPTANCE.md`, and the specification and plan at v1.0 |
+| T9 | Doing | Pull request |
 | T10 | To do | Release after the merge, then `phase-close` |
 
 ## Decisions and deviations
@@ -69,8 +68,7 @@ Anything decided during implementation that isn't in SPEC.md, or that changes it
 
 Lessons from earlier phases that apply here are in SPEC §4.5.
 
-- **For CLAUDE.md, in T8:** a click on a node with empty bounds raises no error, and lands at the screen's corner. Under `MainActivity`, close the keyboard before a click that follows a scroll.
-- **For the `tablet` skill, in T8: driving the editor through adb.** Focusing a field scrolls the form, so "the Nth field on screen" changes between taps. Find a field by its place after one holding a known value. A round's controls are in its header, above its name field. Press Back only when `dumpsys input_method` shows `mInputShown=true`, because Back on a closed keyboard leaves the editor. T7 needs this to create "One hour".
+None. This phase's lessons are in CLAUDE.md and the `tablet` skill.
 
 ## Pending wiring
 
@@ -130,5 +128,5 @@ Newest first.
 
 ### 2026-11-06
 
-- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3. T4. T5. T6 with the user (SPEC v0.4). T7.
+- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3. T4. T5. T6 with the user (SPEC v0.4). T7. T8, with specification and plan v1.0.
 - Notes: measured on the tablet for the SPEC: a `dumpsys window` poll through adb takes about 130 ms, and one `input` command about 750 ms. The first `input` took 1034 ms.

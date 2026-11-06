@@ -2,8 +2,8 @@
 
 | | |
 |---|---|
-| **Status** | In progress |
-| **Specification** | [SPECIFICATION.md](../../SPECIFICATION.md) v0.11 |
+| **Status** | Done: every requirement passes |
+| **Specification** | [SPECIFICATION.md](../../SPECIFICATION.md) v1.0, whose requirements are the same as those of v0.11, which these checks were written against |
 | **Scenarios** | [P8 SPEC §6](SPEC.md#6-testing) |
 | **Device** | HUAWEI MediaPad T5 10 (`AGS2-W09`), Android 8.0 (API 26), system language Spanish |
 | **Commit** | `56b5747` on `phase/p8-integration`. Later commits must leave the code unchanged, or the checks they affect are repeated. |
@@ -129,4 +129,4 @@ Run on 2026-11-06, from 07:37 to 08:39, with the workout "One hour" and voice cu
 
 ## Problems found
 
-None so far.
+None. No defect was found in the app, and `app/src/main` and `core/src/main` didn't change during P8.
