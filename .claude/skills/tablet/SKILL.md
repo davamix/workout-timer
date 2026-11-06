@@ -46,7 +46,7 @@ Check the connection with `adb devices -l`. The tablet must be listed as `device
 source .claude/skills/tablet/helpers.sh
 ```
 
-It sets `$adb`, `$pkg` (the debug package), `$activity` and `$runner`, and defines:
+It sets `$adb`, `$pkg` (the debug package), `$release_pkg`, `$activity` and `$runner`. The helpers read `$pkg` when they run, so `pkg=$release_pkg` after loading the file points them at the release app. `end_process`, `instrument` and `run-as` only work on the debug app. It defines:
 
 | Function | What it does |
 |---|---|
@@ -61,6 +61,7 @@ It sets `$adb`, `$pkg` (the debug package), `$activity` and `$runner`, and defin
 | `start_workout <name>` | Presses Start on that workout in the list |
 | `end_process` | Ends the app's process as Android does to free memory (`EX-11`); see below |
 | `keeps_screen_on` | `yes` if the app's window has `FLAG_KEEP_SCREEN_ON` (`NF-2`), `no` otherwise |
+| `time_run [slow_seconds] [timeout_seconds]` | Times a workout from outside the app, on the PC's clock (`NF-1`): prints `on`, `off` and `span` in seconds, from the runner's `FLAG_KEEP_SCREEN_ON`. See "Common tasks". |
 | `wakefulness` | `Awake`, or `Asleep` or `Dozing` when the screen is off |
 | `screen_timeout <millis> \| never` | Sets the screen timeout and prints it. Ask the user first, and put it back with `never`. |
 | `wait_for_log <tag> <regex> [seconds]` | Waits until a log line from that tag matches (default 60 s). Clear the log first with `$adb logcat -c`. |
@@ -100,6 +101,7 @@ Gradle finds adb by itself, so the Gradle tasks need no path.
 | Send the app to the background (`EX-10`) | `$adb shell input keyevent KEYCODE_HOME`. Recents is `KEYCODE_APP_SWITCH`, and the power button `KEYCODE_POWER`, then `KEYCODE_WAKEUP` to turn the screen back on. All three stop the activity (P7 T1). |
 | Simulate Android closing the app (`EX-11`) | `end_process`, then `launch`. `am kill` doesn't end the process on this tablet, even when it's cached. `end_process` presses Home, opens Settings and presses Home again, so the app is no longer the "previous" one. Then it sends SIGKILL through `run-as`. Logcat shows "Process … has died: cch CAC", as for a low-memory kill. The task stays in Recents, and reopening it rebuilds the activity from its saved state (P7 T1). |
 | Check that the screen stays on (`NF-2`) | `keeps_screen_on` reads the window's flag. To see it really work, ask the user first, then set `screen_timeout 30000`, wait over a minute on the screen, and check that `wakefulness` is still `Awake`. Then check that a screen that doesn't keep it on goes `Asleep` after 30 s. Put it back with `screen_timeout never`. Touching the tablet, or `input` events, restart the timeout. |
+| Time a workout from outside the app (`NF-1`) | `time_run > <file> &`, then `start_workout <name>`, then `wait`. It works on release builds, which have no logs. The span also holds fixed costs: preparing the audio, "Get ready in", and the move to the completed screen. Measure them as `span − planned` on a 60 s workout with the same voice setting, and subtract them. Numbers from P8 T1, debug build: 2.20 s with voice on, 0.98 s with voice off, each within ±0.07 s. Taps take 0.75 s ± 0.03 s, so the time between a Pause and a Resume tap is accurate to about ±0.15 s. Pause is at (960, 1012) and Resume at (818, 1013). |
 | Tap | `tap_text <text>`, or `$adb shell input tap <x> <y>` with pixel coordinates from a screenshot |
 
 ## Instrumented test results

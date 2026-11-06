@@ -8,6 +8,9 @@
 export MSYS_NO_PATHCONV=1
 adb=/d/Android/Sdk/platform-tools/adb.exe
 pkg=io.github.davamix.workouttimer.debug
+# The helpers read $pkg when they run, so `pkg=$release_pkg` points them at the release app. `end_process` and
+# `run-as` don't work on it, and neither do instrumented tests.
+release_pkg=io.github.davamix.workouttimer
 activity=io.github.davamix.workouttimer.MainActivity
 runner=io.github.davamix.workouttimer.debug.test/androidx.test.runner.AndroidJUnitRunner
 gradle_log=build/gradle.log
@@ -124,6 +127,32 @@ keeps_screen_on() {
     flags=$($adb shell dumpsys window windows | grep -A6 "Window{.*$pkg/$activity" | grep -o 'fl=#[0-9a-f]*' | head -1 | cut -d'#' -f2)
     [ -z "$flags" ] && { echo "keeps_screen_on: the app has no window"; return 1; }
     if [ $((0x$flags & 0x80)) -ne 0 ]; then echo yes; else echo no; fi
+}
+
+# Times a workout from outside the app, on the PC's clock, for NF-1. It waits for the runner's FLAG_KEEP_SCREEN_ON to
+# turn on, then off, and prints "on <seconds>", "off <seconds>" and "span <seconds>". Start it in the background before
+# pressing Start. A poll takes about 130 ms. With SLOW_SECONDS, it polls only every 5 s for that long after the flag
+# turns on, so a long run doesn't load the tablet. Gives up after TIMEOUT_SECONDS (default 300).
+time_run() {
+    local slow=${1:-0} timeout=${2:-300} begin=$SECONDS on_at="" on_seconds=0 flags now
+    while [ $((SECONDS - begin)) -lt "$timeout" ]; do
+        flags=$($adb shell "dumpsys window windows | grep -A6 'Window{.*$pkg/$activity' | grep -o 'fl=#[0-9a-f]*'" | head -1 | tr -d '\r' | cut -d'#' -f2)
+        now=$EPOCHREALTIME
+        if [ -n "$flags" ] && [ $((0x$flags & 0x80)) -ne 0 ]; then
+            if [ -z "$on_at" ]; then
+                on_at=$now
+                on_seconds=$SECONDS
+                echo "on $on_at"
+            fi
+        elif [ -n "$on_at" ]; then
+            echo "off $now"
+            awk -v a="$on_at" -v b="$now" 'BEGIN { printf "span %.3f\n", b - a }'
+            return 0
+        fi
+        if [ -n "$on_at" ] && [ $((SECONDS - on_seconds)) -lt "$slow" ]; then sleep 5; fi
+    done
+    echo "time_run: gave up after $timeout s"
+    return 1
 }
 
 # Prints whether the screen is on: Awake, or Asleep or Dozing when it's off.
