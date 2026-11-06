@@ -58,6 +58,8 @@ wait_for() {
     until $adb exec-out uiautomator dump /dev/tty 2>/dev/null | grep -q "$1"; do
         [ $SECONDS -ge $end ] && { echo "timeout: '$1' not on screen after ${2:-30} s"; return 1; }
     done
+    # Without this, the function returns the loop's status, which is 1 if the text only appeared on a later try.
+    return 0
 }
 
 # Taps the node whose text is exactly TEXT. If several match, "last" takes the last one, such as a dialog's button

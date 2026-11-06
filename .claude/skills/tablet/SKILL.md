@@ -95,7 +95,7 @@ Gradle finds adb by itself, so the Gradle tasks need no path.
 | Stop | `stop_app` |
 | Cold start of the speech engine | `stop_app cold`. The next connection then takes ~3 s, and the speaker's whole `prepare()` 9–10 s. |
 | Battery level | `$adb shell dumpsys battery \| grep -e level -e powered`. Check it before a long manual run, such as a full workout. |
-| Screenshot | `shot <scratchpad>/wt.png`, then Read the PNG to look at it |
+| Screenshot | `shot <scratchpad>/wt.png`, then Read the PNG to look at it. For a picture to publish, such as the README's in `docs/screenshots/`, crop it to 1920 × 1084 from y = 48 with `System.Drawing` in PowerShell. That leaves out the status bar, which shows the user's notifications. |
 | App logs | `$adb logcat -d --pid=$($adb shell pidof -s $pkg) \| tail -200`. Clear the log first with `$adb logcat -c`. The main log wraps: at the end of a 60-minute run, it only reached back 12 minutes (P8 T7). |
 | Crash logs | `$adb logcat -d -b crash \| tail -100` |
 | Send the app to the background (`EX-10`) | `$adb shell input keyevent KEYCODE_HOME`. Recents is `KEYCODE_APP_SWITCH`, and the power button `KEYCODE_POWER`, then `KEYCODE_WAKEUP` to turn the screen back on. All three stop the activity (P7 T1). |

@@ -6,6 +6,19 @@ A workout is made of rounds. Each round is an ordered list of timed exercises, w
 
 The app works offline, with no accounts and no analytics. Workouts are stored only on the device, so uninstalling the app deletes them.
 
+## Screenshots
+
+Taken from version 1.0.0 on the target tablet, cropped to leave out Android's status and navigation bars.
+
+| | |
+|---|---|
+| ![The list of workouts, each with its total time and buttons to start, edit, duplicate or delete it](docs/screenshots/workouts.png) | ![The workout editor, showing the workout's default times and its first round](docs/screenshots/editor.png) |
+| The workout list | The editor, with defaults that rounds and exercises can override |
+| ![An exercise running on a green screen: Jumping jacks, with 18 seconds left](docs/screenshots/exercise.png) | ![A rest on a blue screen, with 9 seconds left and the next exercise named](docs/screenshots/rest.png) |
+| An exercise, in green | A rest, in blue, with the next exercise |
+| ![A paused workout on an orange screen, with Previous, Resume, Next and Stop buttons](docs/screenshots/paused.png) | ![The completed screen: Well done, with the total time, rounds and exercises](docs/screenshots/completed.png) |
+| Paused, in orange | The end of a workout |
+
 ## Status
 
 Version 1.0.0 is finished. It was built for and tested on one device, a HUAWEI MediaPad T5 10 (Android 8.0, landscape, 1920 × 1200), so other screens may not suit it.
