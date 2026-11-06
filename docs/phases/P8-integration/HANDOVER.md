@@ -25,18 +25,18 @@ Start or continue phase P8 (Integration and v1.0) of the workout timer.
 
 ## Current state
 
-T1–T6 are done, on SPEC v0.4. Acceptance runs on the release APK from `56b5747`, whose SHA-256 is in `ACCEPTANCE.md`. No defect has been found.
+T1–T7 are done, on SPEC v0.4. Acceptance ran on the release APK from `56b5747`, whose SHA-256 is in `ACCEPTANCE.md`. No defect was found.
 
-- A run can be timed from outside the app to about ±0.15 s.
-- The release APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app. It holds the §4.4 "Example".
+- The release APK is version 1.0.0, signed with the user's key, and installed on the tablet next to the debug app. It holds "Edges", "Example", "One hour" and "Sixty", so T10 can check that workouts survive `adb install -r`.
 - Every instrumented test passes, including `EndToEndTest`.
 - No production Kotlin has changed, and no wiring is left to do.
-- `ACCEPTANCE.md`: 50 of the 51 rows pass. Only `NF-1` is left, with A17 and the last of A18.
+- `ACCEPTANCE.md`: all 51 rows pass. `NF-1`'s drift is +0.022 s.
 
 ## Next steps
 
-1. `T7`, the 60-minute run (SPEC §4.3.5).
-2. `T8`: close the documents.
+1. `T8`: close the documents.
+2. `T9`: the pull request. The user merges it.
+3. `T10`: the release, with the user's go-ahead, then `phase-close`.
 
 ## Tasks
 
@@ -50,8 +50,8 @@ The task IDs come from SPEC.md §7.
 | T4 | Done | 81 instrumented tests pass; wiring and security checks clean; `ACCEPTANCE.md` written |
 | T5 | Done | A1, A3, A4, A5, A10, A11 and A13 pass, with no defect found. A2 and A18 finish in T6. |
 | T6 | Done | A2, A6–A9, A12 and A14–A16 pass, with no defect found. The user confirmed what only ears and hands can check. |
-| T7 | Doing | The 60-minute run |
-| T8 | To do | Close the documents |
+| T7 | Done | A17 and A18 pass, with a drift of +0.022 s. The user confirmed the cues in the last minute. Numbers in `ACCEPTANCE.md`. |
+| T8 | Doing | Close the documents |
 | T9 | To do | Pull request |
 | T10 | To do | Release after the merge, then `phase-close` |
 
@@ -119,11 +119,16 @@ The difference, about 1.2 s, is "Get ready in".
 - The merged release manifest holds exactly what SPEC §5 expects. There's no secret in a tracked file, no user-facing text in the Kotlin sources, and no network or analytics library. `app/src/main` and `core/src/main` haven't changed since the phase started.
 - `ACCEPTANCE.md` holds all 50 requirement IDs, compared with the specification by script, plus the §5.3 volume rule.
 
+**T7, the 60-minute run,** on 2026-11-06: the numbers are in `ACCEPTANCE.md`. The overhead on the release APK, 2.125 s, is close to T1's 2.195 s on the debug build. Two things about the throwaway script, neither of which affected the result:
+
+- The command meant to keep the PC awake failed on its quoting in Git Bash, so nothing held the PC awake. Windows' System log has no sleep event (`Kernel-Power` 42) during the run.
+- The main logcat only reached back to 08:27 at the end, so the check for `WorkoutAudio` and `WorkoutStorage` lines covers the hour's last 12 minutes. The crash buffer covers all of it.
+
 ## Session log
 
 Newest first.
 
 ### 2026-11-06
 
-- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3. T4. T5.
+- Done: SPEC v0.1 and this handover, then the review: SPEC v0.2 (`Ready`), specification v0.11 (`NF-1`, Q2), plan v0.3 and CLAUDE.md (merged manifest, Q5). Branch created. T1, with `time_run` and `release_pkg` added to the `tablet` skill; its throwaway probe is deleted. T2, with the user's keystore (SPEC v0.3). T3. T4. T5. T6 with the user (SPEC v0.4). T7.
 - Notes: measured on the tablet for the SPEC: a `dumpsys window` poll through adb takes about 130 ms, and one `input` command about 750 ms. The first `input` took 1034 ms.

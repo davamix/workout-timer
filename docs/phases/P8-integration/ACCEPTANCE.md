@@ -31,8 +31,8 @@ This records how each requirement of version 1.0.0 was checked on the tablet. A 
 | A14 | Voice cues off | User | Pass | The switch stayed off after a force-stop. Span 42.97 s for 42 s planned, so get ready started at once. The user heard only the chime. |
 | A15 | Volume keys | User | Pass | The media volume followed the keys during cues, between cues and on the list, and the ring volume never moved. The user confirmed the voice and the chime follow it. |
 | A16 | A reboot | User and Claude | Pass | After `adb reboot` and unlocking: both workouts listed, and voice cues still off. Turned back on afterwards. |
-| A17 | The 60-minute run | Claude; user at the end | To do | |
-| A18 | No crash, no warning from the app | Claude | In progress | No crash, and no `WorkoutAudio` or `WorkoutStorage` line, so far. |
+| A17 | The 60-minute run | Claude; user at the end | Pass | Drift +0.022 s, and the screen stayed on. The user listened to the last minute: all the cues played correctly. See "The 60-minute run" below. |
+| A18 | No crash, no warning from the app | Claude | Pass | The crash buffer stayed empty across every session, including the whole hour. No `WorkoutAudio` or `WorkoutStorage` line in any session. For the hour, the main log only reaches back to 08:27, so that part covers its last 12 minutes. |
 
 ## Requirements
 
@@ -102,7 +102,7 @@ This records how each requirement of version 1.0.0 was checked on the tablet. A 
 
 | ID | Requirement | Scenarios | Result |
 |---|---|---|---|
-| NF-1 | A 60-minute workout ends within ±1 s | A17 | To do |
+| NF-1 | A 60-minute workout ends within ±1 s | A17 | Pass |
 | NF-2 | The screen stays on in the runner | A13 | Pass |
 | NF-3 | Configuration changes don't affect the workout | A12 | Pass |
 | NF-4 | No network permission, no accounts, no analytics | A1, A7 | Pass |
@@ -114,7 +114,18 @@ This records how each requirement of version 1.0.0 was checked on the tablet. A 
 
 ## The 60-minute run (`NF-1`)
 
-To be filled in by A17: the overhead, the span, the paused time and the drift (P8 SPEC §4.3.5).
+Run on 2026-11-06, from 07:37 to 08:39, with the workout "One hour" and voice cues on, on USB and left alone. It was timed from outside the app on the PC's clock, as P8 SPEC §4.3.5 says. After the run, the installed APK's SHA-256 was read from the tablet, and it matches the one recorded above.
+
+| Measure | Value |
+|---|---|
+| Overhead | 2.125 s, from the spans 62.132, 62.094 and 62.149 s of the 60 s workout "Sixty" |
+| Span | 3710.737 s, with no missed polls |
+| Paused time | 108.590 s: 54.278 s at about minute 20, and 54.312 s at about minute 40 |
+| **Drift** | 3710.737 − 108.590 − 3600 − 2.125 = **+0.022 s** (the limit is ±1 s) |
+| Screen | `FLAG_KEEP_SCREEN_ON` was set at every poll until the end, and the screen was awake at every check. The tablet's own timeout is "never", so A13 is what shows that the flag keeps the screen on. |
+| Battery | 60% before and 62% after, on USB |
+| At the end | "One hour is complete." and "Total time 1:00:00 · 12 rounds · 60 exercises" |
+| Last minute | The user listened: all the cues played correctly |
 
 ## Problems found
 
