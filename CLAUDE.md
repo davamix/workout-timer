@@ -7,6 +7,9 @@ An Android interval timer for round-based workouts, with spoken cues. It runs on
 - `docs/SPECIFICATION.md`: what the app does. Requirement IDs look like `EX-4` or `NF-1`.
 - `docs/IMPLEMENTATION_PLAN.md`: how it is built. Decisions `D-n`, phases P1–P8, and their status in §5.1.
 - `docs/phases/PN-<name>/SPEC.md` and `HANDOVER.md`: one specification and one progress tracker per phase.
+- `docs/phases/P8-integration/ACCEPTANCE.md`: how each requirement of version 1.0.0 was checked on the tablet.
+
+The specification and the plan are at v1.0, which matches the app's version 1.0.0. New work starts a new version of each.
 
 When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-start`). They quote everything needed. Each HANDOVER.md starts with a prompt to paste into a new session to start or continue that phase. Keep it current.
 
@@ -18,7 +21,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - `phase-start`: begin or resume a phase (branch, dependencies, status).
 - `handover`: end a session. Runs the checks, updates HANDOVER.md, commits and pushes, and opens the pull request when the phase is done.
 - `phase-close`: after the user merges a phase's pull request, mark the phase `Done` on `main`.
-- `tablet`: build, install, launch, take screenshots and read logs on the tablet. It also covers reading the text on screen without a screenshot, running one instrumented test without wiping the app's data, summarising instrumented test results, measuring device behaviour with a throwaway probe, reading the app's files, and rebooting.
+- `tablet`: build, install, launch, take screenshots and read logs on the tablet. It also covers reading the text on screen without a screenshot, running one instrumented test without wiping the app's data, summarising instrumented test results, timing a workout from outside the app, driving the editor through adb, measuring device behaviour with a throwaway probe, reading the app's files, and rebooting.
 
 ## Commands
 
@@ -29,7 +32,11 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 | Unit tests only | `./gradlew test` |
 | Install on the tablet | `./gradlew installDebug` |
 | Instrumented tests on the tablet | `./gradlew connectedDebugAndroidTest` (uninstalls the app afterwards, which deletes its workouts). To keep them, the `tablet` skill's `instrument` helper runs the whole suite on the installed app. |
+| Signed release APK | `./gradlew assembleRelease`, which writes `app/build/outputs/apk/release/app-release.apk` |
+| Check a release APK's signature | `D:\Android\Sdk\build-tools\37.0.0\apksigner.bat verify --print-certs <apk>`. It must show a v2 signature and `CN=Daniel Valcarce, C=ES`, with the SHA-256 in P8 SPEC §4.3.2. |
+| Install a release on the tablet | `adb install -r <apk>`. It installs next to the debug build, and each keeps its own workouts. |
 
+- **Signing:** the keystore and the file that holds its passwords, the user-level `gradle.properties`, stay outside the repo. Never read or print that file, and never put a password on a command line. Without its four properties, as on CI, the release APK is unsigned and `build` still passes.
 - Gradle runs on Android Studio's JDK; `JAVA_HOME` already points to it.
 - `adb` is not on PATH. The `tablet` skill has the full path.
 - Run `ktlintFormat` as its own command, before `build`. In a single call (`./gradlew ktlintFormat build`), the ktlint check can still report violations that the format step has just fixed, and the build fails.
@@ -83,6 +90,7 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
   - **Compose UI tests:** use the rules from `androidx.compose.ui.test.junit4.v2` (`createComposeRule`, `createAndroidComposeRule`). The v1 rules are deprecated in Compose BOM 2026.09.00. After an action that starts a coroutine, wait for its result (`waitUntil { … }` or `waitForIdle()`) before asserting. Also:
     - A `LazyColumn` item exists only once it's scrolled into composition. Tag the list, and call `performScrollToNode(matcher)` on it before using an item.
     - With the soft keyboard up, Back only closes the keyboard. Call `closeSoftKeyboard()` before `pressBack()`.
+    - A click on a node with empty bounds raises no error, and lands at the screen's corner. Under `MainActivity`, the window resizes when the keyboard changes, even between `performScrollToNode` and `performClick`, so call `closeSoftKeyboard()` before a click that follows a scroll. Focus moving from a name to a number swaps the keyboard a moment later (P8's `EndToEndTest`).
     - `and` and `or` on matchers are members and need no import. `assert(…)` on a node is an extension, imported from `androidx.compose.ui.test.assert`.
     - Check touch targets (`NF-6`) with `assertTouchTargetsAtLeast()`. Material 3 icon buttons lay out at 40 dp but take touches over 48 dp, so it checks the touch bounds of the nodes fully on screen.
     - `captureToImage()` reads the colours and look of a screen in a test, for example a background colour from one pixel. It can't capture a dialog below API 28: it throws.
@@ -100,3 +108,4 @@ When working on a phase, read only its HANDOVER.md and SPEC.md (skill `phase-sta
 - Phase status changes in plan §5.1 also go straight to `main`.
 - HANDOVER.md updates go on the phase branch. The one exception: after the merge, the closing updates go on `main` (skill `phase-close`).
 - Create phase branches with `--no-track` and push them with `-u`, so they never track `main` (skill `phase-start`).
+- A release is a `vX.Y.Z` tag on `main` and a GitHub release with the signed APK (P8 SPEC §4.3.6). The repo is public, so tag and release only with the user's go-ahead.

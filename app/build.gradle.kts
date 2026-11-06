@@ -16,9 +16,26 @@ android {
         minSdk = 26
         targetSdk = 37
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        // The keystore and its passwords stay outside the repo, in the user-level gradle.properties (plan §3). Without
+        // all four properties, as on CI, the release build is unsigned.
+        val keystoreFile = providers.gradleProperty("workoutTimerKeystoreFile").orNull
+        val keystorePassword = providers.gradleProperty("workoutTimerKeystorePassword").orNull
+        val alias = providers.gradleProperty("workoutTimerKeyAlias").orNull
+        val aliasPassword = providers.gradleProperty("workoutTimerKeyPassword").orNull
+        if (keystoreFile != null && keystorePassword != null && alias != null && aliasPassword != null) {
+            create("release") {
+                storeFile = file(keystoreFile)
+                storePassword = keystorePassword
+                keyAlias = alias
+                keyPassword = aliasPassword
+            }
+        }
     }
 
     buildTypes {
@@ -28,6 +45,7 @@ android {
         }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 

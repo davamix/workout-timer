@@ -46,7 +46,7 @@ Check the connection with `adb devices -l`. The tablet must be listed as `device
 source .claude/skills/tablet/helpers.sh
 ```
 
-It sets `$adb`, `$pkg` (the debug package), `$activity` and `$runner`, and defines:
+It sets `$adb`, `$pkg` (the debug package), `$release_pkg`, `$activity` and `$runner`. The helpers read `$pkg` when they run, so `pkg=$release_pkg` after loading the file points them at the release app. `end_process`, `instrument` and `run-as` only work on the debug app. It defines:
 
 | Function | What it does |
 |---|---|
@@ -61,6 +61,7 @@ It sets `$adb`, `$pkg` (the debug package), `$activity` and `$runner`, and defin
 | `start_workout <name>` | Presses Start on that workout in the list |
 | `end_process` | Ends the app's process as Android does to free memory (`EX-11`); see below |
 | `keeps_screen_on` | `yes` if the app's window has `FLAG_KEEP_SCREEN_ON` (`NF-2`), `no` otherwise |
+| `time_run [slow_seconds] [timeout_seconds]` | Times a workout from outside the app, on the PC's clock (`NF-1`): prints `on`, `off` and `span` in seconds, from the runner's `FLAG_KEEP_SCREEN_ON`. See "Common tasks". |
 | `wakefulness` | `Awake`, or `Asleep` or `Dozing` when the screen is off |
 | `screen_timeout <millis> \| never` | Sets the screen timeout and prints it. Ask the user first, and put it back with `never`. |
 | `wait_for_log <tag> <regex> [seconds]` | Waits until a log line from that tag matches (default 60 s). Clear the log first with `$adb logcat -c`. |
@@ -88,18 +89,24 @@ Gradle finds adb by itself, so the Gradle tasks need no path.
 | Instrumented tests, keeping the app's data | `gradle installDebug installDebugAndroidTest && instrument` runs the whole suite on the installed app, and `instrument <classes>` runs some. It passes when it ends with `OK (N tests)`. Read the summary rather than grepping for `OK`: a filter hides errors such as `no devices/emulators found`. The raw command is `adb shell am instrument -w [-e class <full class>[#method][,…]] [-e <arg> <value>] $runner`. |
 | Load a workout for a visual check, without the UI | P3's `PersistenceCheck`: `instrument data.PersistenceCheck#seed -e persistenceCheck seed`. It saves "P3 persistence check" (two rounds, total 4:08), and **also turns voice cues off**. Afterwards, run it again with `clean` in both places: it deletes the workout and turns voice cues back on. |
 | Read the app's private files (debug build only) | `$adb shell run-as $pkg ls -la files/workouts`, or `… cat files/workouts/<id>.json`. Settings are in `files/datastore/settings.preferences_pb`, a binary file. To copy a binary file to the PC, use `exec-out`, which keeps the bytes: `$adb exec-out run-as $pkg cat <path> > <local file>`. |
-| Launch and time it | `$adb shell am start -W -n $pkg/$activity` |
+| Launch and time it | `$adb shell am start -W -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n $pkg/$activity`. Keep the action and category: with a bare `-n`, the task's root intent isn't the launcher's, so a later `launch` stacks a second `MainActivity` on top instead of bringing the task back, and looks like a lost workout (P8 T5). Read `ThisTime`, or the log's `Displayed` line: `TotalTime` can count from an earlier launch (P8 T5: 82 s for a launch that took 1.15 s). |
 | Launch the audio debug screen | `$adb shell am start -n $pkg/io.github.davamix.workouttimer.audiodebug.AudioDebugActivity` |
 | Read the text on screen | `texts`. It lists every text shown, Compose's included, using far less context than a screenshot. Prefer it when only the words matter. **It can't read a running workout:** the time changes every second, so uiautomator never sees the screen idle, and the dump fails. Read it while paused, or use `shot`. |
 | Stop | `stop_app` |
 | Cold start of the speech engine | `stop_app cold`. The next connection then takes ~3 s, and the speaker's whole `prepare()` 9–10 s. |
 | Battery level | `$adb shell dumpsys battery \| grep -e level -e powered`. Check it before a long manual run, such as a full workout. |
 | Screenshot | `shot <scratchpad>/wt.png`, then Read the PNG to look at it |
-| App logs | `$adb logcat -d --pid=$($adb shell pidof -s $pkg) \| tail -200`. Clear the log first with `$adb logcat -c`. |
+| App logs | `$adb logcat -d --pid=$($adb shell pidof -s $pkg) \| tail -200`. Clear the log first with `$adb logcat -c`. The main log wraps: at the end of a 60-minute run, it only reached back 12 minutes (P8 T7). |
 | Crash logs | `$adb logcat -d -b crash \| tail -100` |
 | Send the app to the background (`EX-10`) | `$adb shell input keyevent KEYCODE_HOME`. Recents is `KEYCODE_APP_SWITCH`, and the power button `KEYCODE_POWER`, then `KEYCODE_WAKEUP` to turn the screen back on. All three stop the activity (P7 T1). |
 | Simulate Android closing the app (`EX-11`) | `end_process`, then `launch`. `am kill` doesn't end the process on this tablet, even when it's cached. `end_process` presses Home, opens Settings and presses Home again, so the app is no longer the "previous" one. Then it sends SIGKILL through `run-as`. Logcat shows "Process … has died: cch CAC", as for a low-memory kill. The task stays in Recents, and reopening it rebuilds the activity from its saved state (P7 T1). |
 | Check that the screen stays on (`NF-2`) | `keeps_screen_on` reads the window's flag. To see it really work, ask the user first, then set `screen_timeout 30000`, wait over a minute on the screen, and check that `wakefulness` is still `Awake`. Then check that a screen that doesn't keep it on goes `Asleep` after 30 s. Put it back with `screen_timeout never`. Touching the tablet, or `input` events, restart the timeout. |
+| Time a workout from outside the app (`NF-1`) | `time_run > <file> &`, then `start_workout <name>`, then `wait`. It works on release builds, which have no logs. The span also holds fixed costs: preparing the audio, "Get ready in", and the move to the completed screen. Measure them as `span − planned` on a 60 s workout with the same voice setting, and subtract them. Numbers from P8 T1, debug build: 2.20 s with voice on, 0.98 s with voice off, each within ±0.07 s. Taps take 0.75 s ± 0.03 s, so the time between a Pause and a Resume tap is accurate to about ±0.15 s. Pause is at (960, 1012) and Resume at (818, 1013). On the release APK, the overhead with voice on was 2.125 s (P8 T7). For a long run, `time_run 3660 4200` polls only every 5 s for the first 3660 s. Send `input keyevent 0` about 2 s before a timed tap, because the first `input` after a while takes about 1 s. A background command piped through `grep` shows no output until it ends, so write results to a file. The PC must stay awake throughout: a `Kernel-Power` 42 event in Windows' System log would show that it slept. |
+| Install a release APK | `$adb install -r app/build/outputs/apk/release/app-release.apk`, then `pkg=$release_pkg` for the helpers. Its first launch took 1.15 s (P8 T5). |
+| Check which APK is installed | `$adb shell sha256sum "$($adb shell pm path $pkg \| tr -d '\r' \| cut -d: -f2)"`. It works on release builds too. |
+| Turn Wi-Fi off | Ask the user: `svc wifi disable` has no effect on this tablet, and `wifi_on` stays 1 (P8 Q9). `$adb shell dumpsys connectivity \| grep -m1 'Active default network'` says `none` once it's off. |
+| Media volume | `$adb shell media volume --stream 3 --get`, or `--set <0–15>`. Ask first, and put it back. A check of the volume keys needs a level that has room to go down without muting. |
+| Force a configuration change (`NF-3`) | Ask first. `$adb shell settings put system font_scale 1.15` relaunches the activity, and `1.0` puts it back. Do it from a script with a `trap`, so a failure can't leave it changed. To read the display's rotation: `$adb shell dumpsys input \| grep -m1 SurfaceOrientation`, where 1 and 3 are the two landscapes. |
 | Tap | `tap_text <text>`, or `$adb shell input tap <x> <y>` with pixel coordinates from a screenshot |
 
 ## Instrumented test results
@@ -141,6 +148,15 @@ When a design depends on how the tablet behaves (timing, latency, what Android d
 4. Repeat each measurement 2–3 times. For a cold start, force-stop whatever must be cold first, for example with `stop_app cold`.
 5. Record the numbers in the handover, or in the SPEC if the design depends on them. Then delete the probe: it never goes in a commit.
 
+## Driving the editor through adb
+
+A release build can't load a test workout, so a check on it types with the real keyboard (P8 T5). Keep the helpers in a throwaway script.
+
+- **Find a field by what's around it.** Focusing a field scrolls the form, so "the Nth field on screen" changes between taps. Read the screen before each tap, and find a field by its place after one holding a known value.
+- **Know whose controls you're tapping.** A round's controls are in its header, above its name field. An exercise's are on its row.
+- **Typing:** tap the field, send `KEYCODE_MOVE_END`, send one `KEYCODE_DEL` for each character already there, then `input text`, with `%s` for each space.
+- **Close the keyboard after each field.** Press Back only when `dumpsys input_method` shows `mInputShown=true`, because Back on a closed keyboard leaves the editor.
+
 ## Rebooting
 
 A reboot needs the user at the tablet. Until the screen is unlocked once after boot, the app's private storage is locked, so anything that reads the app's data fails.
@@ -161,7 +177,7 @@ A reboot needs the user at the tablet. Until the screen is unlocked once after b
 
 ## Notes
 
-- **Slow first launch:** the first launch after installing takes 30–75 s, because Android 8 compiles the debug APK on the device. Later cold starts take about 2 s. Measure timing on the second launch.
+- **Slow first launch:** the first launch after installing takes 30–75 s, because Android 8 compiles the debug APK on the device. A release APK's doesn't. Later cold starts take about 2 s. Measure timing on the second launch.
 - **Orientation:** don't change the tablet's rotation settings. A person has to turn the tablet to check how the app follows it. Turning it over (180°) only changes the display's rotation: the activity gets no callback and isn't recreated (P7 T1).
 - **Screen timeout:** set to never (`settings get system screen_off_timeout` gives 2147483647). Checking that the app keeps the screen on needs a shorter timeout for a while; ask the user before changing it, and put it back afterwards (`screen_timeout`).
 - **No lock screen:** after the power button, waking the tablet resumes the app directly.
